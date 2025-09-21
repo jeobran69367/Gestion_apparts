@@ -6,7 +6,6 @@
 
 generator client {
   provider = "prisma-client-js"
-  output   = "../generated/prisma"
 }
 
 datasource db {
@@ -15,39 +14,197 @@ datasource db {
 }
 
 
+// ========================================
+// MODÈLE UTILISATEUR AVEC RÔLES DÉFINIS
+// ========================================
 model User {
-  id        Int      @id @default(autoincrement())
-  email     String   @unique
-  password  String
-  name      String?
-  role      String   @default("guest")
-  listings  Listing[]
-  bookings  Booking[]
-  createdAt DateTime @default(now())
-}
-
-model Listing {
   id          Int      @id @default(autoincrement())
-  title       String
-  description String?
-  priceCents  Int
-  owner       User     @relation(fields: [ownerId], references: [id])
-  ownerId     Int
-  photos      String[] // tableau d'URLs vers S3
+  email       String   @unique
+  password    String
+  firstName   String
+  lastName    String
+  phone       String?
+  role        UserRole @default(GUEST)
+  isActive    Boolean  @default(true)
+  
+  // Métadonnées
   createdAt   DateTime @default(now())
-
-  Booking Booking[]
+  updatedAt   DateTime @updatedAt
+  lastLoginAt DateTime?
+  
+  // Relations
+  studios      Studio[]      // Studios créés (si ADMIN)
+  reservations Reservation[] // Réservations effectuées
+  payments     Payment[]     // Paiements effectués
+  
+  @@map("users")
 }
 
-model Booking {
-  id         Int      @id @default(autoincrement())
-  listing    Listing  @relation(fields: [listingId], references: [id])
-  listingId  Int
-  guest      User     @relation(fields: [guestId], references: [id])
-  guestId    Int
-  startDate  DateTime
-  endDate    DateTime
-  totalCents Int
-  status     String   @default("pending")
-  createdAt  DateTime @default(now())
+// ========================================
+// MODÈLE STUDIO AVEC DÉTAILS COMPLETS
+// ========================================
+model Studio {
+  id          Int      @id @default(autoincrement())
+  name        String
+  description String?
+  
+  // Localisation
+  address     String
+  city        String
+  postalCode  String
+  country     String   @default("France")
+  
+  // Caractéristiques
+  surface     Float?   // en m²
+  capacity    Int      @default(2)
+  bedrooms    Int      @default(1)
+  bathrooms   Int      @default(1)
+  
+  // Prix et disponibilité
+  pricePerNight Int    // en centimes d'euros
+  isAvailable   Boolean @default(true)
+  minStay       Int     @default(1) // nuits minimum
+  maxStay       Int     @default(30) // nuits maximum
+  
+  // Média et services
+  photos        String[] // URLs des photos
+  amenities     String[] // ["wifi", "kitchen", "parking", etc.]
+  rules         String[] // Règles de la maison
+  
+  // Propriétaire (Admin)
+  owner         User     @relation(fields: [ownerId], references: [id])
+  ownerId       Int
+  
+  // Métadonnées
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+  
+  // Relations
+  reservations  Reservation[]
+  
+  @@map("studios")
+}
+
+// ========================================
+// MODÈLE RÉSERVATION AVEC STATUTS
+// ========================================
+model Reservation {
+  id          Int               @id @default(autoincrement())
+  
+  // Dates de séjour
+  checkIn     DateTime
+  checkOut    DateTime
+  nights      Int               // Calculé automatiquement
+  
+  // Participants
+  guestCount  Int               @default(1)
+  
+  // Coûts (en centimes)
+  subtotal    Int               // Prix base
+  cleaningFee Int               @default(0)
+  serviceFee  Int               @default(0)
+  taxes       Int               @default(0)
+  total       Int               // Total final
+  
+  // Statut de la réservation
+  status      ReservationStatus @default(PENDING)
+  
+  // Informations additionnelles
+  specialRequests String?
+  cancelReason    String?
+  cancelledAt     DateTime?
+  
+  // Relations
+  studio      Studio  @relation(fields: [studioId], references: [id])
+  studioId    Int
+  guest       User    @relation(fields: [guestId], references: [id])
+  guestId     Int
+  payments    Payment[]
+  
+  // Métadonnées
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+  
+  @@map("reservations")
+}
+
+// ========================================
+// MODÈLE PAIEMENT AVEC TRAÇABILITÉ
+// ========================================
+model Payment {
+  id            Int           @id @default(autoincrement())
+  
+  // Montant et devise
+  amount        Int           // en centimes
+  currency      String        @default("EUR")
+  
+  // Informations de paiement
+  method        PaymentMethod
+  status        PaymentStatus @default(PENDING)
+  
+  // Références externes (Stripe, PayPal, etc.)
+  externalId    String?       // ID du processeur de paiement
+  externalData  Json?         // Données supplémentaires du processeur
+  
+  // Gestion des erreurs
+  failureReason String?
+  refundAmount  Int?          @default(0)
+  refundReason  String?
+  refundedAt    DateTime?
+  
+  // Relations
+  reservation   Reservation   @relation(fields: [reservationId], references: [id])
+  reservationId Int
+  user          User          @relation(fields: [userId], references: [id])
+  userId        Int
+  
+  // Métadonnées
+  createdAt     DateTime      @default(now())
+  updatedAt     DateTime      @updatedAt
+  processedAt   DateTime?
+  
+  @@map("payments")
+}
+
+// ========================================
+// ÉNUMÉRATIONS (ENUMS)
+// ========================================
+enum UserRole {
+  GUEST      // Utilisateur normal qui réserve
+  ADMIN      // Administrateur qui gère les studios
+  SUPER_ADMIN // Super administrateur système
+  
+  @@map("user_roles")
+}
+
+enum ReservationStatus {
+  PENDING    // En attente de paiement
+  CONFIRMED  // Confirmée et payée
+  CANCELLED  // Annulée
+  COMPLETED  // Séjour terminé
+  NO_SHOW    // Client non présenté
+  
+  @@map("reservation_statuses")
+}
+
+enum PaymentMethod {
+  CREDIT_CARD
+  DEBIT_CARD
+  PAYPAL
+  BANK_TRANSFER
+  APPLE_PAY
+  GOOGLE_PAY
+  
+  @@map("payment_methods")
+}
+
+enum PaymentStatus {
+  PENDING    // En attente
+  PROCESSING // En cours de traitement
+  COMPLETED  // Paiement réussi
+  FAILED     // Échec du paiement
+  REFUNDED   // Remboursé
+  CANCELLED  // Annulé
+  
+  @@map("payment_statuses")
 }
