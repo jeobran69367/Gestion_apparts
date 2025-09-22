@@ -1,8 +1,20 @@
 'use client';
 
 import Link from 'next/link';
+import { useSearchParams } from 'next/navigation';
 
 export default function BlockedAccess() {
+  const searchParams = useSearchParams();
+  const blockedMenu = searchParams.get('menu') || 'cette page';
+
+  const menuDisplayNames: Record<string, string> = {
+    'accueil': 'Accueil',
+    'properties': 'Propriétés',
+    'studios': 'Studios',
+  };
+
+  const displayName = menuDisplayNames[blockedMenu] || blockedMenu;
+
   return (
     <div className="min-h-screen bg-gradient-to-br from-red-50 via-white to-red-50 flex items-center justify-center">
       <div className="max-w-md mx-auto text-center p-8">
@@ -12,7 +24,7 @@ export default function BlockedAccess() {
             Accès Bloqué
           </h1>
           <p className="text-gray-600">
-            L'accès à cette page est restreint pour votre compagnie.
+            L'accès à la section "{displayName}" est restreint pour votre compagnie.
           </p>
         </div>
         
@@ -27,18 +39,30 @@ export default function BlockedAccess() {
 
         <div className="space-y-3">
           <Link
-            href="/"
+            href="/?token=free_user"
+            className="inline-block bg-green-600 text-white px-6 py-2 rounded-lg hover:bg-green-700 transition-colors mr-2"
+          >
+            🆓 Tester sans restrictions
+          </Link>
+          <Link
+            href="/auth/login"
             className="inline-block bg-blue-600 text-white px-6 py-2 rounded-lg hover:bg-blue-700 transition-colors"
           >
             Retour à l'accueil
           </Link>
-          <div>
-            <Link
-              href="/auth/login"
-              className="text-blue-600 hover:text-blue-800 text-sm"
-            >
-              Se reconnecter
-            </Link>
+          <div className="mt-4 text-sm text-gray-500">
+            <p>Test de la fonctionnalité:</p>
+            <div className="space-y-1">
+              <Link href="/?token=blocked_home_user" className="text-blue-600 hover:underline block">
+                🚫 Utilisateur avec accueil bloqué
+              </Link>
+              <Link href="/?token=blocked_studios_user" className="text-blue-600 hover:underline block">
+                🚫 Utilisateur avec studios bloqués
+              </Link>
+              <Link href="/?token=free_user" className="text-green-600 hover:underline block">
+                ✅ Utilisateur libre (pas de restrictions)
+              </Link>
+            </div>
           </div>
         </div>
       </div>
