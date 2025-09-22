@@ -6,6 +6,46 @@ const prisma = new PrismaClient();
 async function main() {
   console.log('🌱 Début du seeding...');
 
+  // Créer des compagnies de test
+  const company1 = await prisma.company.upsert({
+    where: { id: 1 },
+    update: {},
+    create: {
+      name: 'CompagnieA',
+      description: 'Compagnie avec accueil bloqué',
+    },
+  });
+
+  const company2 = await prisma.company.upsert({
+    where: { id: 2 },
+    update: {},
+    create: {
+      name: 'CompagnieB',
+      description: 'Compagnie avec studios bloqués',
+    },
+  });
+
+  // Créer les paramètres de compagnie avec menus bloqués
+  await prisma.companySettings.upsert({
+    where: { companyId: company1.id },
+    update: { blockedMenus: ['accueil'] },
+    create: {
+      companyId: company1.id,
+      blockedMenus: ['accueil'],
+    },
+  });
+
+  await prisma.companySettings.upsert({
+    where: { companyId: company2.id },
+    update: { blockedMenus: ['studios', 'properties'] },
+    create: {
+      companyId: company2.id,
+      blockedMenus: ['studios', 'properties'],
+    },
+  });
+
+  console.log('✅ Compagnies et paramètres créés');
+
   // Créer des utilisateurs de test
   const hashedPassword = await bcrypt.hash('password123', 10);
 
@@ -19,6 +59,7 @@ async function main() {
       lastName: 'Test',
       phone: '+33123456789',
       role: 'ADMIN',
+      companyId: company1.id, // Compagnie avec accueil bloqué
     },
   });
 
@@ -32,6 +73,22 @@ async function main() {
       lastName: 'Test',
       phone: '+33987654321',
       role: 'GUEST',
+      companyId: company2.id, // Compagnie avec studios bloqués
+    },
+  });
+
+  // Utilisateur sans compagnie (pas de restrictions)
+  const user3 = await prisma.user.upsert({
+    where: { email: 'libre@test.com' },
+    update: {},
+    create: {
+      email: 'libre@test.com',
+      password: hashedPassword,
+      firstName: 'Libre',
+      lastName: 'Test',
+      phone: '+33555666777',
+      role: 'GUEST',
+      companyId: null, // Pas de compagnie, donc pas de restrictions
     },
   });
 

@@ -15,6 +15,43 @@ datasource db {
 
 
 // ========================================
+// MODÈLE COMPAGNIE AVEC PARAMÈTRES
+// ========================================
+model Company {
+  id          Int      @id @default(autoincrement())
+  name        String
+  description String?
+  
+  // Métadonnées
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+  
+  // Relations
+  users            User[]           // Utilisateurs de la compagnie
+  companySettings  CompanySettings? // Paramètres de la compagnie
+  
+  @@map("companies")
+}
+
+// ========================================
+// MODÈLE PARAMÈTRES DE COMPAGNIE
+// ========================================
+model CompanySettings {
+  id           Int      @id @default(autoincrement())
+  blockedMenus String[] @default([]) // Liste des menus bloqués
+  
+  // Relations
+  company   Company @relation(fields: [companyId], references: [id], onDelete: Cascade)
+  companyId Int     @unique
+  
+  // Métadonnées
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  
+  @@map("company_settings")
+}
+
+// ========================================
 // MODÈLE UTILISATEUR AVEC RÔLES DÉFINIS
 // ========================================
 model User {
@@ -26,6 +63,10 @@ model User {
   phone       String?
   role        UserRole @default(GUEST)
   isActive    Boolean  @default(true)
+  
+  // Relation avec la compagnie
+  company     Company? @relation(fields: [companyId], references: [id])
+  companyId   Int?
   
   // Métadonnées
   createdAt   DateTime @default(now())

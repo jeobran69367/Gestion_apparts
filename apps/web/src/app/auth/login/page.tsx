@@ -50,9 +50,12 @@ export default function LoginPage() {
         throw new Error(data.message || 'Une erreur est survenue');
       }
 
-      // Stocker le token dans localStorage
+      // Stocker le token dans localStorage et cookies
       localStorage.setItem('token', data.access_token);
       localStorage.setItem('user', JSON.stringify(data.user));
+      
+      // Stocker dans un cookie sécurisé pour le middleware
+      document.cookie = `auth_token=${data.access_token}; path=/; max-age=${24 * 60 * 60}; secure; samesite=strict`;
 
       // Rediriger vers la page d'ajout de studio
       router.push('/studios/create');

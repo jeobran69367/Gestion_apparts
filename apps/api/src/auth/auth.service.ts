@@ -60,9 +60,16 @@ export class AuthService {
   async login(loginDto: LoginDto) {
     const { email, password } = loginDto;
 
-    // Trouver l'utilisateur
+    // Trouver l'utilisateur avec ses informations de compagnie
     const user = await this.prisma.user.findUnique({
       where: { email },
+      include: {
+        company: {
+          include: {
+            companySettings: true,
+          },
+        },
+      },
     });
 
     if (!user) {
@@ -82,11 +89,13 @@ export class AuthService {
       data: { lastLoginAt: new Date() },
     });
 
-    // Générer le token JWT
+    // Générer le token JWT avec les informations de compagnie
     const token = this.jwtService.sign({
       sub: user.id,
       email: user.email,
       role: user.role,
+      companyId: user.companyId,
+      blockedMenus: user.company?.companySettings?.blockedMenus || [],
     });
 
     return {
@@ -98,6 +107,12 @@ export class AuthService {
         phone: user.phone,
         role: user.role,
         createdAt: user.createdAt,
+        companyId: user.companyId,
+        company: user.company ? {
+          id: user.company.id,
+          name: user.company.name,
+          blockedMenus: user.company.companySettings?.blockedMenus || [],
+        } : null,
       },
       access_token: token,
     };
@@ -114,6 +129,14 @@ export class AuthService {
         phone: true,
         role: true,
         isActive: true,
+        companyId: true,
+      },
+      include: {
+        company: {
+          include: {
+            companySettings: true,
+          },
+        },
       },
     });
 
@@ -121,6 +144,9 @@ export class AuthService {
       return null;
     }
 
-    return user;
+    return {
+      ...user,
+      blockedMenus: user.company?.companySettings?.blockedMenus || [],
+    };
   }
 }
