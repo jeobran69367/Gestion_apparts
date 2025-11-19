@@ -23,7 +23,39 @@ async function bootstrap() {
   // Global prefix
   app.setGlobalPrefix('api');
 
+  // Fonction pour logger les routes (après l'initialisation)
+  const logRoutes = () => {
+    const server = app.getHttpServer();
+    const request = server._events?.request;
+    const router = request?._router;
+
+    if (!router || !router.stack) {
+      console.warn('Router or router stack is undefined. Unable to log routes.');
+      return;
+    }
+
+    const availableRoutes: any[] = [];
+    router.stack.forEach((layer: any) => {
+      if (layer.route) {
+        availableRoutes.push({
+          path: layer.route.path,
+          methods: Object.keys(layer.route.methods),
+        });
+      }
+    });
+
+    console.log('=== REGISTERED ROUTES ===');
+    availableRoutes.forEach(route => {
+      console.log(`${route.methods.join(', ').padEnd(8)} ${route.path}`);
+    });
+    console.log('=========================');
+  };
+
   await app.listen(process.env.PORT ?? 4000);
+  
+  // Logger les routes une fois que l'application est prête
+  logRoutes();
+  
   console.log(
     `🚀 API running on: http://localhost:${process.env.PORT ?? 4000}/api`,
   );

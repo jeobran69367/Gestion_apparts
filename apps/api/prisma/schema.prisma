@@ -80,8 +80,7 @@ model Studio {
   updatedAt     DateTime @updatedAt
   
   // Relations
-  reservations  Reservation[]
-  
+  reservations  Reservation[]  
   @@map("studios")
 }
 
@@ -165,6 +164,8 @@ model Payment {
   
   @@map("payments")
 }
+
+
 
 // ========================================
 // ÉNUMÉRATIONS (ENUMS)

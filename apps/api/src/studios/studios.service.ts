@@ -184,6 +184,28 @@ export class StudiosService {
     });
   }
 
+  async getReservations(studioId: number) {
+    const reservations = await this.prisma.reservation.findMany({
+      where: {
+        studioId,
+        status: {
+          in: ['CONFIRMED', 'PENDING'],
+        },
+      },
+      select: {
+        id: true,
+        checkIn: true,
+        checkOut: true,
+        status: true,
+      },
+      orderBy: {
+        checkIn: 'asc',
+      },
+    });
+
+    return reservations;
+  }
+
   async getStats(ownerId: number) {
     const [totalStudios, activeStudios, totalReservations, totalRevenue] = await Promise.all([
       this.prisma.studio.count({ where: { ownerId } }),

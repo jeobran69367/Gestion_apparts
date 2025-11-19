@@ -1,0 +1,12 @@
+// reservations.module.ts
+import { Module } from '@nestjs/common';
+import { ReservationsController } from './reservations.controller';
+import { ReservationsService } from './reservations.service';
+import { PrismaService } from '../prisma/prisma.service';
+
+@Module({
+  controllers: [ReservationsController],
+  providers: [ReservationsService, PrismaService],
+  exports: [ReservationsService], // Optionnel, si d'autres modules en ont besoin
+})
+export class ReservationsModule {}
