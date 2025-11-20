@@ -1,133 +1,96 @@
 // app/api/pawapay/deposit/route.ts
-import { NextRequest, NextResponse } from 'next/server';
+import { NextRequest, NextResponse } from "next/server";
 
 export async function POST(request: NextRequest) {
   const startTime = Date.now();
-  
-  const apiKey = process.env.PAWAPAY_API_KEY; 
-  const environment = process.env.PAWAPAY_ENVIRONMENT || 'sandbox';
+
+  const apiKey = process.env.PAWAPAY_API_KEY;
+  const environment = process.env.PAWAPAY_ENVIRONMENT || "sandbox";
 
   if (!apiKey) {
-    console.error('❌ PAWAPAY_API_KEY manquante');
+    console.error("❌ PAWAPAY_API_KEY manquante");
     return NextResponse.json(
-      { 
-        error: 'Configuration manquante',
-        message: 'Service de paiement temporairement indisponible'
+      {
+        error: "Configuration manquante",
+        message: "Service de paiement temporairement indisponible",
       },
       { status: 503 }
     );
   }
-   
+
   let body;
   try {
     body = await request.json();
-    console.log('📥 Requête reçue:', JSON.stringify(body, null, 2));
   } catch (error) {
-    console.error('❌ Erreur de parsing JSON:', error);
+    console.error("❌ Erreur de parsing JSON:", error);
     return NextResponse.json(
-      { error: 'Format de requête invalide', message: 'Le corps de la requête doit être un JSON valide.' },
+      {
+        error: "Format de requête invalide",
+        message: "Le corps de la requête doit être un JSON valide.",
+      },
       { status: 400 }
     );
   }
 
-  // ⚠️ CORRECTION : Extraction selon la structure attendue du frontend
-  const { 
+  // Extraction des données
+  const {
     depositId,
-    amount, // ⚠️ Doit être une string directement
+    amount,
     currency,
     payer,
     clientReferenceId,
     customerMessage,
-    metadata
+    metadata,
   } = body;
 
-  // Validation des champs requis selon la documentation PawaPay
+  // Validation des champs requis
   if (!depositId) {
-    console.error('❌ depositId manquant');
     return NextResponse.json(
-      { 
-        error: 'depositId manquant',
-        message: 'Le depositId est obligatoire.'
-      },
+      { error: "depositId manquant", message: "Le depositId est obligatoire." },
       { status: 400 }
     );
   }
 
   if (!amount) {
-    console.error('❌ amount manquant');
     return NextResponse.json(
-      { 
-        error: 'amount manquant',
-        message: 'Le montant est obligatoire.'
-      },
+      { error: "amount manquant", message: "Le montant est obligatoire." },
       { status: 400 }
     );
   }
 
   if (!currency) {
-    console.error('❌ currency manquant');
     return NextResponse.json(
-      { 
-        error: 'currency manquant',
-        message: 'La devise est obligatoire.'
+      { error: "currency manquant", message: "La devise est obligatoire." },
+      { status: 400 }
+    );
+  }
+
+  if (!payer?.accountDetails?.phoneNumber) {
+    return NextResponse.json(
+      {
+        error: "Numéro de téléphone manquant",
+        message: "Le numéro de téléphone est obligatoire.",
       },
       { status: 400 }
     );
   }
 
-  if (!payer) {
-    console.error('❌ payer manquant');
+  if (!payer?.accountDetails?.provider) {
     return NextResponse.json(
-      { 
-        error: 'payer manquant',
-        message: 'Les informations du payeur sont obligatoires.'
+      {
+        error: "Opérateur manquant",
+        message: "L'opérateur mobile est obligatoire.",
       },
       { status: 400 }
     );
   }
 
-  // Validation du type de payer
-  if (payer.type !== 'MMO') {
-    console.error('❌ Type de payer invalide:', payer.type);
+  // Validation du format du montant
+  if (typeof amount !== "string") {
     return NextResponse.json(
-      { 
-        error: 'Type de payer invalide',
-        message: 'Le type de payer doit être "MMO"'
-      },
-      { status: 400 }
-    );
-  }
-
-  // Validation des détails du compte
-  if (!payer.accountDetails?.phoneNumber) {
-    console.error('❌ phoneNumber manquant');
-    return NextResponse.json(
-      { 
-        error: 'Numéro de téléphone manquant',
-        message: 'Le numéro de téléphone est obligatoire.'
-      },
-      { status: 400 }
-    );
-  }
-
-  if (!payer.accountDetails?.provider) {
-    console.error('❌ provider manquant');
-    return NextResponse.json(
-      { 
-        error: 'Opérateur manquant',
-        message: 'L\'opérateur mobile est obligatoire.'
-      },
-      { status: 400 }
-    );
-  }
-
-  // Validation du montant (doit être une string)
-  if (typeof amount !== 'string') {
-    console.error('❌ Format de montant invalide:', { amount, type: typeof amount });
-    return NextResponse.json(
-      { 
-        error: 'Format de montant invalide',
-        message: 'Le montant doit être une chaîne de caractères'
+      {
+        error: "Format de montant invalide",
+        message: "Le montant doit être une chaîne de caractères",
       },
       { status: 400 }
     );
@@ -135,220 +98,170 @@ export async function POST(request: NextRequest) {
 
   // Validation numérique du montant
   const amountNumber = parseInt(amount, 10);
-  if (isNaN(amountNumber) || !Number.isInteger(amountNumber) || amountNumber <= 0) {
-    console.error('❌ Montant numérique invalide:', { 
-      amountString: amount, 
-      parsed: amountNumber
-    });
+  if (
+    isNaN(amountNumber) ||
+    !Number.isInteger(amountNumber) ||
+    amountNumber <= 0
+  ) {
     return NextResponse.json(
-      { 
-        error: 'Montant invalide',
-        message: 'Le montant doit être un nombre entier positif'
+      {
+        error: "Montant invalide",
+        message: "Le montant doit être un nombre entier positif",
       },
       { status: 400 }
     );
   }
 
   // Validation de la devise
-  const validCurrencies = ['XAF', 'ZMW', 'GHS', 'NGN', 'UGX', 'RWF', 'MWK', 'USD', 'EUR'];
+  const validCurrencies = [
+    "XAF",
+    "ZMW",
+    "GHS",
+    "NGN",
+    "UGX",
+    "RWF",
+    "MWK",
+    "USD",
+    "EUR",
+  ];
   if (!validCurrencies.includes(currency)) {
-    console.error('❌ Devise non supportée:', currency);
     return NextResponse.json(
-      { 
-        error: 'Devise non supportée',
-        message: `Devise ${currency} non supportée. Devises valides: ${validCurrencies.join(', ')}`
-      },
-      { status: 400 }
-    );
-  }
-
-  // Nettoyage du numéro de téléphone
-  const cleanPhoneNumberForPawaPay = (phone: string): string => {
-    // Supprimer tous les caractères non numériques
-    const cleaned = phone.replace(/\D/g, '');
-    // Supprimer le préfixe international si présent (ex: +237, 237)
-    if (cleaned.startsWith('237') && cleaned.length > 9) {
-      return cleaned.substring(3);
-    }
-    return cleaned;
-  };
-
-  const cleanedPhoneNumber = cleanPhoneNumberForPawaPay(payer.accountDetails.phoneNumber);
-
-  // Validation du numéro nettoyé
-  if (cleanedPhoneNumber.length < 9) {
-    console.error('❌ Numéro de téléphone invalide après nettoyage:', {
-      original: payer.accountDetails.phoneNumber,
-      cleaned: cleanedPhoneNumber
-    });
-    return NextResponse.json(
-      { 
-        error: 'Numéro de téléphone invalide',
-        message: 'Le numéro de téléphone doit contenir au moins 9 chiffres après nettoyage'
-      },
-      { status: 400 }
-    );
-  }
-
-  // ⚠️ CORRECTION CRUCIALE : Construction du payload EXACT selon la documentation PawaPay
-  const pawapayPayload: any = {
-    depositId,
-    amount: amount, // ⚠️ String directement à la racine
-    currency: currency, // ⚠️ Devise directement à la racine
-    payer: {
-      type: 'MMO',
-      accountDetails: {
-        phoneNumber: cleanedPhoneNumber,
-        provider: payer.accountDetails.provider
-      }
-    }
-  };
-
-  // Ajout des champs optionnels seulement s'ils sont présents
-  if (clientReferenceId) {
-    pawapayPayload.clientReferenceId = clientReferenceId;
-  } else {
-    pawapayPayload.clientReferenceId = `STUDIO-${Date.now()}`;
-  }
-
-  if (customerMessage) {
-    pawapayPayload.customerMessage = customerMessage.substring(0, 22);
-  } else {
-    pawapayPayload.customerMessage = 'Réservation studio';
-  }
-
-  // ⚠️ CORRECTION : metadata doit être un tableau d'objets
-  if (metadata && Array.isArray(metadata)) {
-    pawapayPayload.metadata = metadata;
-  } else {
-    pawapayPayload.metadata = [
       {
-        orderId: `booking-${Date.now()}`,
-        service: 'studio-booking',
-        timestamp: new Date().toISOString()
-      }
-    ];
+        error: "Devise non supportée",
+        message: `Devise ${currency} non supportée. Devises valides: ${validCurrencies.join(
+          ", "
+        )}`,
+      },
+      { status: 400 }
+    );
   }
 
-  console.log('👀 Payload FINAL pour PawaPay:', JSON.stringify(pawapayPayload, null, 2));
+  // ⚠️ IMPORTANT : On utilise le numéro TEL QUEL du frontend (déjà formaté international)
+  const phoneNumber = payer.accountDetails.phoneNumber;
 
-  const apiUrl = environment === 'production' 
-    ? 'https://api.pawapay.io/v2/deposits' 
-    : 'https://api.sandbox.pawapay.io/v2/deposits';
+  // Validation que c'est bien uniquement des chiffres
+  const digitsOnlyRegex = /^\d+$/;
+  if (!digitsOnlyRegex.test(phoneNumber)) {
+    console.error(
+      "❌ Format téléphone contient des caractères non-numériques:",
+      phoneNumber
+    );
+    return NextResponse.json(
+      {
+        error: "Format de téléphone invalide",
+        message:
+          "Le numéro doit contenir uniquement des chiffres (ex: 237699123456)",
+      },
+      { status: 400 }
+    );
+  }
 
-  console.log('🌐 URL API:', apiUrl);
+  // Validation de la longueur
+  if (phoneNumber.length < 9 || phoneNumber.length > 15) {
+    console.error("❌ Longueur téléphone invalide:", phoneNumber.length);
+    return NextResponse.json(
+      {
+        error: "Numéro de téléphone invalide",
+        message: "Le numéro doit contenir entre 9 et 15 chiffres",
+      },
+      { status: 400 }
+    );
+  }
 
-  // Ajout d'un timeout pour les requêtes
+  // Construction du payload PawaPay
+  const pawapayPayload = {
+    depositId,
+    amount: amount,
+    currency: currency,
+    payer: {
+      type: "MMO",
+      accountDetails: {
+        phoneNumber: phoneNumber, // ⚠️ Utilisation directe du numéro formaté
+        provider: payer.accountDetails.provider,
+      },
+    },
+    clientReferenceId: clientReferenceId || `STUDIO-${Date.now()}`,
+    customerMessage: customerMessage
+      ? customerMessage.substring(0, 22)
+      : "Réservation studio",
+    metadata:
+      metadata && Array.isArray(metadata)
+        ? metadata
+        : [
+            {
+              orderId: `booking-${Date.now()}`,
+              service: "studio-booking",
+            },
+          ],
+  };
+
+  const apiUrl =
+    environment === "production"
+      ? "https://api.pawapay.io/v2/deposits"
+      : "https://api.sandbox.pawapay.io/v2/deposits";
+
+  // Timeout de 15 secondes
   const controller = new AbortController();
-  const timeout = setTimeout(() => controller.abort(), 15000); // Timeout de 15 secondes
+  const timeout = setTimeout(() => controller.abort(), 15000);
 
   try {
-    console.log('🚀 Envoi requête à PawaPay...');
-    
     const response = await fetch(apiUrl, {
-      method: 'POST',
+      method: "POST",
       headers: {
-        'Authorization': `Bearer ${apiKey}`,
-        'Content-Type': 'application/json',
-        'User-Agent': 'StudioBooking/1.0'
+        Authorization: `Bearer ${apiKey}`,
+        "Content-Type": "application/json",
       },
       body: JSON.stringify(pawapayPayload),
-      signal: controller.signal
+      signal: controller.signal,
     });
 
     clearTimeout(timeout);
 
     const responseTime = Date.now() - startTime;
-    
-    let responseData;
-    const responseText = await response.text();
-    
-    try {
-      responseData = JSON.parse(responseText);
-    } catch (parseError) {
-      console.error('❌ Réponse non-JSON de PawaPay:', responseText);
-      responseData = { rawResponse: responseText };
-    }
-
-    console.log(`⏱️ Temps de réponse PawaPay: ${responseTime}ms`, {
-      status: response.status,
-      statusText: response.statusText,
-      response: responseData
-    });
+    const responseData = await response.json();
 
     if (!response.ok) {
-      console.error('❌ Erreur PawaPay détaillée:', {
+      console.error("❌ Erreur PawaPay:", {
         status: response.status,
-        headers: Object.fromEntries(response.headers.entries()),
         response: responseData,
-        payload: pawapayPayload
       });
 
-      // Extraction du message d'erreur
-      let errorMessage = 'Erreur lors du traitement du paiement';
-      
-      if (responseData.details?.failureReason?.failureMessage) {
-        errorMessage = responseData.details.failureReason.failureMessage;
-      } else if (responseData.failureReason?.failureMessage) {
-        errorMessage = responseData.failureReason.failureMessage;
-      } else if (responseData.message) {
-        errorMessage = responseData.message;
-      } else if (responseData.error) {
-        errorMessage = responseData.error;
-      }
+      const errorMessage =
+        responseData.failureReason?.failureMessage ||
+        responseData.message ||
+        responseData.error ||
+        `Erreur ${response.status}`;
 
       return NextResponse.json(
-        { 
+        {
           error: `Erreur ${response.status}`,
           message: errorMessage,
-          details: responseData
+          details: responseData,
         },
         { status: response.status }
       );
     }
 
-    console.log('✅ Réponse PawaPay réussie:', responseData);
     return NextResponse.json(responseData);
-
   } catch (error) {
     clearTimeout(timeout);
-    const responseTime = Date.now() - startTime;
 
-    console.error('💥 Erreur complète:', {
-      error,
-      responseTime,
-      apiUrl,
-      payload: pawapayPayload
-    });
-
-    if (error instanceof Error) {
-      if (error.name === 'AbortError') {
-        console.error('⏳ Timeout atteint pour la requête à PawaPay');
-        return NextResponse.json(
-          {
-            error: 'Timeout',
-            message: 'La requête a pris trop de temps. Veuillez réessayer.'
-          },
-          { status: 504 }
-        );
-      }
-
-      console.error('💥 Erreur réseau ou interne:', error.message);
+    if (error instanceof Error && error.name === "AbortError") {
+      console.error("⏳ Timeout atteint");
       return NextResponse.json(
         {
-          error: 'Erreur de connexion',
-          message: 'Impossible de se connecter au service de paiement. Veuillez vérifier votre connexion et réessayer.',
-          debug: process.env.NODE_ENV === 'development' ? error.message : undefined
+          error: "Timeout",
+          message: "La requête a pris trop de temps. Veuillez réessayer.",
         },
-        { status: 500 }
+        { status: 504 }
       );
     }
 
-    console.error('💥 Erreur inconnue:', error);
+    console.error("💥 Erreur:", error);
     return NextResponse.json(
       {
-        error: 'Erreur interne du serveur',
-        message: 'Une erreur inattendue est survenue. Veuillez réessayer.'
+        error: "Erreur de connexion",
+        message: "Impossible de se connecter au service de paiement.",
       },
       { status: 500 }
     );

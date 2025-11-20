@@ -24,7 +24,7 @@ function SmartPriceDisplay({
   paymentMethod,
   className = ''
 }: SmartPriceDisplayProps) {
-  const formatted = (price).toLocaleString('fr-FR', { style: 'currency', currency: 'EUR' });
+  const formatted = (price ).toLocaleString('fr-FR', { style: 'currency', currency: 'EUR' });
   const sizeClass = size === 'lg' ? 'text-lg' : 'text-sm';
 
   return (
@@ -67,6 +67,7 @@ interface Studio {
 }
 
 interface BookingData {
+  studioId: number;
   checkIn: string;
   checkOut: string;
   guestCount: number;
@@ -91,12 +92,10 @@ interface BookingData {
     cardholderName: string;
     // PayPal
     email?: string;
-    // Mobile Money
+    // Mobile Money / PawaPay
     phoneNumber?: string;
     provider?: string;
-    // Orange Money
     country?: string;
-    // Monetbil
     operator?: string;
   };
 }
@@ -113,6 +112,7 @@ export default function BookingPage() {
   const [isSubmitting, setIsSubmitting] = useState(false);
   
   const [bookingData, setBookingData] = useState<BookingData>({
+    studioId: parseInt(studioId),
     checkIn: '',
     checkOut: '',
     guestCount: 1,
@@ -129,11 +129,13 @@ export default function BookingPage() {
       phone: ''
     },
     paymentInfo: {
-      method: 'CREDIT_CARD',
+      method: 'PAWAPAY', // ⚠️ Changé par défaut pour PawaPay
       cardNumber: '',
       expiryDate: '',
       cvv: '',
-      cardholderName: ''
+      cardholderName: '',
+      phoneNumber: '',
+      provider: ''
     }
   });
 
@@ -159,7 +161,7 @@ export default function BookingPage() {
   }, [studioId]);
 
   useEffect(() => {
-    if (bookingData.checkIn && bookingData.checkOut) {
+    if (bookingData.checkIn && bookingData.checkOut && studio) {
       calculateTotalPrice();
     }
   }, [bookingData.checkIn, bookingData.checkOut, studio]);
@@ -169,8 +171,6 @@ export default function BookingPage() {
       const response = await fetch(`http://localhost:4000/api/studios/${studioId}`);
       if (response.ok) {
         const data = await response.json();
-        console.log('Studio data received:', data);
-        // L'API devrait retourner directement le studio avec les relations
         setStudio(data);
       } else {
         console.error('Error response:', response.status);
@@ -193,8 +193,8 @@ export default function BookingPage() {
     
     if (nights > 0) {
       // Calculs en centimes (comme dans le schéma Prisma)
-      const subtotal = studio.pricePerNight * nights; // déjà en centimes
-      const serviceFee = Math.round(subtotal * 0.1); // 12% de frais de service
+      const subtotal = studio.pricePerNight * nights;
+      const serviceFee = Math.round(subtotal * 0.12); // 12% de frais de service
       const taxes = Math.round(subtotal * 0.05); // 5% de taxes
       const total = subtotal + serviceFee + taxes;
       
@@ -210,20 +210,22 @@ export default function BookingPage() {
   };
 
   const handleInputChange = (section: keyof BookingData, field: string, value: string | number) => {
-    if (section === 'guestInfo' || section === 'paymentInfo') {
-      setBookingData(prev => ({
-        ...prev,
-        [section]: {
-          ...prev[section],
+    setBookingData(prev => {
+      if (section === 'guestInfo' || section === 'paymentInfo') {
+        return {
+          ...prev,
+          [section]: {
+            ...prev[section],
+            [field]: value
+          }
+        };
+      } else {
+        return {
+          ...prev,
           [field]: value
-        }
-      }));
-    } else {
-      setBookingData(prev => ({
-        ...prev,
-        [field]: value
-      }));
-    }
+        };
+      }
+    });
   };
 
   // Version adaptée pour le composant de paiement
@@ -238,8 +240,7 @@ export default function BookingPage() {
       case 2:
         return Object.values(bookingData.guestInfo).every(value => value.trim() !== '');
       case 3:
-        // La validation est maintenant gérée par BookingConfirmationManager
-        return true;
+        return true; // La validation est gérée par BookingConfirmationManager
       default:
         return false;
     }
@@ -255,6 +256,15 @@ export default function BookingPage() {
     if (currentStep > 2) {
       setCurrentStep(currentStep - 1);
     }
+  };
+
+  const handleBookingComplete = (bookingId: string) => {
+    console.log('✅ Réservation confirmée:', bookingId);
+    setCurrentStep(4);
+  };
+
+  const handleCancel = () => {
+    setCurrentStep(2); // Retour aux infos personnelles
   };
 
   const defaultImage = 'https://images.unsplash.com/photo-1560448204-e02f11c3d0e2?w=400&h=300&fit=crop';
@@ -396,7 +406,7 @@ export default function BookingPage() {
                         value={bookingData.guestInfo.phone}
                         onChange={(e) => handleInputChange('guestInfo', 'phone', e.target.value)}
                         className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                        placeholder="+33 1 23 45 67 89"
+                        placeholder="+237 6XX XX XX XX"
                       />
                     </div>
 
@@ -413,40 +423,68 @@ export default function BookingPage() {
                       />
                     </div>
                   </div>
+
+                  {/* Navigation Buttons */}
+                  <div className="flex justify-between mt-8 pt-8 border-t">
+                    <button
+                      onClick={handlePrevStep}
+                      disabled={currentStep === 2}
+                      className={`px-6 py-3 rounded-lg font-medium ${
+                        currentStep === 2 
+                          ? 'bg-gray-100 text-gray-400 cursor-not-allowed'
+                          : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
+                      }`}
+                    >
+                      Précédent
+                    </button>
+                    
+                    <button
+                      onClick={handleNextStep}
+                      disabled={!validateStep(currentStep) || isSubmitting}
+                      className={`px-6 py-3 rounded-lg font-medium ${
+                        !validateStep(currentStep) || isSubmitting
+                          ? 'bg-gray-300 text-gray-500 cursor-not-allowed'
+                          : 'bg-blue-600 text-white hover:bg-blue-700'
+                      }`}
+                    >
+                      {isSubmitting ? 'Chargement...' : 'Continuer vers le paiement'}
+                    </button>
+                  </div>
                 </div>
               )}
 
               {/* Step 3: Payment */}
               {currentStep === 3 && (
-                <BookingConfirmationManager
-                  bookingData={{
-                    studioId: parseInt(studioId),
-                    checkIn: bookingData.checkIn,
-                    checkOut: bookingData.checkOut,
-                    guestCount: bookingData.guestCount,
-                    totalNights: bookingData.totalNights,
-                    subtotal: bookingData.subtotal,
-                    serviceFee: bookingData.serviceFee,
-                    taxes: bookingData.taxes,
-                    total: bookingData.total,
-                    specialRequests: bookingData.specialRequests,
-                    guestInfo: bookingData.guestInfo
-                  }}
-                  paymentInfo={bookingData.paymentInfo}
-                  onInputChange={handlePaymentInputChange}
-                  onBookingComplete={(bookingId) => {
-                    console.log('Réservation confirmée:', bookingId);
-                    setCurrentStep(4);
-                  }}
-                  onCancel={() => {
-                    setCurrentStep(2); // Retour aux infos personnelles
-                  }}
-                />
+                <div>
+                  <h2 className="text-2xl font-bold text-gray-900 mb-6">
+                    Paiement sécurisé
+                  </h2>
+                  
+                  <BookingConfirmationManager
+                    bookingData={{
+                      studioId: parseInt(studioId),
+                      checkIn: bookingData.checkIn,
+                      checkOut: bookingData.checkOut,
+                      guestCount: bookingData.guestCount,
+                      totalNights: bookingData.totalNights,
+                      subtotal: bookingData.subtotal,
+                      serviceFee: bookingData.serviceFee,
+                      taxes: bookingData.taxes,
+                      total: bookingData.total,
+                      specialRequests: bookingData.specialRequests,
+                      guestInfo: bookingData.guestInfo
+                    }}
+                    paymentInfo={bookingData.paymentInfo}
+                    onInputChange={handlePaymentInputChange}
+                    onBookingComplete={handleBookingComplete}
+                    onCancel={handleCancel}
+                  />
+                </div>
               )}
 
               {/* Step 4: Confirmation */}
               {currentStep === 4 && (
-                <div className="text-center">
+                <div className="text-center py-8">
                   <div className="w-16 h-16 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-6">
                     <svg width="32" height="32" fill="#10b981" viewBox="0 0 20 20">
                       <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
@@ -457,53 +495,24 @@ export default function BookingPage() {
                     Réservation confirmée !
                   </h2>
                   
-                  <p className="text-gray-600 mb-8">
-                    Votre réservation a été confirmée. Vous recevrez un email de confirmation sous peu.
+                  <p className="text-gray-600 mb-8 max-w-md mx-auto">
+                    Votre réservation a été confirmée avec succès. Vous recevrez un email de confirmation avec tous les détails de votre séjour.
                   </p>
                   
                   <div className="flex flex-col sm:flex-row gap-4 justify-center">
                     <Link
                       href="/studios/my-bookings"
-                      className="bg-blue-600 text-white px-6 py-3 rounded-lg hover:bg-blue-700 transition-colors"
+                      className="bg-blue-600 text-white px-6 py-3 rounded-lg hover:bg-blue-700 transition-colors font-medium"
                     >
                       Voir mes réservations
                     </Link>
                     <Link
                       href="/studios"
-                      className="bg-gray-100 text-gray-700 px-6 py-3 rounded-lg hover:bg-gray-200 transition-colors"
+                      className="bg-gray-100 text-gray-700 px-6 py-3 rounded-lg hover:bg-gray-200 transition-colors font-medium"
                     >
-                      Retour aux studios
+                      Découvrir d'autres studios
                     </Link>
                   </div>
-                </div>
-              )}
-
-              {/* Navigation Buttons */}
-              {currentStep < 4 && currentStep !== 3 && (
-                <div className="flex justify-between mt-8 pt-8 border-t">
-                  <button
-                    onClick={handlePrevStep}
-                    disabled={currentStep === 2}
-                    className={`px-6 py-3 rounded-lg font-medium ${
-                      currentStep === 2 
-                        ? 'bg-gray-100 text-gray-400 cursor-not-allowed'
-                        : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
-                    }`}
-                  >
-                    Précédent
-                  </button>
-                  
-                  <button
-                    onClick={handleNextStep}
-                    disabled={!validateStep(currentStep) || isSubmitting}
-                    className={`px-6 py-3 rounded-lg font-medium ${
-                      !validateStep(currentStep) || isSubmitting
-                        ? 'bg-gray-300 text-gray-500 cursor-not-allowed'
-                        : 'bg-blue-600 text-white hover:bg-blue-700'
-                    }`}
-                  >
-                    {isSubmitting ? 'Chargement...' : 'Suivant'}
-                  </button>
                 </div>
               )}
             </div>
@@ -535,18 +544,27 @@ export default function BookingPage() {
                   <div className="space-y-2 text-sm">
                     <div className="flex justify-between">
                       <span>Dates:</span>
-                      <span>{bookingData.checkIn} → {bookingData.checkOut}</span>
+                      <span className="text-right">
+                        {new Date(bookingData.checkIn).toLocaleDateString('fr-FR')} →<br />
+                        {new Date(bookingData.checkOut).toLocaleDateString('fr-FR')}
+                      </span>
+                    </div>
+                    <div className="flex justify-between">
+                      <span>Durée:</span>
+                      <span>{bookingData.totalNights} nuit{bookingData.totalNights > 1 ? 's' : ''}</span>
                     </div>
                     <div className="flex justify-between">
                       <span>Invités:</span>
-                      <span>{bookingData.guestCount}</span>
+                      <span>{bookingData.guestCount} personne{bookingData.guestCount > 1 ? 's' : ''}</span>
                     </div>
+                  </div>
+
+                  <div className="space-y-2 text-sm pt-4 border-t">
                     <div className="flex justify-between">
-                      <span>Prix par nuit × {bookingData.totalNights} nuits:</span>
+                      <span>Prix du séjour:</span>
                       <SmartPriceDisplay
                         price={bookingData.subtotal}
                         size="sm"
-                        showPaymentConversion={false}
                         className="text-right"
                       />
                     </div>
@@ -555,7 +573,6 @@ export default function BookingPage() {
                       <SmartPriceDisplay
                         price={bookingData.serviceFee}
                         size="sm"
-                        showPaymentConversion={false}
                         className="text-right"
                       />
                     </div>
@@ -564,7 +581,6 @@ export default function BookingPage() {
                       <SmartPriceDisplay
                         price={bookingData.taxes}
                         size="sm"
-                        showPaymentConversion={false}
                         className="text-right"
                       />
                     </div>
@@ -576,10 +592,11 @@ export default function BookingPage() {
                       <SmartPriceDisplay
                         price={bookingData.total}
                         size="lg"
-                        showPaymentConversion={true}
-                        paymentMethod={bookingData.paymentInfo.method}
-                        className="text-right"
+                        className="text-right font-bold"
                       />
+                    </div>
+                    <div className="text-xs text-gray-500 text-right mt-1">
+                      Méthode: {bookingData.paymentInfo.method}
                     </div>
                   </div>
                 </div>

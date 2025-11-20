@@ -15,7 +15,6 @@ class PaymentCache {
 
   // Stocker un statut de paiement
   set(paymentId: string, status: PaymentStatus): void {
-    console.log(`💾 Cache: Stockage statut ${paymentId} → ${status.status}`);
     this.cache.set(paymentId, {
       ...status,
       timestamp: new Date().toISOString()
@@ -31,10 +30,8 @@ class PaymentCache {
   get(paymentId: string): PaymentStatus | null {
     const status = this.cache.get(paymentId);
     if (status) {
-      console.log(`📖 Cache: Lecture statut ${paymentId} → ${status.status}`);
       return status;
     }
-    console.log(`❓ Cache: Statut non trouvé pour ${paymentId}`);
     return null;
   }
 
@@ -42,8 +39,7 @@ class PaymentCache {
   delete(paymentId: string): void {
     const deleted = this.cache.delete(paymentId);
     if (deleted) {
-      console.log(`🗑️ Cache: Suppression statut ${paymentId}`);
-    }
+      }
   }
 
   // Lister tous les statuts (pour debug)
@@ -59,7 +55,6 @@ class PaymentCache {
   clear(): void {
     const size = this.cache.size;
     this.cache.clear();
-    console.log(`🧹 Cache: Nettoyage ${size} entrées`);
   }
 }
 

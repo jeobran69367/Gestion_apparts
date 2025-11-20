@@ -589,14 +589,11 @@ export default function Home() {
                             <div className="nav-links">
                 {isLoggedIn ? (
                   <>
-                    <Link href="/properties" className="nav-link">
-                      🏘️ Propriétés
+                    <Link href="/studios" className="nav-link">
+                      🏘️ Studios
                     </Link>
                     <Link href="/studios/my-studios" className="nav-link">
-                      📋 Mes Propriétés
-                    </Link>
-                    <Link href="/studios/create" className="nav-link">
-                      ➕ Ajouter
+                      📋 Mes Studios
                     </Link>
                     <button onClick={handleLogout} className="nav-link" style={{background: 'none', border: 'none', cursor: 'pointer'}}>
                       🚪 Déconnexion

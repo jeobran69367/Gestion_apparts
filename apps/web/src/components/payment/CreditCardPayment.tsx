@@ -41,7 +41,10 @@ export default function CreditCardPayment({
   paymentInfo,
   onInputChange
 }: CreditCardPaymentProps) {
-  const cardType = detectCardType(paymentInfo.cardNumber);
+  
+  // 🟢 CORRECTION : Utilisation du chaînage optionnel pour gérer le cas où paymentInfo est undefined.
+  const cardNumberValue = paymentInfo?.cardNumber || '';
+  const cardType = detectCardType(cardNumberValue);
 
   /* --------------------------- Change Handlers --------------------------- */
 
@@ -108,7 +111,8 @@ export default function CreditCardPayment({
         <label className="block text-sm font-medium text-gray-700 mb-1">Nom sur la carte *</label>
         <input
           type="text"
-          value={paymentInfo.cardholderName}
+          // Assure que la valeur est une chaîne même si la propriété est manquante
+          value={paymentInfo?.cardholderName || ''} 
           onChange={(e) => onInputChange('cardholderName', e.target.value)}
           placeholder="Nom complet"
           className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
@@ -121,7 +125,8 @@ export default function CreditCardPayment({
         <div className="relative">
           <input
             type="text"
-            value={paymentInfo.cardNumber}
+            // Assure que la valeur est une chaîne même si la propriété est manquante
+            value={paymentInfo?.cardNumber || ''} 
             onChange={handleCardNumberChange}
             placeholder="1234 5678 9012 3456"
             maxLength={19}
@@ -143,7 +148,7 @@ export default function CreditCardPayment({
           <label className="block text-sm font-medium text-gray-700 mb-1">Date d'expiration *</label>
           <input
             type="text"
-            value={paymentInfo.expiryDate}
+            value={paymentInfo?.expiryDate || ''} // Assure que la valeur est une chaîne
             onChange={handleExpiryChange}
             placeholder="MM/AA"
             maxLength={5}
@@ -156,7 +161,7 @@ export default function CreditCardPayment({
           <label className="block text-sm font-medium text-gray-700 mb-1">CVV *</label>
           <input
             type="text"
-            value={paymentInfo.cvv}
+            value={paymentInfo?.cvv || ''} // Assure que la valeur est une chaîne
             onChange={handleCVVChange}
             placeholder={cardType === 'amex' ? '1234' : '123'}
             maxLength={cardType === 'amex' ? 4 : 3}

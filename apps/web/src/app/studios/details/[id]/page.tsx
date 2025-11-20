@@ -154,7 +154,6 @@ export default function StudioDetailsPage() {
           }
           return range;
         }).flat();
-        console.log('Dates réservées:', dates);
         setReservedDates(dates);
       } catch (error) {
         console.error('Erreur lors de la récupération des dates réservées:', error);
@@ -573,11 +572,11 @@ export default function StudioDetailsPage() {
             
             {/* Breadcrumb moderne */}
             <div className="hidden md:flex items-center gap-2 text-sm text-gray-500">
-              <span>Accueil</span>
+              <Link href="/" className="text-gray-500 ">Accueil</Link>
               <svg width="16" height="16" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1} d="M9 5l7 7-7 7" />
               </svg>
-              <span>Studios</span>
+              <Link href="/studios" className="text-gray-500 ">Studios</Link>
               <svg width="16" height="16" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1} d="M9 5l7 7-7 7" />
               </svg>
@@ -843,21 +842,6 @@ export default function StudioDetailsPage() {
                   </div>
                 </div>
               </div>
-            </div>
-
-            {/* Location Map */}
-            <div className="border-t pt-8">
-              <h2 className="text-xl font-semibold text-gray-900 mb-4">Emplacement</h2>
-              <div className="bg-gray-100 rounded-lg h-64 flex items-center justify-center mb-4">
-                <div className="text-center text-gray-500">
-                  <svg width="48" height="48" fill="none" stroke="currentColor" viewBox="0 0 24 24" className="mx-auto mb-2">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1} d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1} d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" />
-                  </svg>
-                  <p className="text-sm">Carte interactive</p>
-                </div>
-              </div>
-              <p className="text-gray-600">{studio.address}, {studio.city}, {studio.country}</p>
             </div>
           </div>
 

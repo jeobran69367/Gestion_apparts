@@ -24,7 +24,6 @@ export default function ReservationDetailsPage() {
   const [reservation, setReservation] = useState<ReservationDetails | null>(null);
 
   useEffect(() => {
-    console.log('ID récupéré:', id); // Log pour vérifier l'ID
     if (id) {
       fetch(`http://localhost:4000/api/reservations/${id}`)
         .then((response) => response.json())

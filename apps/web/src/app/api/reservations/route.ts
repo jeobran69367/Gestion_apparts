@@ -20,14 +20,6 @@ export async function POST(request: NextRequest) {
       guestInfo
     } = await request.json();
 
-    console.log('🏨 Création de réservation:', {
-      paymentId,
-      studioId,
-      guestId,
-      checkIn,
-      checkOut,
-      total
-    });
 
     if (!paymentId || !studioId || !checkIn || !checkOut || !total) {
       return NextResponse.json({
@@ -58,7 +50,6 @@ export async function POST(request: NextRequest) {
       createdAt: new Date().toISOString()
     };
 
-    console.log('✅ Réservation créée avec succès:', reservationData.id);
 
     // SIMULATION: En production, ici vous feriez :
     // 1. Appel à votre API backend NestJS pour créer la réservation

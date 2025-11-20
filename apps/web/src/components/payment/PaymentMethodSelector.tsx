@@ -19,6 +19,8 @@ export default function PaymentMethodSelector({
   amount = 0, 
   currency = 'EUR' 
 }: PaymentMethodSelectorProps) {
+
+  
   const [selectedMethod, setSelectedMethod] = useState(paymentInfo.method || 'CREDIT_CARD');
 
   const paymentMethods = [
@@ -48,6 +50,8 @@ export default function PaymentMethodSelector({
       name: 'PawaPay',
       description: 'Paiement mobile rapide et sécurisé',
       icon: '📱',
+      countries: ['CM', 'CI', 'SN'], // Cameroun, Côte d'Ivoire, Sénégal
+      currencies: ['XAF', 'XOF'],
       popular: false
     }
   ];

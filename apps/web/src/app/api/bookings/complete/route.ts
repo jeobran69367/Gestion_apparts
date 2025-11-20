@@ -22,12 +22,6 @@ export async function POST(request: NextRequest) {
       autoCreateUser = true
     } = await request.json();
 
-    console.log('🏨 Création complète: Utilisateur + Réservation', {
-      paymentId,
-      studioId,
-      guestInfo,
-      total
-    });
 
     // 1. CRÉER L'UTILISATEUR AUTOMATIQUEMENT avec mot de passe 1234
     let userId = null;
@@ -35,7 +29,6 @@ export async function POST(request: NextRequest) {
       try {
         const userResult = await createOrGetUser(guestInfo);
         userId = userResult.userId;
-        console.log(`👤 Utilisateur créé/récupéré: ID ${userId}`);
       } catch (error) {
         console.error('❌ Erreur création utilisateur:', error);
         return NextResponse.json({
@@ -62,6 +55,9 @@ export async function POST(request: NextRequest) {
       specialRequests: specialRequests || null
     };
 
+    // Ajout de logs pour déboguer les données envoyées à l'API Backend
+    console.log('📤 Données envoyées à l\'API Backend:', reservationData);
+
     try {
       // Appel à l'API Backend NestJS
       const backendResponse = await fetch('http://localhost:4000/api/reservations', {
@@ -72,13 +68,16 @@ export async function POST(request: NextRequest) {
         body: JSON.stringify(reservationData)
       });
 
+      // Vérification de la réponse de l'API Backend
       if (!backendResponse.ok) {
+        console.error('❌ Erreur API Backend:', await backendResponse.text());
         throw new Error(`API Backend error: ${backendResponse.status}`);
       }
 
       const reservation = await backendResponse.json();
+      // Log de la réponse réussie
+      console.log('✅ Réponse API Backend:', reservation);
       
-      console.log('✅ Réservation créée en BDD:', reservation.id);
 
       // 3. METTRE À JOUR LE CACHE DE PAIEMENT avec la réservation liée
       updatePaymentCacheWithReservation(paymentId, reservation.id, userId);
@@ -158,7 +157,6 @@ async function createOrGetUser(guestInfo: any) {
     
     if (userResponse.ok) {
       const existingUser = await userResponse.json();
-      console.log(`👤 Utilisateur existant trouvé: ${existingUser.id}`);
       return { userId: existingUser.id, created: false };
     }
 
@@ -185,7 +183,6 @@ async function createOrGetUser(guestInfo: any) {
     }
 
     const newUser = await createUserResponse.json();
-    console.log(`✅ Nouvel utilisateur créé: ${newUser.user?.id || newUser.id}`);
     
     return { 
       userId: newUser.user?.id || newUser.id, 
@@ -197,7 +194,6 @@ async function createOrGetUser(guestInfo: any) {
     
     // FALLBACK: Créer un utilisateur virtuel pour la démo
     const fallbackUserId = Math.floor(Math.random() * 1000) + 1000;
-    console.log(`🔄 Utilisateur virtuel créé (fallback): ${fallbackUserId}`);
     
     return { 
       userId: fallbackUserId, 
@@ -223,7 +219,6 @@ function updatePaymentCacheWithReservation(paymentId: string, reservationId: str
           confirmedAt: new Date().toISOString()
         }
       });
-      console.log(`📝 Cache paiement mis à jour: ${paymentId} → Réservation ${reservationId}`);
     }
   } catch (error) {
     console.error('❌ Erreur mise à jour cache:', error);
@@ -251,7 +246,6 @@ export async function GET(request: NextRequest) {
     const reservationId = searchParams.get('reservationId');
     const userId = searchParams.get('userId');
 
-    console.log('📋 Récupération réservation:', { paymentId, reservationId, userId });
 
     // Récupérer depuis Backend NestJS si possible
     if (reservationId) {

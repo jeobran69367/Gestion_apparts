@@ -44,21 +44,14 @@ async function bootstrap() {
       }
     });
 
-    console.log('=== REGISTERED ROUTES ===');
     availableRoutes.forEach(route => {
-      console.log(`${route.methods.join(', ').padEnd(8)} ${route.path}`);
     });
-    console.log('=========================');
   };
 
   await app.listen(process.env.PORT ?? 4000);
   
   // Logger les routes une fois que l'application est prête
   logRoutes();
-  
-  console.log(
-    `🚀 API running on: http://localhost:${process.env.PORT ?? 4000}/api`,
-  );
 }
 
 void bootstrap();

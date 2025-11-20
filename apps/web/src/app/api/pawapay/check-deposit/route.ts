@@ -1,9 +1,8 @@
 // app/api/pawapay/check-deposit/route.ts
 import { NextRequest, NextResponse } from 'next/server';
 
-// Validate environment variables at runtime
 if (!process.env.PAWAPAY_API_KEY) {
-  throw new Error('❌ PAWAPAY_API_KEY is missing. Please set it in the environment variables.');
+  throw new Error('❌ PAWAPAY_API_KEY is missing.');
 }
 
 export async function GET(request: NextRequest) {
@@ -12,15 +11,6 @@ export async function GET(request: NextRequest) {
   if (!depositId) {
     return NextResponse.json(
       { error: 'depositId requis' },
-      { status: 400 }
-    );
-  }
-
-  // Validation du format UUID
-  const uuidRegex = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
-  if (!uuidRegex.test(depositId)) {
-    return NextResponse.json(
-      { error: 'Format depositId invalide. Doit être un UUID.' },
       { status: 400 }
     );
   }
@@ -39,7 +29,6 @@ export async function GET(request: NextRequest) {
       headers: {
         'Authorization': `Bearer ${apiKey}`,
         'Content-Type': 'application/json',
-        'User-Agent': 'StudioBooking/1.0'
       }
     });
 
@@ -66,29 +55,48 @@ export async function GET(request: NextRequest) {
 
     const data = await response.json();
 
-    console.log('✅ Réponse vérification PawaPay:', {
-      depositId: data.depositId,
-      status: data.status,
-      amount: data.amount,
-      currency: data.currency
-    });
+    console.log('✅ Réponse COMPLÈTE PawaPay:', JSON.stringify(data, null, 2));
 
-    // ⚠️ CORRECTION : Format de réponse standardisé selon la documentation
-    const formattedResponse = {
-      depositId: data.depositId,
-      status: data.status,
-      amount: data.amount,
-      currency: data.currency,
-      payer: data.payer,
-      clientReferenceId: data.clientReferenceId,
-      mnoTransactionId: data.mnoTransactionId,
-      completedAt: data.completedAt,
-      failureReason: data.failureReason,
-      metadata: data.metadata,
-      checkedAt: new Date().toISOString()
-    };
+    // ⚠️ CORRECTION CRUCIALE : La réponse a une structure différente
+    // PawaPay retourne { status: "FOUND", data: { ... } }
+    if (data.status === "FOUND" && data.data) {
+      // On retourne les données du dépôt directement
+      const depositData = data.data;
+      
+      console.log('📊 Données du dépôt:', {
+        depositId: depositData.depositId,
+        status: depositData.status,
+        amount: depositData.amount,
+        currency: depositData.currency
+      });
 
-    return NextResponse.json(formattedResponse);
+      const formattedResponse = {
+        depositId: depositData.depositId,
+        status: depositData.status, // ⚠️ C'est le statut réel du dépôt (COMPLETED, PENDING, etc.)
+        amount: depositData.amount,
+        currency: depositData.currency,
+        payer: depositData.payer,
+        clientReferenceId: depositData.clientReferenceId,
+        mnoTransactionId: depositData.providerTransactionId, // ⚠️ Correction du nom
+        completedAt: depositData.created, // ⚠️ Utiliser 'created' comme completedAt
+        failureReason: depositData.failureReason,
+        metadata: depositData.metadata,
+        checkedAt: new Date().toISOString(),
+        // Ajout des champs supplémentaires pour le debug
+        rawStatus: data.status, // "FOUND"
+        hasData: !!data.data
+      };
+
+      return NextResponse.json(formattedResponse);
+    } else {
+      // Cas où le dépôt n'est pas trouvé ou autre statut
+      console.log('📭 Dépôt non trouvé ou statut inattendu:', data);
+      return NextResponse.json({
+        status: data.status || 'UNKNOWN',
+        message: 'Dépôt non trouvé ou statut inattendu',
+        rawResponse: data
+      }, { status: 404 });
+    }
 
   } catch (error) {
     console.error('💥 Erreur de réseau vérification PawaPay:', error);

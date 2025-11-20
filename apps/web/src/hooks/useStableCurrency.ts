@@ -27,7 +27,6 @@ export function useStableCurrency() {
   const actions = useMemo(() => ({
     updatePaymentMethod: (method: string) => {
       // Pas d'update nécessaire - toujours XAF
-      console.log(`Méthode de paiement: ${method} (toujours en FCFA)`);
     },
     
     convertPrice: (price: number, targetCurrency?: string) => {

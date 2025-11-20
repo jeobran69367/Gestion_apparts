@@ -4,7 +4,6 @@ import * as bcrypt from 'bcryptjs';
 const prisma = new PrismaClient();
 
 async function main() {
-  console.log('🌱 Début du seeding...');
 
   // Créer des utilisateurs de test
   const hashedPassword = await bcrypt.hash('password123', 10);
@@ -35,7 +34,6 @@ async function main() {
     },
   });
 
-  console.log('✅ Utilisateurs créés');
 
   // Créer des studios de test
   const studios = [
@@ -156,7 +154,6 @@ async function main() {
     }
   }
 
-  console.log('✅ Studios créés');
 
   // Créer quelques réservations de test
   const reservations = [
@@ -191,10 +188,8 @@ async function main() {
       });
     }
 
-    console.log('✅ Réservations créées');
   }
 
-  console.log('🎉 Seeding terminé avec succès !');
 }
 
 main()

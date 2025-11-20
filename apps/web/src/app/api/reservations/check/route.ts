@@ -16,7 +16,6 @@ export async function GET(request: NextRequest) {
       }, { status: 400 });
     }
 
-    console.log(`🔍 Vérification réservation pour paiement: ${paymentId}`);
 
     // Vérifier dans le backend NestJS
     const backendUrl = process.env.BACKEND_URL || 'http://localhost:3001';
@@ -31,7 +30,6 @@ export async function GET(request: NextRequest) {
 
       if (response.ok) {
         const reservation = await response.json();
-        console.log(`✅ Réservation trouvée:`, reservation);
         
         return NextResponse.json({
           found: true,
@@ -39,7 +37,6 @@ export async function GET(request: NextRequest) {
           message: 'Réservation trouvée avec succès'
         });
       } else if (response.status === 404) {
-        console.log(`❌ Aucune réservation trouvée pour ${paymentId}`);
         return NextResponse.json({
           found: false,
           message: 'Aucune réservation trouvée pour ce paiement'
@@ -82,7 +79,6 @@ export async function POST(request: NextRequest) {
       }, { status: 400 });
     }
 
-    console.log(`🔄 Forcer la création de réservation pour: ${paymentId}`);
 
     // Forcer l'appel à l'API de création complète
     const completeResponse = await fetch(`${process.env.NEXT_PUBLIC_BASE_URL || 'http://localhost:3000'}/api/bookings/complete`, {
@@ -111,7 +107,6 @@ export async function POST(request: NextRequest) {
 
     if (completeResponse.ok) {
       const result = await completeResponse.json();
-      console.log(`✅ Réservation forcée créée:`, result);
       
       return NextResponse.json({
         success: true,

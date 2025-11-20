@@ -27,7 +27,6 @@ export default function MyStudiosPage() {
 
   const fetchMyStudios = async (token: string) => {
     try {
-      console.log('Token:', token); // Debug
       const response = await fetch('http://localhost:4000/api/studios/my-studios', {
         headers: {
           'Authorization': `Bearer ${token}`,
@@ -35,11 +34,9 @@ export default function MyStudiosPage() {
         },
       });
 
-      console.log('Response status:', response.status); // Debug
 
       if (response.ok) {
         const data = await response.json();
-        console.log('Studios data:', data); // Debug
 
         // Adapter les données pour le composant CardMaisonLocation
         const adaptedStudios = data.studios.map((studio: any) => ({
@@ -142,7 +139,6 @@ export default function MyStudiosPage() {
   };
 
   const handleManageCalendar = async (id: number) => {
-    console.log('Gestion calendrier pour studio:', id);
     // TODO: Implémenter la gestion du calendrier
   };
 

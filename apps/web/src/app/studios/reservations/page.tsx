@@ -129,7 +129,6 @@ export default function ReservationsPage() {
       guestId: parseInt(formData.guestId, 10),
     };
 
-    console.log('Données envoyées:', reservationData); // Log pour vérifier les données envoyées
 
     try {
       const response = await fetch('http://localhost:4000/api/reservations', {

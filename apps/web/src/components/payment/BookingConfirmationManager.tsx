@@ -2,7 +2,6 @@
 
 import { useState } from 'react';
 import PaymentMethodSelector from './PaymentMethodSelector';
-import PawaPayPayment from './PawaPayPayment';
 
 interface BookingConfirmationManagerProps {
   bookingData: {
@@ -170,94 +169,82 @@ export default function BookingConfirmationManager({
     }
   };
 
-  // handlePaymentSuccess removed here to avoid duplicate declaration;
-  // the full implementation that accepts paymentData is defined later in the file.
+  const handlePaymentSuccess = async () => {
+    try {
+      // 1. Créer la réservation en base de données
+      const bookingResult = await createBooking();
 
- 
-  // Dans votre BookingConfirmationManager
-const handlePaymentSuccess = async (paymentData: any) => {
-  try {
-    // 1. Créer la réservation en base de données
-    const bookingResult = await createBooking(paymentData);
+      if (bookingResult.success) {
+        // 2. Confirmer la réservation
+        setPaymentProgress(prev => ({ ...prev, isVisible: false }));
+        onBookingComplete(bookingResult.bookingId);
+        onInputChange('payment', 'status', 'COMPLETED'); // Mettre à jour le statut en cas de succès
+      } else {
+        throw new Error(bookingResult.error || 'Erreur lors de la création de la réservation');
+      }
 
-    if (bookingResult.success) {
-      // 2. Confirmer la réservation
+    } catch (error) {
+      console.error('Erreur confirmation réservation:', error);
+      setError(error instanceof Error ? error.message : 'Erreur confirmation réservation');
       setPaymentProgress(prev => ({ ...prev, isVisible: false }));
-      onBookingComplete(bookingResult.bookingId);
-      onInputChange('payment', 'status', 'COMPLETED');
-      
-      // Mettre à jour les détails du paiement
-      onInputChange('paymentInfo', 'pawaPayData', JSON.stringify(paymentData));
-      onInputChange('paymentInfo', 'paidAt', new Date().toISOString());
-    } else {
-      throw new Error(bookingResult.error || 'Erreur lors de la création de la réservation');
-    }
-
-  } catch (error) {
-    console.error('Erreur confirmation réservation:', error);
-    setError(error instanceof Error ? error.message : 'Erreur confirmation réservation');
-    setPaymentProgress(prev => ({ ...prev, isVisible: false }));
-    onInputChange('payment', 'status', 'FAILED');
-  }
-};
-
-const createBooking = async (paymentData: any) => {
-  const token = localStorage.getItem('token');
-
-  const reservationData = {
-    studioId: bookingData.studioId,
-    checkIn: new Date(bookingData.checkIn).toISOString(),
-    checkOut: new Date(bookingData.checkOut).toISOString(),
-    nights: bookingData.totalNights,
-    guestCount: bookingData.guestCount,
-    subtotal: bookingData.subtotal,
-    serviceFee: bookingData.serviceFee,
-    taxes: bookingData.taxes,
-    total: bookingData.total,
-    specialRequests: bookingData.specialRequests || null,
-    guestInfo: bookingData.guestInfo,
-    paymentData: {
-      paymentId: paymentData.depositId,
-      referenceId: paymentData.referenceId,
-      amount: paymentData.amount,
-      method: 'PAWAPAY',
-      provider: paymentData.provider,
-      phoneNumber: paymentData.phoneNumber,
-      status: 'COMPLETED',
-      paidAt: new Date().toISOString(),
-      rawData: paymentData
+      onInputChange('payment', 'status', 'FAILED'); // Mettre à jour le statut en cas d'erreur
     }
   };
 
-  const response = await fetch('http://localhost:4000/api/reservations', {
-    method: 'POST',
-    headers: {
-      'Content-Type': 'application/json',
-      'Authorization': `Bearer ${token}`
-    },
-    body: JSON.stringify(reservationData)
-  });
+  const createBooking = async () => {
+    const token = localStorage.getItem('token');
 
-  const result = await response.json();
-
-  if (response.ok) {
-    return {
-      success: true,
-      bookingId: result.id,
-      booking: result
+    const reservationData = {
+      studioId: bookingData.studioId,
+      checkIn: new Date(bookingData.checkIn).toISOString(),
+      checkOut: new Date(bookingData.checkOut).toISOString(),
+      nights: bookingData.totalNights,
+      guestCount: bookingData.guestCount,
+      subtotal: bookingData.subtotal,
+      serviceFee: bookingData.serviceFee,
+      taxes: bookingData.taxes,
+      total: bookingData.total,
+      specialRequests: bookingData.specialRequests || null,
+      guestInfo: bookingData.guestInfo,
+      paymentData: {
+        paymentId: paymentProgress.paymentId,
+        amount: bookingData.total,
+        method: paymentInfo.method,
+        status: 'COMPLETED',
+        paidAt: new Date().toISOString()
+      }
     };
-  } else {
-    return {
-      success: false,
-      error: result.message || 'Erreur lors de la création de la réservation'
-    };
-  }
-};
 
-const handlePaymentCancel = () => {
-  setPaymentProgress(prev => ({ ...prev, isVisible: false }));
-  setError('Paiement annulé par l\'utilisateur');
-  // Optionnel: nettoyer les données temporaires
+    const response = await fetch('http://localhost:4000/api/reservations', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${token}`
+      },
+      body: JSON.stringify(reservationData)
+    });
+
+    const result = await response.json();
+
+    if (response.ok) {
+      return {
+        success: true,
+        bookingId: result.id,
+        booking: result
+      };
+    } else {
+      return {
+        success: false,
+        error: result.message || 'Erreur lors de la création de la réservation'
+      };
+    }
+  };
+  
+
+  const handlePaymentCancel = () => {
+    setPaymentProgress(prev => ({ ...prev, isVisible: false }));
+    setError('Paiement annulé par l\'utilisateur');
+    // Optionnel: nettoyer les données temporaires
   };
 
   const handlePaymentError = (errorMessage: string) => {

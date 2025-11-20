@@ -37,14 +37,13 @@ export default function PaypalPayment({ paymentInfo, onInputChange, amount }: Pa
             return actions.order.create({
               purchase_units: [
                 {
-                  amount: { value: (amount / 100).toFixed(2) },
+                  amount: { value: (amount ).toFixed(2) },
                 },
               ],
             });
           },
           onApprove: async (_: any, actions: { order: { capture: () => any; }; }) => {
             await actions.order.capture();
-            console.log('Paiement validé via PayPal !');
           },
         }).render('#paypal-button-container');
       }
