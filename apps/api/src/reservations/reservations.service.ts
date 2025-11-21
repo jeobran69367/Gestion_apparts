@@ -6,6 +6,37 @@ import { PrismaService } from '../prisma/prisma.service';
 export class ReservationsService {
   constructor(private prisma: PrismaService) {}
 
+  async findByUserId(userId: number) {
+    return this.prisma.reservation.findMany({
+      where: {
+        guestId: userId,
+      },
+      include: {
+        studio: {
+          select: {
+            id: true,
+            name: true,
+            city: true,
+            photos: true,
+            address: true,
+            pricePerNight: true,
+          },
+        },
+        guest: {
+          select: {
+            firstName: true,
+            lastName: true,
+            email: true,
+            phone: true,
+          },
+        },
+      },
+      orderBy: {
+        createdAt: 'desc',
+      },
+    });
+  }
+
   async create(data: any) {
     const { checkIn, checkOut, studioId, guestId } = data;
 

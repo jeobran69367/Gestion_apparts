@@ -6,6 +6,7 @@ import { PrismaModule } from './prisma/prisma.module';
 import { AuthModule } from './auth/auth.module';
 import { StudiosModule } from './studios/studios.module';
 import { ReservationsModule } from './reservations/reservations.module';
+import { PaymentsModule } from './payments/payments.module'; 
 import { UserModule} from './user/user.module';
 
 @Module({
@@ -18,6 +19,7 @@ import { UserModule} from './user/user.module';
     StudiosModule,
     ReservationsModule, // Added ReservationsModule
     UserModule,
+    PaymentsModule, // Ajout du module PaymentsModule
   ],
   controllers: [AppController],
   providers: [AppService],

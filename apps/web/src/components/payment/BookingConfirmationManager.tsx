@@ -2,6 +2,7 @@
 
 import { useState } from 'react';
 import PaymentMethodSelector from './PaymentMethodSelector';
+import PawaPayPayment from './PawaPayPayment';
 
 interface BookingConfirmationManagerProps {
   bookingData: {
@@ -28,15 +29,6 @@ interface BookingConfirmationManagerProps {
   onCancel: () => void;
 }
 
-interface PaymentProgress {
-  isVisible: boolean;
-  paymentId: string;
-  amount: number;
-  channel: string;
-  channelUssd?: string;
-  phoneNumber: string;
-}
-
 export default function BookingConfirmationManager({
   bookingData,
   paymentInfo,
@@ -45,153 +37,135 @@ export default function BookingConfirmationManager({
   onCancel
 }: BookingConfirmationManagerProps) {
   const [isProcessing, setIsProcessing] = useState(false);
-  const [paymentProgress, setPaymentProgress] = useState<PaymentProgress>({
-    isVisible: false,
-    paymentId: '',
-    amount: 0,
-    channel: '',
-    phoneNumber: ''
-  });
+  const [isPaymentStep, setIsPaymentStep] = useState(false); 
+  const [paymentStatus, setPaymentStatus] = useState<'IDLE' | 'IN_PROGRESS' | 'COMPLETED' | 'FAILED'>('IDLE');
   const [error, setError] = useState('');
+  const [currentReservationId, setCurrentReservationId] = useState<number | null>(null);
+  const [currentUserId, setCurrentUserId] = useState<number | null>(null);
 
-  const handlePaymentSubmit = async () => {
-    setIsProcessing(true);
+  const handlePaymentInitiation = async () => {
     setError('');
-
+    
     try {
-      // Vérifier que le montant est valide
-      if (!bookingData.total || bookingData.total <= 0) {
-        throw new Error('Le montant total de la réservation est invalide.');
+      // ÉTAPE 1 : Vérifier/créer l'utilisateur
+      const userId = await getOrCreateUser();
+      setCurrentUserId(userId);
+
+      // ÉTAPE 2 : Créer la réservation avec statut PENDING
+      if (!currentReservationId) {
+        const reservation = await createPendingReservation(userId);
+        setCurrentReservationId(reservation.id);
       }
 
-      // 1. Valider les données de paiement selon la méthode
-      const isValid = validatePaymentMethod(paymentInfo.method);
-      if (!isValid) {
-        throw new Error('Informations de paiement incomplètes');
-      }
-
-      // 2. Initier le paiement selon la méthode choisie
-      const paymentResult = await initiatePayment();
-
-      if (paymentResult.success) {
-        // 3. Afficher le widget de progression
-        setPaymentProgress({
-          isVisible: true,
-          paymentId: paymentResult.paymentId,
-          amount: bookingData.total,
-          channel: paymentResult.channel,
-          channelUssd: paymentResult.channelUssd,
-          phoneNumber: paymentInfo.phoneNumber || paymentInfo.email || 'N/A'
-        });
-
-        // 4. Mettre à jour le statut de la réservation
-        onInputChange('payment', 'status', 'IN_PROGRESS');
+      // ÉTAPE 3 : Lancer le processus de paiement
+      if (paymentInfo.method === 'PAWAPAY') {
+        setIsPaymentStep(true); 
+        setPaymentStatus('IDLE');
       } else {
-        throw new Error(paymentResult.error || 'Erreur lors de l\'initialisation du paiement');
+        await handleDirectPaymentSubmit();
       }
-
+      
     } catch (error) {
-      console.error('Erreur paiement:', error);
-      setError(error instanceof Error ? error.message : 'Erreur inconnue');
-      onInputChange('payment', 'status', 'FAILED'); // Mettre à jour le statut en cas d'erreur
-    } finally {
+      const errorMessage = handleError(error, 'Erreur lors de l\'initialisation');
+      setError(errorMessage);
+      setPaymentStatus('FAILED');
       setIsProcessing(false);
     }
   };
 
-  const validatePaymentMethod = (method: string): boolean => {
-    switch (method) {
-      case 'CREDIT_CARD':
-        return !!(paymentInfo.cardholderName && paymentInfo.cardNumber && 
-                 paymentInfo.expiryDate && paymentInfo.cvv);
-      
-      case 'PAYPAL':
-        return true; // PayPal gère sa propre validation
-      
-      case 'MOBILE_MONEY':
-      case 'ORANGE_MONEY':
-      case 'MONETBIL':
-        return !!(paymentInfo.phoneNumber && paymentInfo.country && 
-                 (paymentInfo.operator || paymentInfo.provider));
-      
-      default:
-        return false;
-    }
+  const handleError = (error: unknown, defaultMessage: string) => {
+    console.error('Erreur:', error);
+    return error instanceof Error ? error.message : defaultMessage;
   };
 
-  const initiatePayment = async () => {
-    const method = paymentInfo.method;
+  const apiCall = async (url: string, method: string, body: any, token?: string | null) => {
+    const headers: Record<string, string> = {
+      'Content-Type': 'application/json',
+    };
+    if (token) headers['Authorization'] = `Bearer ${token}`;
 
-    if (method === 'MONETBIL') {
-      // Appel à l'API Monetbil
-      const response = await fetch('/api/monetbil/payment', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          amount: bookingData.total,
-          phoneNumber: paymentInfo.phoneNumber,
-          country: paymentInfo.country,
-          operator: paymentInfo.operator,
-          email: paymentInfo.email,
-          bookingId: `booking_${Date.now()}`,
-          description: `Réservation Studio - ${bookingData.totalNights} nuits`
-        })
-      });
+    const response = await fetch(url, {
+      method,
+      headers,
+      body: JSON.stringify(body),
+    });
 
-      return await response.json();
-    } 
-    
-    // Autres méthodes de paiement (PayPal, Stripe, etc.)
-    else if (method === 'CREDIT_CARD') {
-      // Simulation pour Stripe/carte bancaire
-      return {
-        success: true,
-        paymentId: `stripe_${Date.now()}`,
-        channel: 'Carte Bancaire',
-        message: 'Paiement par carte en cours...'
-      };
+    const result = await response.json();
+    if (!response.ok) {
+      throw new Error(result.message || 'Erreur lors de l\'appel API');
     }
-    
-    else if (method === 'PAYPAL') {
-      // Simulation pour PayPal
-      return {
-        success: true,
-        paymentId: `paypal_${Date.now()}`,
-        channel: 'PayPal',
-        message: 'Redirection vers PayPal...'
-      };
-    }
-    
-    else {
-      throw new Error('Méthode de paiement non supportée');
-    }
+    return result;
   };
 
-  const handlePaymentSuccess = async () => {
-    try {
-      // 1. Créer la réservation en base de données
-      const bookingResult = await createBooking();
-
-      if (bookingResult.success) {
-        // 2. Confirmer la réservation
-        setPaymentProgress(prev => ({ ...prev, isVisible: false }));
-        onBookingComplete(bookingResult.bookingId);
-        onInputChange('payment', 'status', 'COMPLETED'); // Mettre à jour le statut en cas de succès
-      } else {
-        throw new Error(bookingResult.error || 'Erreur lors de la création de la réservation');
+  // ÉTAPE 1 : Vérifier si l'utilisateur existe, sinon le créer
+  const getOrCreateUser = async (): Promise<number> => {
+    const token = localStorage.getItem('token');
+    
+    // Si l'utilisateur est déjà connecté, utiliser son ID
+    if (token) {
+      const userId = getUserIdFromToken(token);
+      if (userId) {
+        console.log('👤 Utilisateur déjà connecté:', userId);
+        return userId;
       }
+    }
 
-    } catch (error) {
-      console.error('Erreur confirmation réservation:', error);
-      setError(error instanceof Error ? error.message : 'Erreur confirmation réservation');
-      setPaymentProgress(prev => ({ ...prev, isVisible: false }));
-      onInputChange('payment', 'status', 'FAILED'); // Mettre à jour le statut en cas d'erreur
+    // Sinon, créer un nouvel utilisateur avec les guestInfo
+    console.log('👤 Création nouvel utilisateur avec:', bookingData.guestInfo);
+    
+    const userData = {
+      email: bookingData.guestInfo.email,
+      password: generateTemporaryPassword(), // Générer un mot de passe temporaire
+      firstName: bookingData.guestInfo.firstName,
+      lastName: bookingData.guestInfo.lastName,
+      phone: bookingData.guestInfo.phone,
+      role: 'GUEST' as const
+    };
+
+    try {
+      // Essayer de créer l'utilisateur via l'API d'inscription
+      const result = await apiCall('http://localhost:4000/api/auth/register', 'POST', userData);
+      console.log('✅ Utilisateur créé:', result);
+      
+      // Stocker le token si retourné
+      if (result.access_token) {
+        localStorage.setItem('token', result.access_token);
+      }
+      
+      return result.user?.id || result.id;
+
+    } catch (error: any) {
+      // Si l'utilisateur existe déjà (email unique), essayer de se connecter
+      if (error.message.includes('existe déjà') || error.message.includes('already exists')) {
+        console.log('🔄 Utilisateur existe déjà, tentative de connexion...');
+        
+        try {
+          const loginResult = await apiCall('http://localhost:4000/api/auth/login', 'POST', {
+            email: bookingData.guestInfo.email,
+            password: 'temporary123' // Mot de passe par défaut pour la récupération
+          });
+          
+          if (loginResult.access_token) {
+            localStorage.setItem('token', loginResult.access_token);
+            return loginResult.user?.id || getUserIdFromToken(loginResult.access_token);
+          }
+        } catch (loginError) {
+          console.error('Erreur de connexion:', loginError);
+          throw new Error('Impossible de créer ou de connecter l\'utilisateur');
+        }
+      }
+      
+      throw error;
     }
   };
 
-  const createBooking = async () => {
+  // Générer un mot de passe temporaire
+    const generateTemporaryPassword = (): string => {
+      return `Temp${Date.now()}!`;
+    };
+
+  // ÉTAPE 2 : Créer une réservation en attente de paiement
+  const createPendingReservation = async (userId: number) => {
     const token = localStorage.getItem('token');
 
     const reservationData = {
@@ -205,58 +179,247 @@ export default function BookingConfirmationManager({
       taxes: bookingData.taxes,
       total: bookingData.total,
       specialRequests: bookingData.specialRequests || null,
-      guestInfo: bookingData.guestInfo,
-      paymentData: {
-        paymentId: paymentProgress.paymentId,
-        amount: bookingData.total,
-        method: paymentInfo.method,
-        status: 'COMPLETED',
-        paidAt: new Date().toISOString()
-      }
+      guestId: userId, // ID de l'utilisateur (créé ou existant)
+      status: 'PENDING' // Réservation en attente de paiement
     };
 
-    const response = await fetch('http://localhost:4000/api/reservations', {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        'Authorization': `Bearer ${token}`
-      },
-      body: JSON.stringify(reservationData)
-    });
+    console.log('📝 Création réservation PENDING:', reservationData);
 
-    const result = await response.json();
+    const result = await apiCall('http://localhost:4000/api/reservations', 'POST', reservationData, token);
+    console.log('✅ Réservation PENDING créée:', result);
+    
+    return result;
+  };
 
-    if (response.ok) {
-      return {
-        success: true,
-        bookingId: result.id,
-        booking: result
-      };
-    } else {
-      return {
-        success: false,
-        error: result.message || 'Erreur lors de la création de la réservation'
-      };
+  // ÉTAPE 3 : Créer le paiement et confirmer la réservation
+  const confirmReservationAndCreatePayment = async (paymentId: string, paymentData: any = {}) => {
+    const token = localStorage.getItem('token');
+    
+    if (!currentReservationId || !currentUserId) {
+      throw new Error('Données de réservation ou utilisateur manquantes');
+    }
+
+    // ÉTAPE 3A : Créer l'enregistrement de paiement
+    const paymentPayload = {
+      amount: bookingData.total,
+      currency: 'XAF',
+      method: 'CREDIT_CARD',
+      status: 'COMPLETED',
+      externalId: paymentId,
+      reservationId: currentReservationId,
+      userId: currentUserId
+    };
+
+    console.log('💰 Création paiement COMPLETED:', paymentPayload);
+    const paymentResult = await apiCall('http://localhost:4000/api/payments', 'POST', paymentPayload, token);
+    console.log('✅ Paiement créé:', paymentResult);
+
+    // ÉTAPE 3B : Mettre à jour la réservation en CONFIRMED
+    const updateReservationPayload = {
+      status: 'CONFIRMED'
+    };
+
+    console.log('🔄 Mise à jour réservation CONFIRMED');
+    await apiCall(`http://localhost:4000/api/reservations/${currentReservationId}`, 'PATCH', updateReservationPayload, token);
+    
+    console.log('🎉 Réservation confirmée avec succès!');
+    return paymentResult;
+  };
+
+  const handleDirectPaymentSubmit = async () => {
+    setIsProcessing(true);
+    setError('');
+
+    try {
+      if (!bookingData.total || bookingData.total <= 0) {
+        throw new Error('Le montant total de la réservation est invalide.');
+      }
+
+      const paymentResult = await initiatePayment(); 
+
+      if (paymentResult.success) {
+        setPaymentStatus('IN_PROGRESS'); 
+        
+        // Simuler le succès du paiement
+        setTimeout(async () => {
+          try {
+            await confirmReservationAndCreatePayment(paymentResult.paymentId);
+            setPaymentStatus('COMPLETED');
+            setIsProcessing(false);
+            onBookingComplete(currentReservationId!.toString());
+          } catch (error) {
+            const errorMessage = handleError(error, 'Erreur lors de la confirmation');
+            setError(errorMessage);
+            setPaymentStatus('FAILED');
+            setIsProcessing(false);
+          }
+        }, 1500);
+      } else {
+        throw new Error(paymentResult.error || 'Erreur lors de l\'initialisation du paiement');
+      }
+    } catch (error) {
+      const errorMessage = handleError(error, 'Erreur inconnue');
+      setError(errorMessage);
+      setPaymentStatus('FAILED');
+      setIsProcessing(false);
+    } 
+  };
+
+  const validatePaymentMethod = (method: string): boolean => {
+    switch (method) {
+      case 'CREDIT_CARD':
+        return !!(paymentInfo.cardholderName && paymentInfo.cardNumber && 
+                 paymentInfo.expiryDate && paymentInfo.cvv);
+      case 'PAYPAL':
+        return true; 
+      case 'PAWAPAY': 
+        return true;
+      default:
+        return false;
     }
   };
-  
 
-  const handlePaymentCancel = () => {
-    setPaymentProgress(prev => ({ ...prev, isVisible: false }));
-    setError('Paiement annulé par l\'utilisateur');
-    // Optionnel: nettoyer les données temporaires
+  const initiatePayment = async () => {
+    const method = paymentInfo.method;
+
+    if (method === 'MONETBIL') {
+      const response = await fetch('/api/monetbil/payment', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ /* ... payload ... */ })
+      });
+      return await response.json();
+    } 
+    
+    if (method === 'CREDIT_CARD' || method === 'PAYPAL') {
+        return {
+            success: true,
+            paymentId: `${method.toLowerCase()}_${Date.now()}`,
+            channel: method === 'CREDIT_CARD' ? 'Carte Bancaire' : 'PayPal',
+            message: 'Redirection/Traitement...'
+        };
+    }
+    
+    throw new Error('Méthode de paiement non supportée');
   };
 
-  const handlePaymentError = (errorMessage: string) => {
-    setPaymentProgress(prev => ({ ...prev, isVisible: false }));
+  // Gestion du succès PawaPay
+  const handlePawaPaySuccess = async (paymentData: any) => {
+    console.log('✅ Paiement PawaPay confirmé. Données reçues:', paymentData);
+    
+    setPaymentStatus('COMPLETED');
+    setIsProcessing(true);
+    
+    const paymentId = paymentData.depositId || paymentData.paymentId;
+    
+    if (!paymentId) {
+      console.error('❌ Aucun ID de paiement trouvé');
+      setError('Erreur: Identifiant de paiement manquant');
+      setIsProcessing(false);
+      return;
+    }
+    
+    try {
+      // ÉTAPE 3 : Confirmer la réservation et créer le paiement
+      await confirmReservationAndCreatePayment(paymentId, paymentData);
+      
+      setIsPaymentStep(false);
+      setIsProcessing(false);
+      onBookingComplete(currentReservationId!.toString());
+      
+    } catch (error) {
+      console.error('❌ Erreur lors de la confirmation:', error);
+      setError('Erreur lors de la confirmation de la réservation');
+      setPaymentStatus('FAILED');
+      setIsProcessing(false);
+    }
+  };
+
+  const handlePawaPayError = (errorMessage: string) => {
+    console.error('❌ Erreur finale PawaPay:', errorMessage);
+    setPaymentStatus('FAILED');
     setError(errorMessage);
-    // Optionnel: logger l'erreur pour analyse
-    console.error('Erreur paiement:', errorMessage);
+    setIsPaymentStep(false);
+    setIsProcessing(false);
   };
+
+  const handlePawaPayStatusChange = (status: string) => {
+    console.log('📊 Statut PawaPay changé:', status);
+    
+    if (status === 'PENDING' || status === 'INITIATED' || status === 'ACCEPTED') {
+      setPaymentStatus('IN_PROGRESS');
+    } else if (status === 'FAILED' || status === 'REJECTED' || status === 'EXPIRED') {
+      setPaymentStatus('FAILED');
+    } else if (status === 'COMPLETED') {
+      setPaymentStatus('COMPLETED');
+    }
+    onInputChange('paymentInfo', 'status', status);
+  };
+
+  // Fonction utilitaire pour extraire l'ID utilisateur du token
+  const getUserIdFromToken = (token: string | null): number | null => {
+    if (!token) return null;
+    
+    try {
+      // Vérifier d'abord dans localStorage
+      const userData = localStorage.getItem('userData');
+      if (userData) {
+        const user = JSON.parse(userData);
+        return user.id ? parseInt(user.id) : null;
+      }
+      
+      // Décoder le token JWT
+      const payload = JSON.parse(atob(token.split('.')[1]));
+      return payload.sub ? parseInt(payload.sub) : 
+             payload.userId ? parseInt(payload.userId) : 
+             payload.id ? parseInt(payload.id) : null;
+    } catch (error) {
+      console.error('Erreur lors de l\'extraction de l\'ID utilisateur:', error);
+      return null;
+    }
+  };
+
+  // Rendu Conditionnel
+  if (paymentInfo.method === 'PAWAPAY' && isPaymentStep && paymentStatus !== 'COMPLETED') {
+    return (
+      <div className="max-w-md mx-auto">
+        <h3 className="text-xl font-bold mb-4">Finalisation du Paiement Mobile</h3>
+        
+        <PawaPayPayment
+          paymentInfo={paymentInfo}
+          onInputChange={(section, field, value) => onInputChange(section, field, value)}
+          amount={bookingData.total}
+          onPaymentSuccess={handlePawaPaySuccess}
+          onPaymentError={handlePawaPayError}
+          onPaymentStatusChange={handlePawaPayStatusChange}
+        />
+
+        {paymentStatus === 'FAILED' && (
+          <button 
+            onClick={() => {
+              setIsPaymentStep(false);
+              setPaymentStatus('IDLE');
+            }}
+            className="mt-6 w-full py-3 px-6 rounded-lg bg-gray-100 text-gray-700 hover:bg-gray-200 transition-colors"
+          >
+            Retourner à la sélection du mode de paiement
+          </button>
+        )}
+      </div>
+    );
+  }
+
+  if (paymentStatus === 'COMPLETED') {
+    return (
+      <div className="text-center p-8 bg-green-50 rounded-lg">
+        <h3 className="text-2xl font-bold text-green-800">Paiement et Réservation Confirmés ! 🎉</h3>
+        <p className="mt-2 text-green-700">Votre réservation est finalisée. Veuillez patienter pour la redirection.</p>
+      </div>
+    );
+  }
 
   return (
     <>
-      {/* Formulaire de paiement principal */}
       <div className="space-y-6">
         <PaymentMethodSelector
           paymentInfo={paymentInfo}
@@ -264,15 +427,12 @@ export default function BookingConfirmationManager({
           amount={bookingData.total}
         />
 
-        {/* Affichage d'erreur */}
         {error && (
           <div className="bg-red-50 border border-red-200 rounded-lg p-4">
-            <div className="flex">
-              <div className="flex-shrink-0">
-                <svg className="h-5 w-5 text-red-400" viewBox="0 0 20 20" fill="currentColor">
-                  <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z" clipRule="evenodd" />
-                </svg>
-              </div>
+            <div className="flex items-start">
+              <svg className="h-5 w-5 text-red-400 mt-0.5 flex-shrink-0" viewBox="0 0 20 20" fill="currentColor">
+                <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z" clipRule="evenodd" />
+              </svg>
               <div className="ml-3">
                 <h4 className="font-medium text-red-800">Erreur de paiement</h4>
                 <p className="text-sm text-red-600 mt-1">{error}</p>
@@ -280,36 +440,44 @@ export default function BookingConfirmationManager({
             </div>
           </div>
         )}
+        
+        {paymentStatus === 'IN_PROGRESS' && paymentInfo.method !== 'PAWAPAY' && (
+          <div className="p-4 bg-blue-50 border border-blue-200 rounded-lg">
+            <p className="text-blue-800">
+              <span className="inline-flex animate-pulse mr-2">...</span>
+              Traitement de votre paiement en cours. Veuillez ne pas fermer cette page.
+            </p>
+          </div>
+        )}
 
-        {/* Boutons d'action */}
         <div className="flex gap-4">
           <button
             onClick={onCancel}
             className="flex-1 bg-gray-100 text-gray-700 py-3 px-6 rounded-lg hover:bg-gray-200 transition-colors"
+            disabled={isProcessing}
           >
             Annuler
           </button>
           
           <button
-            onClick={handlePaymentSubmit}
-            disabled={isProcessing || !validatePaymentMethod(paymentInfo.method)}
-            className="flex-1 bg-blue-600 text-white py-3 px-6 rounded-lg hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+            onClick={handlePaymentInitiation}
+            disabled={isProcessing || paymentInfo.method === '' || paymentStatus === 'IN_PROGRESS'}
+            className="flex-1 bg-orange-600 text-white py-3 px-6 rounded-lg hover:bg-orange-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
           >
-            {isProcessing ? (
+            {isProcessing || paymentStatus === 'IN_PROGRESS' ? (
               <span className="flex items-center justify-center">
                 <svg className="animate-spin -ml-1 mr-3 h-5 w-5 text-white" fill="none" viewBox="0 0 24 24">
                   <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
                   <path className="opacity-75" fill="currentColor" d="m4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z" />
                 </svg>
-                Traitement...
+                {paymentStatus === 'IN_PROGRESS' ? 'Vérification...' : 'Traitement...'}
               </span>
             ) : (
-              'Confirmer et Payer'
+              `Confirmer et Payer ${(bookingData.total)}`
             )}
           </button>
         </div>
       </div>
-
     </>
   );
 }

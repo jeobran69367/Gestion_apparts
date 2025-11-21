@@ -9,22 +9,24 @@ interface Booking {
   studioId: number;
   checkIn: string;
   checkOut: string;
-  guests: number;
-  totalPrice: number;
-  status: 'pending' | 'confirmed' | 'cancelled' | 'completed';
+  guestCount: number;
+  total: number;
+  status: 'PENDING' | 'CONFIRMED' | 'CANCELLED' | 'COMPLETED' | 'NO_SHOW';
   createdAt: string;
-  guestInfo: {
+  nights: number;
+  guest: {
     firstName: string;
     lastName: string;
     email: string;
     phone: string;
-    message?: string;
   };
   studio: {
     id: number;
     name: string;
     city: string;
     photos: string[];
+    address: string;
+    pricePerNight: number;
   };
 }
 
@@ -41,42 +43,69 @@ export default function MyBookingsPage() {
       return;
     }
 
-    fetchMyBookings();
+    fetchMyReservations();
   }, [router]);
 
-  const fetchMyBookings = async () => {
+  const fetchMyReservations = async () => {
     try {
+      setError('');
       const token = localStorage.getItem('token');
-      const response = await fetch('http://localhost:4000/api/bookings/my-bookings', {
+      
+      if (!token) {
+        router.push('/auth/login');
+        return;
+      }
+
+      // CORRECTION : Utilisez l'endpoint qui récupère automatiquement les réservations de l'utilisateur connecté
+      const response = await fetch('http://localhost:4000/api/reservations/my-reservations', {
         headers: {
           'Authorization': `Bearer ${token}`,
           'Content-Type': 'application/json',
         },
       });
 
+      const data = await response.json();
+
       if (response.ok) {
-        const data = await response.json();
-        setBookings(data.bookings || []);
+        setBookings(data.reservations || data || []);
       } else {
-        setError('Erreur lors du chargement de vos réservations');
+        switch (response.status) {
+          case 401:
+            setError('Session expirée - veuillez vous reconnecter');
+            localStorage.removeItem('token');
+            router.push('/auth/login');
+            break;
+          case 404:
+            setError('Endpoint non trouvé - contactez le support');
+            break;
+          case 500:
+            setError('Erreur serveur - veuillez réessayer plus tard');
+            break;
+          default:
+            setError(data.message || 'Erreur lors du chargement des réservations');
+        }
       }
     } catch (err) {
-      setError('Erreur de connexion');
+      console.error('Erreur fetch:', err);
+      setError('Impossible de se connecter au serveur. Vérifiez votre connexion.');
     } finally {
       setLoading(false);
     }
   };
 
+  // ... le reste de votre code reste inchangé ...
   const getStatusColor = (status: string) => {
     switch (status) {
-      case 'confirmed':
+      case 'CONFIRMED':
         return 'bg-green-100 text-green-800';
-      case 'pending':
+      case 'PENDING':
         return 'bg-yellow-100 text-yellow-800';
-      case 'cancelled':
+      case 'CANCELLED':
         return 'bg-red-100 text-red-800';
-      case 'completed':
+      case 'COMPLETED':
         return 'bg-blue-100 text-blue-800';
+      case 'NO_SHOW':
+        return 'bg-gray-100 text-gray-800';
       default:
         return 'bg-gray-100 text-gray-800';
     }
@@ -84,14 +113,16 @@ export default function MyBookingsPage() {
 
   const getStatusText = (status: string) => {
     switch (status) {
-      case 'confirmed':
+      case 'CONFIRMED':
         return 'Confirmée';
-      case 'pending':
+      case 'PENDING':
         return 'En attente';
-      case 'cancelled':
+      case 'CANCELLED':
         return 'Annulée';
-      case 'completed':
+      case 'COMPLETED':
         return 'Terminée';
+      case 'NO_SHOW':
+        return 'No Show';
       default:
         return status;
     }
@@ -106,10 +137,13 @@ export default function MyBookingsPage() {
     });
   };
 
-  const calculateNights = (checkIn: string, checkOut: string) => {
-    const start = new Date(checkIn);
-    const end = new Date(checkOut);
-    return Math.ceil((end.getTime() - start.getTime()) / (1000 * 60 * 60 * 24));
+  const formatPrice = (priceInCents: number) => {
+    return (priceInCents / 100).toFixed(2);
+  };
+
+  const retryFetch = () => {
+    setLoading(true);
+    fetchMyReservations();
   };
 
   if (loading) {
@@ -117,7 +151,7 @@ export default function MyBookingsPage() {
       <div className="min-h-screen bg-gray-50 flex items-center justify-center">
         <div className="text-center">
           <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto mb-4"></div>
-          <p className="text-gray-600">Chargement...</p>
+          <p className="text-gray-600">Chargement de vos réservations...</p>
         </div>
       </div>
     );
@@ -142,12 +176,18 @@ export default function MyBookingsPage() {
         </div>
 
         {error && (
-          <div className="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded-lg mb-6">
-            {error}
+          <div className="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded-lg mb-6 flex justify-between items-center">
+            <span>{error}</span>
+            <button
+              onClick={retryFetch}
+              className="bg-red-600 text-white px-4 py-2 rounded hover:bg-red-700 transition-colors text-sm"
+            >
+              Réessayer
+            </button>
           </div>
         )}
 
-        {bookings.length === 0 ? (
+        {bookings.length === 0 && !error ? (
           <div className="text-center py-12">
             <div className="max-w-sm mx-auto bg-white/80 backdrop-blur-sm rounded-xl shadow-lg p-8">
               <div className="w-20 h-20 mx-auto mb-6 text-gray-400">
@@ -219,21 +259,21 @@ export default function MyBookingsPage() {
                           Au {formatDate(booking.checkOut)}
                         </p>
                         <p className="text-xs text-gray-500 mt-1">
-                          {calculateNights(booking.checkIn, booking.checkOut)} nuit{calculateNights(booking.checkIn, booking.checkOut) > 1 ? 's' : ''}
+                          {booking.nights} nuit{booking.nights > 1 ? 's' : ''}
                         </p>
                       </div>
 
                       <div className="bg-gray-50 p-4 rounded-lg">
                         <h4 className="font-medium text-gray-900 mb-1">Invités</h4>
                         <p className="text-sm text-gray-600">
-                          {booking.guests} personne{booking.guests > 1 ? 's' : ''}
+                          {booking.guestCount} personne{booking.guestCount > 1 ? 's' : ''}
                         </p>
                       </div>
 
                       <div className="bg-gray-50 p-4 rounded-lg">
                         <h4 className="font-medium text-gray-900 mb-1">Total</h4>
                         <p className="text-lg font-semibold text-blue-600">
-                          {(booking.totalPrice).toFixed(2)}€
+                          {formatPrice(booking.total)}€
                         </p>
                       </div>
                     </div>
@@ -245,13 +285,13 @@ export default function MyBookingsPage() {
                       
                       <div className="flex space-x-3">
                         <Link
-                          href={`/studios/${booking.studioId}`}
+                          href={`/studios/${booking.studio.id}`}
                           className="text-blue-600 hover:text-blue-800 font-medium text-sm"
                         >
                           Voir le studio
                         </Link>
                         
-                        {booking.status === 'confirmed' && (
+                        {booking.status === 'CONFIRMED' && (
                           <button className="text-red-600 hover:text-red-800 font-medium text-sm">
                             Annuler
                           </button>
@@ -280,21 +320,21 @@ export default function MyBookingsPage() {
               
               <div className="text-center">
                 <div className="text-2xl font-bold text-green-600">
-                  {bookings.filter(b => b.status === 'confirmed').length}
+                  {bookings.filter(b => b.status === 'CONFIRMED').length}
                 </div>
                 <div className="text-sm text-gray-600">Confirmées</div>
               </div>
               
               <div className="text-center">
                 <div className="text-2xl font-bold text-yellow-600">
-                  {bookings.filter(b => b.status === 'pending').length}
+                  {bookings.filter(b => b.status === 'PENDING').length}
                 </div>
                 <div className="text-sm text-gray-600">En attente</div>
               </div>
               
               <div className="text-center">
                 <div className="text-2xl font-bold text-purple-600">
-                  {bookings.reduce((sum, b) => sum + (b.totalPrice), 0).toFixed(0)}€
+                  {formatPrice(bookings.reduce((sum, b) => sum + b.total, 0))}€
                 </div>
                 <div className="text-sm text-gray-600">Total dépensé</div>
               </div>
