@@ -476,7 +476,7 @@ export default function PropertiesPage() {
                   color: '#333',
                   fontSize: '14px'
                 }}>
-                  💰 Prix min (€/nuit)
+                  💰 Prix min (Fcfa/nuit)
                 </label>
                 <input
                   type="number"
@@ -495,7 +495,7 @@ export default function PropertiesPage() {
                   color: '#333',
                   fontSize: '14px'
                 }}>
-                  💰 Prix max (€/nuit)
+                  💰 Prix max (Fcfa/nuit)
                 </label>
                 <input
                   type="number"

@@ -525,7 +525,7 @@ export default function CardMaisonLocation({
           {/* Prix */}
           <div style={priceTagStyles}>
             <span style={{ fontSize: '16px', fontWeight: '700', color: '#1f2937' }}>
-              {priceInEuros}€
+              {priceInEuros}Fcfa
             </span>
             <span style={{ fontSize: '12px', color: '#6b7280', marginLeft: '2px' }}>
               /nuit

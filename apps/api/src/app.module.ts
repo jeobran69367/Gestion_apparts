@@ -8,6 +8,7 @@ import { StudiosModule } from './studios/studios.module';
 import { ReservationsModule } from './reservations/reservations.module';
 import { PaymentsModule } from './payments/payments.module'; 
 import { UserModule} from './user/user.module';
+import { EmailModule } from './email/email.module';
 
 @Module({
   imports: [
@@ -20,6 +21,7 @@ import { UserModule} from './user/user.module';
     ReservationsModule, // Added ReservationsModule
     UserModule,
     PaymentsModule, // Ajout du module PaymentsModule
+    EmailModule,
   ],
   controllers: [AppController],
   providers: [AppService],

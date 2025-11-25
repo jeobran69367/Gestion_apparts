@@ -3,6 +3,7 @@
 import { useState } from 'react';
 import PaymentMethodSelector from './PaymentMethodSelector';
 import PawaPayPayment from './PawaPayPayment';
+import EmailSender from '../EmailSender';
 
 interface BookingConfirmationManagerProps {
   bookingData: {
@@ -122,6 +123,11 @@ export default function BookingConfirmationManager({
       role: 'GUEST' as const
     };
 
+    // Validate the password field before making the API call
+    if (!userData.password || typeof userData.password !== 'string' || userData.password.length < 6) {
+      throw new Error('Password must be a string and at least 6 characters long.');
+    }
+
     try {
       // Essayer de créer l'utilisateur via l'API d'inscription
       const result = await apiCall('http://localhost:4000/api/auth/register', 'POST', userData);
@@ -159,10 +165,10 @@ export default function BookingConfirmationManager({
     }
   };
 
-  // Générer un mot de passe temporaire
-    const generateTemporaryPassword = (): string => {
-      return `Temp${Date.now()}!`;
-    };
+  // Update the password generation logic to ensure it meets the requirements
+const generateTemporaryPassword = (): string => {
+  return `Temp${Math.random().toString(36).slice(-6)}!`;
+};
 
   // ÉTAPE 2 : Créer une réservation en attente de paiement
   const createPendingReservation = async (userId: number) => {
@@ -193,12 +199,13 @@ export default function BookingConfirmationManager({
 
   // ÉTAPE 3 : Créer le paiement et confirmer la réservation
   const confirmReservationAndCreatePayment = async (paymentId: string, paymentData: any = {}) => {
-    const token = localStorage.getItem('token');
-    
-    if (!currentReservationId || !currentUserId) {
-      throw new Error('Données de réservation ou utilisateur manquantes');
-    }
+  const token = localStorage.getItem('token');
+  
+  if (!currentReservationId || !currentUserId) {
+    throw new Error('Données de réservation ou utilisateur manquantes');
+  }
 
+  try {
     // ÉTAPE 3A : Créer l'enregistrement de paiement
     const paymentPayload = {
       amount: bookingData.total,
@@ -223,8 +230,72 @@ export default function BookingConfirmationManager({
     await apiCall(`http://localhost:4000/api/reservations/${currentReservationId}`, 'PATCH', updateReservationPayload, token);
     
     console.log('🎉 Réservation confirmée avec succès!');
+
+    // ÉTAPE 3C : Envoi de l'email de confirmation (NE PAS BLOQUER EN CAS D'ERREUR)
+    try {
+      await handleEmailSending();
+      console.log('✉️ Email de confirmation envoyé avec succès.');
+    } catch (emailError) {
+      console.error('⚠️ Erreur lors de l\'envoi de l\'email, mais réservation confirmée:', emailError);
+      // Ne pas propager l'erreur pour ne pas bloquer la réservation
+    }
+
     return paymentResult;
+    
+  } catch (error) {
+    console.error('❌ Erreur lors de la confirmation de la réservation:', error);
+    throw error;
+  }
+};
+
+const handleEmailSending = async () => {
+  // VALIDATION CRITIQUE - Vérifier que les données nécessaires existent
+  if (!bookingData.guestInfo?.email) {
+    console.error('❌ Email manquant dans guestInfo:', bookingData.guestInfo);
+    throw new Error('Missing required field: recipientEmail');
+  }
+
+  if (!bookingData.studioId || !bookingData.checkIn || !bookingData.checkOut || !bookingData.total) {
+    console.error('❌ Données de réservation manquantes:', bookingData);
+    throw new Error('Missing required reservation details');
+  }
+
+  const emailPayload = {
+    recipientEmail: bookingData.guestInfo.email,
+    reservationDetails: {
+      studioId: bookingData.studioId,
+      checkIn: bookingData.checkIn,
+      checkOut: bookingData.checkOut,
+      total: bookingData.total,
+      guestInfo: bookingData.guestInfo,
+    }
   };
+
+  console.log('📧 Envoi email avec payload:', emailPayload);
+
+  try {
+    const response = await fetch('http://localhost:4000/api/email/send-email', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify(emailPayload),
+    });
+
+    if (!response.ok) {
+      const result = await response.json();
+      throw new Error(result.message || `Erreur HTTP: ${response.status}`);
+    }
+
+    const result = await response.json();
+    console.log('✅ Email envoyé avec succès:', result);
+    return result;
+    
+  } catch (error) {
+    console.error('❌ Erreur lors de l\'envoi de l\'email:', error);
+    throw error; // Propager l'erreur pour la gestion en amont
+  }
+};
 
   const handleDirectPaymentSubmit = async () => {
     setIsProcessing(true);

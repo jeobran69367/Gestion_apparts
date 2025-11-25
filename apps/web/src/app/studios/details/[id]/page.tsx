@@ -172,6 +172,20 @@ export default function StudioDetailsPage() {
     return dateToCheck < today;
   };
 
+  // Function to find the closest `checkIn` after a given date
+  const findClosestCheckIn = (date: Date): Date | null => {
+    const futureCheckIns = reservations
+      .map((reservation) => new Date(reservation.checkIn))
+      .filter((checkInDate) => checkInDate > date);
+
+    if (futureCheckIns.length === 0) return null;
+
+    return futureCheckIns.reduce((closest, current) => {
+      return current < closest ? current : closest;
+    });
+  };
+
+  // Updated `isDateBlocked` function
   const isDateBlocked = (date: Date) => {
     // Bloquer les dates passées
     if (isDateInPast(date)) {
@@ -179,15 +193,29 @@ export default function StudioDetailsPage() {
     }
     
     // Bloquer les dates réservées
-    return reservedDates.some(
-      (reservedDate) => {
+    if (
+      reservedDates.some((reservedDate) => {
         const reserved = new Date(reservedDate);
         reserved.setHours(0, 0, 0, 0);
         const dateToCheck = new Date(date);
         dateToCheck.setHours(0, 0, 0, 0);
         return reserved.getTime() === dateToCheck.getTime();
+      })
+    ) {
+      return true;
+    }
+
+    // Bloquer les dates après le plus proche `checkIn` dans les réservations
+    if (checkIn) {
+      const selectedCheckInDate = new Date(checkIn);
+      const closestCheckIn = findClosestCheckIn(selectedCheckInDate);
+
+      if (closestCheckIn && date >= closestCheckIn) {
+        return true;
       }
-    );
+    }
+
+    return false;
   };
 
   const handleDateClick = (date: Date) => {
@@ -1118,4 +1146,4 @@ export default function StudioDetailsPage() {
       <PhotoGalleryModal />
     </div>
   )
-}; 
+};

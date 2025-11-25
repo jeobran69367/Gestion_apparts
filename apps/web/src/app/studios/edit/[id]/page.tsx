@@ -338,7 +338,7 @@ export default function EditStudioPage() {
             </div>
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-1">
-                Prix par nuit (€)
+                Prix par nuit (Fcfa)
               </label>
               <input
                 type="number"

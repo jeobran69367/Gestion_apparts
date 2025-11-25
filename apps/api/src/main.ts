@@ -1,6 +1,7 @@
 import { NestFactory } from '@nestjs/core';
 import { ValidationPipe } from '@nestjs/common';
 import { AppModule } from './app.module';
+import emailRouter from './email/email.routes';
 
 async function bootstrap() {
   const app = await NestFactory.create(AppModule);
@@ -22,6 +23,7 @@ async function bootstrap() {
   
   // Global prefix
   app.setGlobalPrefix('api');
+
 
   // Fonction pour logger les routes (après l'initialisation)
   const logRoutes = () => {
@@ -47,6 +49,9 @@ async function bootstrap() {
     availableRoutes.forEach(route => {
     });
   };
+
+  // Enregistrer les routes email
+  app.use('/api', emailRouter);
 
   await app.listen(process.env.PORT ?? 4000);
   

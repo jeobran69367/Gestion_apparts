@@ -521,7 +521,7 @@ export default function CreateStudioPage() {
               
               <div className="form-row-3">
                 <div className="form-group">
-                  <label className="form-label">Prix par nuit (€) *</label>
+                  <label className="form-label">Prix par nuit (Fcfa) *</label>
                   <input
                     type="number"
                     name="pricePerNight"

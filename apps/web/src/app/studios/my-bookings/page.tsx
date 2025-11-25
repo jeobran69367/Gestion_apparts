@@ -273,7 +273,7 @@ export default function MyBookingsPage() {
                       <div className="bg-gray-50 p-4 rounded-lg">
                         <h4 className="font-medium text-gray-900 mb-1">Total</h4>
                         <p className="text-lg font-semibold text-blue-600">
-                          {formatPrice(booking.total)}€
+                          {formatPrice(booking.total)}Fcfa
                         </p>
                       </div>
                     </div>
@@ -334,7 +334,7 @@ export default function MyBookingsPage() {
               
               <div className="text-center">
                 <div className="text-2xl font-bold text-purple-600">
-                  {formatPrice(bookings.reduce((sum, b) => sum + b.total, 0))}€
+                  {formatPrice(bookings.reduce((sum, b) => sum + b.total, 0))}Fcfa
                 </div>
                 <div className="text-sm text-gray-600">Total dépensé</div>
               </div>

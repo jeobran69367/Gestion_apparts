@@ -5,8 +5,12 @@ generator client {
   provider = "prisma-client-js"
 }
 
+
+
 datasource db {
   provider = "postgresql"
+  url      = env("DATABASE_URL") // <-- C'est la ligne manquante
+  // ... Le reste des commentaires peut être laissé ou retiré ...
 }
 
 // ========================================

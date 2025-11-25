@@ -48,7 +48,7 @@ async function main() {
       capacity: 2,
       bedrooms: 1,
       bathrooms: 1,
-      pricePerNight: 8500, // 85€/nuit en centimes
+      pricePerNight: 8500, // 85Fcfa/nuit en centimes
       photos: [
         'https://images.unsplash.com/photo-1522708323590-d24dbb6b0267?w=800',
         'https://images.unsplash.com/photo-1560448204-e02f11c3d0e2?w=800',
@@ -69,7 +69,7 @@ async function main() {
       capacity: 4,
       bedrooms: 2,
       bathrooms: 1,
-      pricePerNight: 12000, // 120€/nuit
+      pricePerNight: 12000, // 120Fcfa/nuit
       photos: [
         'https://images.unsplash.com/photo-1449824913935-59a10b8d2000?w=800',
         'https://images.unsplash.com/photo-1484154218962-a197022b5858?w=800'
@@ -89,7 +89,7 @@ async function main() {
       capacity: 2,
       bedrooms: 1,
       bathrooms: 1,
-      pricePerNight: 6500, // 65€/nuit
+      pricePerNight: 6500, // 65Fcfa/nuit
       photos: [
         'https://images.unsplash.com/photo-1520637836862-4d197d17c13a?w=800'
       ],
@@ -108,7 +108,7 @@ async function main() {
       capacity: 6,
       bedrooms: 2,
       bathrooms: 2,
-      pricePerNight: 15000, // 150€/nuit
+      pricePerNight: 15000, // 150Fcfa/nuit
       photos: [
         'https://images.unsplash.com/photo-1556020685-ae41abfc9365?w=800',
         'https://images.unsplash.com/photo-1556909114-f6e7ad7d3136?w=800'
@@ -128,7 +128,7 @@ async function main() {
       capacity: 1,
       bedrooms: 1,
       bathrooms: 1,
-      pricePerNight: 4500, // 45€/nuit
+      pricePerNight: 4500, // 45Fcfa/nuit
       photos: [
         'https://images.unsplash.com/photo-1566195992011-5f6b21e539aa?w=800'
       ],
@@ -162,7 +162,7 @@ async function main() {
       checkOut: new Date('2024-01-20'),
       nights: 5,
       guestCount: 2,
-      subtotal: 42500, // 5 nuits * 85€
+      subtotal: 42500, // 5 nuits * 85Fcfa
       cleaningFee: 2500,
       serviceFee: 1500,
       taxes: 3000,
