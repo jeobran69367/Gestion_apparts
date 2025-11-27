@@ -39,8 +39,9 @@ export function useAuth() {
     if (userStr) {
       try {
         user = JSON.parse(userStr);
-      } catch (e) {
-        console.error('Error parsing user from localStorage:', e);
+      } catch {
+        // Invalid user data in localStorage, ignore silently
+        user = null;
       }
     }
 
