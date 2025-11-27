@@ -54,8 +54,12 @@ export default function LoginPage() {
       localStorage.setItem('token', data.access_token);
       localStorage.setItem('user', JSON.stringify(data.user));
 
-      // Rediriger vers la page d'ajout de studio
-      router.push('/studios/create');
+      // Rediriger en fonction du rôle de l'utilisateur
+      if (data.user.role === 'ADMIN' || data.user.role === 'SUPER_ADMIN') {
+        router.push('/studios/my-studios');
+      } else {
+        router.push('/studios');
+      }
     } catch (err: any) {
       setError(err.message);
     } finally {

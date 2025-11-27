@@ -41,7 +41,16 @@ export default function CreateStudioPage() {
       return;
     }
 
-    setUser(JSON.parse(userData));
+    const parsedUser = JSON.parse(userData);
+    
+    // Vérifier si l'utilisateur est un administrateur
+    if (parsedUser.role !== 'ADMIN' && parsedUser.role !== 'SUPER_ADMIN') {
+      console.error('User is not authorized to create studios. Redirecting to studios.');
+      router.push('/studios');
+      return;
+    }
+
+    setUser(parsedUser);
   }, [router]);
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {

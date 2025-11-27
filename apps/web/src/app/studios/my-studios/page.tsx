@@ -16,9 +16,27 @@ export default function MyStudiosPage() {
   useEffect(() => {
     setMounted(true);
     const token = localStorage.getItem('token');
+    const userStr = localStorage.getItem('user');
+    
     if (!token) {
       console.error('No token found in localStorage. Redirecting to login.');
       router.push('/auth/login');
+      return;
+    }
+
+    // Vérifier si l'utilisateur est un administrateur
+    let user = null;
+    if (userStr) {
+      try {
+        user = JSON.parse(userStr);
+      } catch (e) {
+        console.error('Error parsing user from localStorage:', e);
+      }
+    }
+
+    if (!user || (user.role !== 'ADMIN' && user.role !== 'SUPER_ADMIN')) {
+      console.error('User is not authorized to access this page. Redirecting to studios.');
+      router.push('/studios');
       return;
     }
 

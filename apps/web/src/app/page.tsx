@@ -1,21 +1,13 @@
 "use client";
 
 import Link from "next/link";
-import { useState, useEffect } from "react";
+import { useAuth } from "../hooks/useAuth";
 
 export default function Home() {
-  const [isLoggedIn, setIsLoggedIn] = useState(false);
-  const [mounted, setMounted] = useState(false);
-
-  useEffect(() => {
-    setMounted(true);
-    const token = localStorage.getItem('token');
-    setIsLoggedIn(!!token);
-  }, []);
+  const { isLoggedIn, isAdmin, mounted, logout } = useAuth();
 
   const handleLogout = () => {
-    localStorage.removeItem('token');
-    setIsLoggedIn(false);
+    logout();
   };
 
   const testimonials = [
@@ -592,8 +584,21 @@ export default function Home() {
                     <Link href="/studios" className="nav-link">
                       🏘️ Studios
                     </Link>
-                    <Link href="/studios/my-studios" className="nav-link">
-                      📋 Mes Studios
+                    {isAdmin && (
+                      <>
+                        <Link href="/studios/my-studios" className="nav-link">
+                          📋 Mes Studios
+                        </Link>
+                        <Link href="/studios/create" className="nav-link">
+                          ➕ Créer un studio
+                        </Link>
+                        <Link href="/studios/reservations" className="nav-link">
+                          📅 Réservations
+                        </Link>
+                      </>
+                    )}
+                    <Link href="/studios/my-bookings" className="nav-link">
+                      🎫 Mes Réservations
                     </Link>
                     <button onClick={handleLogout} className="nav-link" style={{background: 'none', border: 'none', cursor: 'pointer'}}>
                       🚪 Déconnexion
@@ -601,20 +606,14 @@ export default function Home() {
                   </>
                 ) : (
                   <>
-                    <Link href="/properties" className="nav-link">
-                      🏘️ Propriétés
+                    <Link href="/studios" className="nav-link">
+                      🏘️ Studios
                     </Link>
                     <Link href="/auth/login" className="nav-link">
                       🔑 Connexion
                     </Link>
                   </>
                 )}
-                <a href="http://localhost:5555" target="_blank" className="nav-link">
-                  🗄️ Base de Données
-                </a>
-                <a href="http://localhost:4000" target="_blank" className="nav-link">
-                  🚀 API
-                </a>
               </div>
             </div>
           </div>
