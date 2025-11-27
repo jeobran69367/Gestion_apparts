@@ -1,10 +1,33 @@
-import { Controller, Get, Post, Body, Param, Delete, Put, ParseIntPipe } from '@nestjs/common';
+import { Controller, Get, Post, Body, Param, Delete, Put, ParseIntPipe, UseGuards, Request, Query } from '@nestjs/common';
 import { PaymentsService } from './payments.service';
 import { CreatePaymentDto, UpdatePaymentDto } from './dto/payments.controller';
+import { JwtAuthGuard } from '../auth/jwt-auth.guard';
 
 @Controller('payments')
 export class PaymentsController {
   constructor(private readonly paymentsService: PaymentsService) {}
+
+  // Endpoint pour récupérer les studios avec réservations et paiements pour un admin/propriétaire
+  @Get('studio-payments')
+  @UseGuards(JwtAuthGuard)
+  async getStudioPayments(
+    @Request() req,
+    @Query('startDate') startDate?: string,
+    @Query('endDate') endDate?: string,
+  ) {
+    const userId = req.user.id;
+    const userRole = req.user.role;
+    const studioPayments = await this.paymentsService.getStudioPayments(
+      userId,
+      userRole,
+      startDate,
+      endDate,
+    );
+    return {
+      message: 'Paiements des studios récupérés avec succès',
+      data: studioPayments,
+    };
+  }
 
   @Post()
   async create(@Body() createPaymentDto: CreatePaymentDto) {
