@@ -3,13 +3,13 @@
 import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
+import { useAuth } from '../../../hooks/useAuth';
 
 export default function CreateStudioPage() {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
-  const [user, setUser] = useState<any>(null);
-  const [mounted, setMounted] = useState(false);
   const router = useRouter();
+  const { user, isLoggedIn, isAdmin, mounted } = useAuth();
 
   const [formData, setFormData] = useState({
     name: '',
@@ -31,27 +31,18 @@ export default function CreateStudioPage() {
   });
 
   useEffect(() => {
-    setMounted(true);
-    // Vérifier l'authentification
-    const token = localStorage.getItem('token');
-    const userData = localStorage.getItem('user');
+    if (!mounted) return;
 
-    if (!token || !userData) {
+    if (!isLoggedIn) {
       router.push('/auth/login');
       return;
     }
 
-    const parsedUser = JSON.parse(userData);
-    
-    // Vérifier si l'utilisateur est un administrateur
-    if (parsedUser.role !== 'ADMIN' && parsedUser.role !== 'SUPER_ADMIN') {
-      console.error('User is not authorized to create studios. Redirecting to studios.');
+    if (!isAdmin) {
       router.push('/studios');
       return;
     }
-
-    setUser(parsedUser);
-  }, [router]);
+  }, [mounted, isLoggedIn, isAdmin, router]);
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
     setFormData({

@@ -3,6 +3,7 @@
 import { useState, useEffect, ChangeEvent, FormEvent } from 'react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
+import { useAuth } from '../../../hooks/useAuth';
 
 interface Reservation {
   id: string;
@@ -46,21 +47,17 @@ export default function ReservationsPage() {
   const [success, setSuccess] = useState('');
   const [loading, setLoading] = useState(true);
   const router = useRouter();
+  const { isLoggedIn, isAdmin, mounted } = useAuth();
 
   useEffect(() => {
-    // Vérifier si l'utilisateur est un administrateur
-    const userStr = localStorage.getItem('user');
-    let user = null;
-    if (userStr) {
-      try {
-        user = JSON.parse(userStr);
-      } catch (e) {
-        console.error('Error parsing user from localStorage:', e);
-      }
+    if (!mounted) return;
+
+    if (!isLoggedIn) {
+      router.push('/auth/login');
+      return;
     }
 
-    if (!user || (user.role !== 'ADMIN' && user.role !== 'SUPER_ADMIN')) {
-      console.error('User is not authorized to access this page. Redirecting to studios.');
+    if (!isAdmin) {
       router.push('/studios');
       return;
     }
@@ -68,7 +65,7 @@ export default function ReservationsPage() {
     fetchReservations();
     fetchStudios(); 
     fetchGuests();
-  }, [router]);
+  }, [mounted, isLoggedIn, isAdmin, router]);
 
   const fetchReservations = async () => {
     try {

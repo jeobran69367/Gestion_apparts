@@ -1,6 +1,6 @@
 'use client';
 
-export default function PaymentPage({ params }: { params: Promise<{ token: string }> }) {
+export default function PaymentPage({ params: _params }: { params: Promise<{ token: string }> }) {
   return (
     <div className="min-h-screen flex items-center justify-center">
       <div className="text-center">

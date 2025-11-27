@@ -4,44 +4,34 @@ import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 import CardMaisonLocation, { MaisonLocation } from '../../../components/CardMaisonLocation';
+import { useAuth } from '../../../hooks/useAuth';
 
 export default function MyStudiosPage() {
   const [studios, setStudios] = useState<MaisonLocation[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
-  const [mounted, setMounted] = useState(false);
   const [operationLoading, setOperationLoading] = useState<number | null>(null);
   const router = useRouter();
+  const { isLoggedIn, isAdmin, mounted } = useAuth();
 
   useEffect(() => {
-    setMounted(true);
-    const token = localStorage.getItem('token');
-    const userStr = localStorage.getItem('user');
+    if (!mounted) return;
     
-    if (!token) {
-      console.error('No token found in localStorage. Redirecting to login.');
+    if (!isLoggedIn) {
       router.push('/auth/login');
       return;
     }
 
-    // Vérifier si l'utilisateur est un administrateur
-    let user = null;
-    if (userStr) {
-      try {
-        user = JSON.parse(userStr);
-      } catch (e) {
-        console.error('Error parsing user from localStorage:', e);
-      }
-    }
-
-    if (!user || (user.role !== 'ADMIN' && user.role !== 'SUPER_ADMIN')) {
-      console.error('User is not authorized to access this page. Redirecting to studios.');
+    if (!isAdmin) {
       router.push('/studios');
       return;
     }
 
-    fetchMyStudios(token);
-  }, [router]);
+    const token = localStorage.getItem('token');
+    if (token) {
+      fetchMyStudios(token);
+    }
+  }, [mounted, isLoggedIn, isAdmin, router]);
 
   const fetchMyStudios = async (token: string) => {
     try {
