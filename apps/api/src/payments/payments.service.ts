@@ -25,11 +25,10 @@ export class PaymentsService {
         dateFilter.checkOut = { lte: new Date(endDate) };
       }
 
-      // Si l'utilisateur est ADMIN ou SUPER_ADMIN, récupérer tous ses studios
-      // Sinon, retourner uniquement les studios qu'il possède
-      const whereClause = userRole === 'ADMIN' || userRole === 'SUPER_ADMIN'
-        ? { ownerId: userId }
-        : { ownerId: userId };
+      // Récupérer les studios de l'utilisateur connecté
+      // Note: Pour l'instant, tous les utilisateurs récupèrent uniquement leurs propres studios
+      // Les admins peuvent voir les statistiques détaillées de leurs studios
+      const whereClause = { ownerId: userId };
 
       const studios = await this.prisma.studio.findMany({
         where: whereClause,

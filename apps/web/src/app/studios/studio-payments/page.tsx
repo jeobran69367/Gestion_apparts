@@ -333,7 +333,7 @@ export default function StudioPaymentsPage() {
               <span className="text-3xl">🏠</span>
             </div>
             <h3 className="text-lg font-semibold text-gray-900 mb-2">Aucun studio trouvé</h3>
-            <p className="text-gray-600 mb-4">Vous n&apos;avez pas encore de studio enregistré.</p>
+            <p className="text-gray-600 mb-4">Vous n{"'"}avez pas encore de studio enregistré.</p>
             <Link
               href="/studios/create"
               className="inline-block px-6 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
