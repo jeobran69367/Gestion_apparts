@@ -253,7 +253,7 @@ export default function PropertiesPage() {
         
         .properties-grid {
           display: grid;
-          grid-template-columns: repeat(auto-fill, minmax(380px, 1fr));
+          grid-template-columns: repeat(3, 1fr);
           gap: 32px;
           margin: 60px 0;
         }
@@ -355,6 +355,13 @@ export default function PropertiesPage() {
           font-size: 48px;
         }
         
+        @media (max-width: 1024px) {
+          .properties-grid {
+            grid-template-columns: repeat(2, 1fr);
+            gap: 24px;
+          }
+        }
+
         @media (max-width: 768px) {
           .properties-grid {
             grid-template-columns: 1fr;
@@ -371,7 +378,7 @@ export default function PropertiesPage() {
             gap: 12px;
           }
         }
-      `}</style>
+            `}</style>
 
       <div style={{ minHeight: '100vh', background: 'linear-gradient(135deg, #f8fafc 0%, #e2e8f0 100%)' }}>
         {/* Hero Section */}
@@ -469,7 +476,7 @@ export default function PropertiesPage() {
                   color: '#333',
                   fontSize: '14px'
                 }}>
-                  💰 Prix min (€/nuit)
+                  💰 Prix min (Fcfa/nuit)
                 </label>
                 <input
                   type="number"
@@ -488,7 +495,7 @@ export default function PropertiesPage() {
                   color: '#333',
                   fontSize: '14px'
                 }}>
-                  💰 Prix max (€/nuit)
+                  💰 Prix max (Fcfa/nuit)
                 </label>
                 <input
                   type="number"
@@ -667,10 +674,10 @@ export default function PropertiesPage() {
                   Sélection triée sur le volet de {properties.length} studios d'exception
                 </p>
               </div>
-              
+
               <div className="properties-grid">
                 {properties.map((property) => (
-                  <div key={property.id} className="hover-lift">
+                  <div key={property.id}>
                     <CardMaisonLocation
                       maison={property}
                     />

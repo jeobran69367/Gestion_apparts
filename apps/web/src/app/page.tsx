@@ -25,7 +25,7 @@ export default function Home() {
       rating: 5,
       comment: "Service exceptionnel ! Mon studio a été loué en moins de 48h. L'équipe est réactive et professionnelle.",
       image: "👩‍💼",
-      revenue: "2,400€/mois"
+      revenue: "2,400Fcfa/mois"
     },
     {
       name: "Thomas Martin",
@@ -33,7 +33,7 @@ export default function Home() {
       rating: 5,
       comment: "Interface intuitive, gestion simplifiée. Mes 3 appartements génèrent maintenant des revenus stables.",
       image: "👨‍💻",
-      revenue: "5,800€/mois"
+      revenue: "5,800Fcfa/mois"
     },
     {
       name: "Sophie Bernard",
@@ -41,7 +41,7 @@ export default function Home() {
       rating: 5,
       comment: "Excellent support client ! Chaque réservation est gérée automatiquement. Je recommande vivement.",
       image: "👩‍🎨",
-      revenue: "3,200€/mois"
+      revenue: "3,200Fcfa/mois"
     }
   ];
 
@@ -589,14 +589,11 @@ export default function Home() {
                             <div className="nav-links">
                 {isLoggedIn ? (
                   <>
-                    <Link href="/properties" className="nav-link">
-                      🏘️ Propriétés
+                    <Link href="/studios" className="nav-link">
+                      🏘️ Studios
                     </Link>
                     <Link href="/studios/my-studios" className="nav-link">
-                      📋 Mes Propriétés
-                    </Link>
-                    <Link href="/studios/create" className="nav-link">
-                      ➕ Ajouter
+                      📋 Mes Studios
                     </Link>
                     <button onClick={handleLogout} className="nav-link" style={{background: 'none', border: 'none', cursor: 'pointer'}}>
                       🚪 Déconnexion

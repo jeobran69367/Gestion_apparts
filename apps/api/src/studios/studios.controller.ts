@@ -12,14 +12,20 @@ import {
   ParseIntPipe,
   HttpCode,
   HttpStatus,
+  NotFoundException,
+  InternalServerErrorException,
 } from '@nestjs/common';
 import { StudiosService } from './studios.service';
 import { CreateStudioDto, UpdateStudioDto } from './dto/studio.dto';
 import { JwtAuthGuard } from '../auth/jwt-auth.guard';
+import { PrismaService } from '../prisma/prisma.service';
 
 @Controller('studios')
 export class StudiosController {
-  constructor(private readonly studiosService: StudiosService) {}
+  constructor(
+    private readonly studiosService: StudiosService,
+    private readonly prisma: PrismaService,
+  ) {}
 
   @Post()
   @UseGuards(JwtAuthGuard)
@@ -52,9 +58,9 @@ export class StudiosController {
     return this.studiosService.getStats(req.user.id);
   }
 
-  @Get(':id')
-  findOne(@Param('id', ParseIntPipe) id: number) {
-    return this.studiosService.findOne(id);
+  @Get(':id/reservations')
+  getReservations(@Param('id', ParseIntPipe) id: number) {
+    return this.studiosService.getReservations(id);
   }
 
   @Patch(':id')
@@ -72,5 +78,10 @@ export class StudiosController {
   @HttpCode(HttpStatus.NO_CONTENT)
   remove(@Param('id', ParseIntPipe) id: number, @Request() req) {
     return this.studiosService.remove(id, req.user.id);
+  }
+
+  @Get(':id')
+  findOne(@Param('id', ParseIntPipe) id: number) {
+    return this.studiosService.findOne(id);
   }
 }

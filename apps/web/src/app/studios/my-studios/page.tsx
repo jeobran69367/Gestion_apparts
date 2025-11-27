@@ -17,17 +17,16 @@ export default function MyStudiosPage() {
     setMounted(true);
     const token = localStorage.getItem('token');
     if (!token) {
+      console.error('No token found in localStorage. Redirecting to login.');
       router.push('/auth/login');
       return;
     }
 
-    fetchMyStudios();
+    fetchMyStudios(token);
   }, [router]);
 
-  const fetchMyStudios = async () => {
+  const fetchMyStudios = async (token: string) => {
     try {
-      const token = localStorage.getItem('token');
-      console.log('Token:', token); // Debug
       const response = await fetch('http://localhost:4000/api/studios/my-studios', {
         headers: {
           'Authorization': `Bearer ${token}`,
@@ -35,12 +34,10 @@ export default function MyStudiosPage() {
         },
       });
 
-      console.log('Response status:', response.status); // Debug
-      
+
       if (response.ok) {
         const data = await response.json();
-        console.log('Studios data:', data); // Debug
-        
+
         // Adapter les données pour le composant CardMaisonLocation
         const adaptedStudios = data.studios.map((studio: any) => ({
           id: studio.id,
@@ -62,15 +59,21 @@ export default function MyStudiosPage() {
           owner: studio.owner,
           reservations: studio.reservations
         }));
-        
+
         setStudios(adaptedStudios);
       } else {
         const errorText = await response.text();
-        console.log('Error response:', errorText); // Debug
-        setError('Erreur lors du chargement de vos studios');
+        console.error('Error response:', errorText); // Debug
+
+        if (response.status === 401) {
+          console.error('Unauthorized: Token might be invalid or expired. Redirecting to login.');
+          router.push('/auth/login');
+        } else {
+          setError('Erreur lors du chargement de vos studios');
+        }
       }
     } catch (err) {
-      console.log('Fetch error:', err); // Debug
+      console.error('Fetch error:', err); // Debug
       setError('Erreur de connexion');
     } finally {
       setLoading(false);
@@ -136,7 +139,6 @@ export default function MyStudiosPage() {
   };
 
   const handleManageCalendar = async (id: number) => {
-    console.log('Gestion calendrier pour studio:', id);
     // TODO: Implémenter la gestion du calendrier
   };
 
@@ -224,9 +226,9 @@ export default function MyStudiosPage() {
             </div>
 
             {/* Grille des propriétés */}
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-3">
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 2xl:grid-cols-5 gap-4">
               {Array.isArray(studios) && studios.map((studio) => (
-                <div key={studio.id} className="relative">
+                <div key={studio.id} className="relative group">
                   <CardMaisonLocation
                     maison={studio}
                     variant="compact"
@@ -236,13 +238,13 @@ export default function MyStudiosPage() {
                   />
                   
                   {/* Actions de propriétaire */}
-                  <div className="absolute top-1 right-1 flex gap-1">
+                  <div className="absolute top-2 right-2 flex gap-1 opacity-0 group-hover:opacity-100 transition-opacity duration-200">
                     <button
                       onClick={() => handleEdit(studio.id)}
-                      className="p-1 bg-white/90 backdrop-blur-sm rounded-full shadow-sm hover:bg-white transition-all"
+                      className="p-2 bg-white/95 backdrop-blur-sm rounded-full shadow-md hover:bg-white hover:shadow-lg transition-all transform hover:scale-110"
                       title="Modifier"
                     >
-                      <svg width="12" height="12" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <svg width="14" height="14" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
                       </svg>
                     </button>
@@ -250,21 +252,21 @@ export default function MyStudiosPage() {
                     <button
                       onClick={() => handleToggleAvailability(studio.id, studio.isAvailable)}
                       disabled={operationLoading === studio.id}
-                      className={`p-1 backdrop-blur-sm rounded-full shadow-sm hover:scale-110 transition-all ${
+                      className={`p-2 backdrop-blur-sm rounded-full shadow-md hover:shadow-lg transform hover:scale-110 transition-all ${
                         studio.isAvailable 
-                          ? 'bg-green-100/90 text-green-700 hover:bg-green-200/90' 
-                          : 'bg-gray-100/90 text-gray-700 hover:bg-gray-200/90'
+                          ? 'bg-green-100/95 text-green-700 hover:bg-green-200/95' 
+                          : 'bg-gray-100/95 text-gray-700 hover:bg-gray-200/95'
                       }`}
                       title={studio.isAvailable ? "Marquer comme indisponible" : "Marquer comme disponible"}
                     >
                       {operationLoading === studio.id ? (
-                        <div className="w-3 h-3 border-2 border-current border-t-transparent rounded-full animate-spin" />
+                        <div className="w-3.5 h-3.5 border-2 border-current border-t-transparent rounded-full animate-spin" />
                       ) : studio.isAvailable ? (
-                        <svg width="12" height="12" fill="currentColor" viewBox="0 0 20 20">
+                        <svg width="14" height="14" fill="currentColor" viewBox="0 0 20 20">
                           <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
                         </svg>
                       ) : (
-                        <svg width="12" height="12" fill="currentColor" viewBox="0 0 20 20">
+                        <svg width="14" height="14" fill="currentColor" viewBox="0 0 20 20">
                           <path fillRule="evenodd" d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z" clipRule="evenodd" />
                         </svg>
                       )}
@@ -273,10 +275,10 @@ export default function MyStudiosPage() {
                     <button
                       onClick={() => handleDelete(studio.id)}
                       disabled={operationLoading === studio.id}
-                      className="p-1 bg-red-100/90 backdrop-blur-sm rounded-full shadow-sm hover:bg-red-200/90 text-red-700 transition-all"
+                      className="p-2 bg-red-100/95 backdrop-blur-sm rounded-full shadow-md hover:bg-red-200/95 hover:shadow-lg text-red-700 transition-all transform hover:scale-110"
                       title="Supprimer"
                     >
-                      <svg width="12" height="12" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <svg width="14" height="14" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
                       </svg>
                     </button>
