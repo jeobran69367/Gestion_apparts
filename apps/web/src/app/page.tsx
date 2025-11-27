@@ -571,46 +571,151 @@ export default function Home() {
         <nav className="nav-bar">
           <div className="container">
             <div className="nav-content">
-              <a href="#" className="logo">
+              <Link href="/" className="logo">
                 <div className="logo-icon">🏠</div>
                 <div>
-                  <div style={{fontSize: '24px', fontWeight: '700'}}>StudioRent</div>
-                  <div style={{fontSize: '12px', color: '#666'}}>Location Premium</div>
+                  <div style={{fontSize: '22px', fontWeight: '700', letterSpacing: '-0.02em'}}>StudioRent</div>
+                  <div style={{fontSize: '11px', color: '#64748b', fontWeight: '500'}}>Location Premium</div>
                 </div>
-              </a>
-                            <div className="nav-links">
+              </Link>
+              <div className="nav-links">
                 {isLoggedIn ? (
                   <>
-                    <Link href="/studios" className="nav-link">
-                      🏘️ Studios
+                    <Link href="/studios" style={{
+                      padding: '10px 18px',
+                      background: 'linear-gradient(135deg, #f1f5f9 0%, #e2e8f0 100%)',
+                      color: '#334155',
+                      textDecoration: 'none',
+                      borderRadius: '10px',
+                      fontWeight: '500',
+                      fontSize: '14px',
+                      transition: 'all 0.2s ease',
+                      display: 'flex',
+                      alignItems: 'center',
+                      gap: '8px',
+                      border: '1px solid #e2e8f0'
+                    }}>
+                      <span>🏘️</span> Studios
                     </Link>
                     {isAdmin && (
                       <>
-                        <Link href="/studios/my-studios" className="nav-link">
-                          📋 Mes Studios
+                        <Link href="/studios/my-studios" style={{
+                          padding: '10px 18px',
+                          background: 'linear-gradient(135deg, #3b82f6 0%, #1d4ed8 100%)',
+                          color: 'white',
+                          textDecoration: 'none',
+                          borderRadius: '10px',
+                          fontWeight: '500',
+                          fontSize: '14px',
+                          transition: 'all 0.2s ease',
+                          display: 'flex',
+                          alignItems: 'center',
+                          gap: '8px',
+                          boxShadow: '0 2px 8px rgba(59, 130, 246, 0.25)'
+                        }}>
+                          <span>📋</span> Mes Studios
                         </Link>
-                        <Link href="/studios/create" className="nav-link">
-                          ➕ Créer un studio
+                        <Link href="/studios/create" style={{
+                          padding: '10px 18px',
+                          background: 'linear-gradient(135deg, #10b981 0%, #059669 100%)',
+                          color: 'white',
+                          textDecoration: 'none',
+                          borderRadius: '10px',
+                          fontWeight: '500',
+                          fontSize: '14px',
+                          transition: 'all 0.2s ease',
+                          display: 'flex',
+                          alignItems: 'center',
+                          gap: '8px',
+                          boxShadow: '0 2px 8px rgba(16, 185, 129, 0.25)'
+                        }}>
+                          <span>✨</span> Créer
                         </Link>
-                        <Link href="/studios/reservations" className="nav-link">
-                          📅 Réservations
+                        <Link href="/studios/reservations" style={{
+                          padding: '10px 18px',
+                          background: 'linear-gradient(135deg, #f59e0b 0%, #d97706 100%)',
+                          color: 'white',
+                          textDecoration: 'none',
+                          borderRadius: '10px',
+                          fontWeight: '500',
+                          fontSize: '14px',
+                          transition: 'all 0.2s ease',
+                          display: 'flex',
+                          alignItems: 'center',
+                          gap: '8px',
+                          boxShadow: '0 2px 8px rgba(245, 158, 11, 0.25)'
+                        }}>
+                          <span>📊</span> Réservations
                         </Link>
                       </>
                     )}
-                    <Link href="/studios/my-bookings" className="nav-link">
-                      🎫 Mes Réservations
+                    <Link href="/studios/my-bookings" style={{
+                      padding: '10px 18px',
+                      background: 'linear-gradient(135deg, #8b5cf6 0%, #7c3aed 100%)',
+                      color: 'white',
+                      textDecoration: 'none',
+                      borderRadius: '10px',
+                      fontWeight: '500',
+                      fontSize: '14px',
+                      transition: 'all 0.2s ease',
+                      display: 'flex',
+                      alignItems: 'center',
+                      gap: '8px',
+                      boxShadow: '0 2px 8px rgba(139, 92, 246, 0.25)'
+                    }}>
+                      <span>🎫</span> Mes Réservations
                     </Link>
-                    <button onClick={handleLogout} className="nav-link" style={{background: 'none', border: 'none', cursor: 'pointer'}}>
-                      🚪 Déconnexion
+                    <button onClick={handleLogout} style={{
+                      padding: '10px 18px',
+                      background: 'linear-gradient(135deg, #ef4444 0%, #dc2626 100%)',
+                      color: 'white',
+                      border: 'none',
+                      borderRadius: '10px',
+                      fontWeight: '500',
+                      fontSize: '14px',
+                      cursor: 'pointer',
+                      transition: 'all 0.2s ease',
+                      display: 'flex',
+                      alignItems: 'center',
+                      gap: '8px',
+                      boxShadow: '0 2px 8px rgba(239, 68, 68, 0.25)'
+                    }}>
+                      <span>🚪</span> Déconnexion
                     </button>
                   </>
                 ) : (
                   <>
-                    <Link href="/studios" className="nav-link">
-                      🏘️ Studios
+                    <Link href="/studios" style={{
+                      padding: '10px 18px',
+                      background: 'linear-gradient(135deg, #f1f5f9 0%, #e2e8f0 100%)',
+                      color: '#334155',
+                      textDecoration: 'none',
+                      borderRadius: '10px',
+                      fontWeight: '500',
+                      fontSize: '14px',
+                      transition: 'all 0.2s ease',
+                      display: 'flex',
+                      alignItems: 'center',
+                      gap: '8px',
+                      border: '1px solid #e2e8f0'
+                    }}>
+                      <span>🏘️</span> Studios
                     </Link>
-                    <Link href="/auth/login" className="nav-link">
-                      🔑 Connexion
+                    <Link href="/auth/login" style={{
+                      padding: '10px 20px',
+                      background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
+                      color: 'white',
+                      textDecoration: 'none',
+                      borderRadius: '10px',
+                      fontWeight: '600',
+                      fontSize: '14px',
+                      transition: 'all 0.2s ease',
+                      display: 'flex',
+                      alignItems: 'center',
+                      gap: '8px',
+                      boxShadow: '0 4px 12px rgba(102, 126, 234, 0.3)'
+                    }}>
+                      <span>🔑</span> Connexion
                     </Link>
                   </>
                 )}
@@ -619,94 +724,286 @@ export default function Home() {
           </div>
         </nav>
 
-        {/* Admin Dashboard Section - Only visible for admins */}
+        {/* Admin Dashboard Section - Professional Design for Admins */}
         {isLoggedIn && isAdmin && (
           <section style={{
-            background: 'linear-gradient(135deg, #1e3a5f 0%, #2d5a87 100%)',
-            padding: '30px 0',
-            marginTop: '90px'
+            background: 'linear-gradient(135deg, #0f172a 0%, #1e293b 50%, #334155 100%)',
+            padding: '40px 0 50px',
+            marginTop: '90px',
+            borderBottom: '3px solid #667eea',
+            position: 'relative',
+            overflow: 'hidden'
           }}>
-            <div className="container">
-              <div style={{marginBottom: '25px'}}>
-                <h2 style={{color: 'white', fontSize: '1.8rem', fontWeight: '700', marginBottom: '8px'}}>
-                  🛠️ Panel Administrateur
-                </h2>
-                <p style={{color: 'rgba(255,255,255,0.8)', fontSize: '1rem'}}>
-                  Gérez vos studios, réservations et propriétés depuis cet espace
-                </p>
+            <div style={{
+              position: 'absolute',
+              top: 0,
+              left: 0,
+              right: 0,
+              bottom: 0,
+              background: 'radial-gradient(ellipse at 20% 50%, rgba(102, 126, 234, 0.15) 0%, transparent 50%), radial-gradient(ellipse at 80% 80%, rgba(118, 75, 162, 0.1) 0%, transparent 50%)',
+              pointerEvents: 'none'
+            }}></div>
+            <div className="container" style={{position: 'relative', zIndex: 1}}>
+              <div style={{display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '30px', flexWrap: 'wrap', gap: '20px'}}>
+                <div style={{display: 'flex', alignItems: 'center', gap: '16px'}}>
+                  <div style={{
+                    width: '56px',
+                    height: '56px',
+                    background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
+                    borderRadius: '14px',
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    boxShadow: '0 8px 25px rgba(102, 126, 234, 0.4)'
+                  }}>
+                    <span style={{fontSize: '28px'}}>⚙️</span>
+                  </div>
+                  <div>
+                    <h2 style={{color: 'white', fontSize: '1.6rem', fontWeight: '700', margin: 0, letterSpacing: '-0.02em'}}>
+                      Espace Administrateur
+                    </h2>
+                    <p style={{color: 'rgba(255,255,255,0.6)', fontSize: '0.9rem', margin: '4px 0 0'}}>
+                      Tableau de bord • Gestion complète
+                    </p>
+                  </div>
+                </div>
+                <div style={{
+                  background: 'rgba(102, 126, 234, 0.2)',
+                  border: '1px solid rgba(102, 126, 234, 0.3)',
+                  borderRadius: '10px',
+                  padding: '10px 18px',
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: '8px'
+                }}>
+                  <div style={{width: '8px', height: '8px', background: '#10b981', borderRadius: '50%', boxShadow: '0 0 8px #10b981'}}></div>
+                  <span style={{color: '#10b981', fontSize: '0.85rem', fontWeight: '600'}}>Admin connecté</span>
+                </div>
               </div>
               
               <div style={{
                 display: 'grid',
-                gridTemplateColumns: 'repeat(auto-fit, minmax(220px, 1fr))',
+                gridTemplateColumns: 'repeat(auto-fit, minmax(260px, 1fr))',
                 gap: '20px'
               }}>
                 <Link href="/studios/my-studios" style={{
-                  background: 'rgba(255,255,255,0.95)',
+                  background: 'linear-gradient(135deg, rgba(255,255,255,0.95) 0%, rgba(248,250,252,0.95) 100%)',
                   borderRadius: '16px',
-                  padding: '24px',
+                  padding: '28px',
                   textDecoration: 'none',
-                  color: '#333',
+                  color: '#1e293b',
                   display: 'flex',
                   flexDirection: 'column',
-                  gap: '12px',
-                  transition: 'transform 0.2s, box-shadow 0.2s',
-                  boxShadow: '0 4px 15px rgba(0,0,0,0.1)'
+                  gap: '14px',
+                  transition: 'all 0.3s cubic-bezier(0.4, 0, 0.2, 1)',
+                  boxShadow: '0 4px 20px rgba(0,0,0,0.15), 0 0 0 1px rgba(255,255,255,0.1)',
+                  position: 'relative',
+                  overflow: 'hidden'
                 }} className="hover-lift">
-                  <span style={{fontSize: '2.5rem'}}>🏠</span>
-                  <h3 style={{fontSize: '1.1rem', fontWeight: '600', margin: 0}}>Mes Studios</h3>
-                  <p style={{fontSize: '0.85rem', color: '#666', margin: 0}}>Gérer vos propriétés</p>
+                  <div style={{position: 'absolute', top: 0, left: 0, right: 0, height: '4px', background: 'linear-gradient(90deg, #3b82f6, #8b5cf6)'}}></div>
+                  <div style={{display: 'flex', alignItems: 'center', justifyContent: 'space-between'}}>
+                    <div style={{width: '50px', height: '50px', background: 'linear-gradient(135deg, #3b82f6 0%, #1d4ed8 100%)', borderRadius: '12px', display: 'flex', alignItems: 'center', justifyContent: 'center', boxShadow: '0 4px 12px rgba(59, 130, 246, 0.3)'}}>
+                      <span style={{fontSize: '24px'}}>🏠</span>
+                    </div>
+                    <span style={{fontSize: '20px', color: '#94a3b8'}}>→</span>
+                  </div>
+                  <div>
+                    <h3 style={{fontSize: '1.15rem', fontWeight: '700', margin: '0 0 4px', color: '#1e293b'}}>Mes Studios</h3>
+                    <p style={{fontSize: '0.85rem', color: '#64748b', margin: 0, lineHeight: '1.4'}}>Gérer et modifier vos propriétés</p>
+                  </div>
                 </Link>
 
                 <Link href="/studios/create" style={{
-                  background: 'rgba(255,255,255,0.95)',
+                  background: 'linear-gradient(135deg, rgba(255,255,255,0.95) 0%, rgba(248,250,252,0.95) 100%)',
                   borderRadius: '16px',
-                  padding: '24px',
+                  padding: '28px',
                   textDecoration: 'none',
-                  color: '#333',
+                  color: '#1e293b',
                   display: 'flex',
                   flexDirection: 'column',
-                  gap: '12px',
-                  transition: 'transform 0.2s, box-shadow 0.2s',
-                  boxShadow: '0 4px 15px rgba(0,0,0,0.1)'
+                  gap: '14px',
+                  transition: 'all 0.3s cubic-bezier(0.4, 0, 0.2, 1)',
+                  boxShadow: '0 4px 20px rgba(0,0,0,0.15), 0 0 0 1px rgba(255,255,255,0.1)',
+                  position: 'relative',
+                  overflow: 'hidden'
                 }} className="hover-lift">
-                  <span style={{fontSize: '2.5rem'}}>➕</span>
-                  <h3 style={{fontSize: '1.1rem', fontWeight: '600', margin: 0}}>Créer un Studio</h3>
-                  <p style={{fontSize: '0.85rem', color: '#666', margin: 0}}>Ajouter une nouvelle propriété</p>
+                  <div style={{position: 'absolute', top: 0, left: 0, right: 0, height: '4px', background: 'linear-gradient(90deg, #10b981, #059669)'}}></div>
+                  <div style={{display: 'flex', alignItems: 'center', justifyContent: 'space-between'}}>
+                    <div style={{width: '50px', height: '50px', background: 'linear-gradient(135deg, #10b981 0%, #059669 100%)', borderRadius: '12px', display: 'flex', alignItems: 'center', justifyContent: 'center', boxShadow: '0 4px 12px rgba(16, 185, 129, 0.3)'}}>
+                      <span style={{fontSize: '24px'}}>✨</span>
+                    </div>
+                    <span style={{fontSize: '20px', color: '#94a3b8'}}>→</span>
+                  </div>
+                  <div>
+                    <h3 style={{fontSize: '1.15rem', fontWeight: '700', margin: '0 0 4px', color: '#1e293b'}}>Nouveau Studio</h3>
+                    <p style={{fontSize: '0.85rem', color: '#64748b', margin: 0, lineHeight: '1.4'}}>Créer une nouvelle propriété</p>
+                  </div>
                 </Link>
 
                 <Link href="/studios/reservations" style={{
-                  background: 'rgba(255,255,255,0.95)',
+                  background: 'linear-gradient(135deg, rgba(255,255,255,0.95) 0%, rgba(248,250,252,0.95) 100%)',
                   borderRadius: '16px',
-                  padding: '24px',
+                  padding: '28px',
                   textDecoration: 'none',
-                  color: '#333',
+                  color: '#1e293b',
                   display: 'flex',
                   flexDirection: 'column',
-                  gap: '12px',
-                  transition: 'transform 0.2s, box-shadow 0.2s',
-                  boxShadow: '0 4px 15px rgba(0,0,0,0.1)'
+                  gap: '14px',
+                  transition: 'all 0.3s cubic-bezier(0.4, 0, 0.2, 1)',
+                  boxShadow: '0 4px 20px rgba(0,0,0,0.15), 0 0 0 1px rgba(255,255,255,0.1)',
+                  position: 'relative',
+                  overflow: 'hidden'
                 }} className="hover-lift">
-                  <span style={{fontSize: '2.5rem'}}>📅</span>
-                  <h3 style={{fontSize: '1.1rem', fontWeight: '600', margin: 0}}>Réservations</h3>
-                  <p style={{fontSize: '0.85rem', color: '#666', margin: 0}}>Voir toutes les réservations</p>
+                  <div style={{position: 'absolute', top: 0, left: 0, right: 0, height: '4px', background: 'linear-gradient(90deg, #f59e0b, #d97706)'}}></div>
+                  <div style={{display: 'flex', alignItems: 'center', justifyContent: 'space-between'}}>
+                    <div style={{width: '50px', height: '50px', background: 'linear-gradient(135deg, #f59e0b 0%, #d97706 100%)', borderRadius: '12px', display: 'flex', alignItems: 'center', justifyContent: 'center', boxShadow: '0 4px 12px rgba(245, 158, 11, 0.3)'}}>
+                      <span style={{fontSize: '24px'}}>📊</span>
+                    </div>
+                    <span style={{fontSize: '20px', color: '#94a3b8'}}>→</span>
+                  </div>
+                  <div>
+                    <h3 style={{fontSize: '1.15rem', fontWeight: '700', margin: '0 0 4px', color: '#1e293b'}}>Réservations</h3>
+                    <p style={{fontSize: '0.85rem', color: '#64748b', margin: 0, lineHeight: '1.4'}}>Suivre toutes les réservations</p>
+                  </div>
                 </Link>
 
                 <Link href="/studios" style={{
-                  background: 'rgba(255,255,255,0.95)',
+                  background: 'linear-gradient(135deg, rgba(255,255,255,0.95) 0%, rgba(248,250,252,0.95) 100%)',
                   borderRadius: '16px',
-                  padding: '24px',
+                  padding: '28px',
                   textDecoration: 'none',
-                  color: '#333',
+                  color: '#1e293b',
                   display: 'flex',
                   flexDirection: 'column',
-                  gap: '12px',
-                  transition: 'transform 0.2s, box-shadow 0.2s',
-                  boxShadow: '0 4px 15px rgba(0,0,0,0.1)'
+                  gap: '14px',
+                  transition: 'all 0.3s cubic-bezier(0.4, 0, 0.2, 1)',
+                  boxShadow: '0 4px 20px rgba(0,0,0,0.15), 0 0 0 1px rgba(255,255,255,0.1)',
+                  position: 'relative',
+                  overflow: 'hidden'
                 }} className="hover-lift">
-                  <span style={{fontSize: '2.5rem'}}>🔍</span>
-                  <h3 style={{fontSize: '1.1rem', fontWeight: '600', margin: 0}}>Tous les Studios</h3>
-                  <p style={{fontSize: '0.85rem', color: '#666', margin: 0}}>Parcourir le catalogue</p>
+                  <div style={{position: 'absolute', top: 0, left: 0, right: 0, height: '4px', background: 'linear-gradient(90deg, #8b5cf6, #7c3aed)'}}></div>
+                  <div style={{display: 'flex', alignItems: 'center', justifyContent: 'space-between'}}>
+                    <div style={{width: '50px', height: '50px', background: 'linear-gradient(135deg, #8b5cf6 0%, #7c3aed 100%)', borderRadius: '12px', display: 'flex', alignItems: 'center', justifyContent: 'center', boxShadow: '0 4px 12px rgba(139, 92, 246, 0.3)'}}>
+                      <span style={{fontSize: '24px'}}>🔍</span>
+                    </div>
+                    <span style={{fontSize: '20px', color: '#94a3b8'}}>→</span>
+                  </div>
+                  <div>
+                    <h3 style={{fontSize: '1.15rem', fontWeight: '700', margin: '0 0 4px', color: '#1e293b'}}>Catalogue</h3>
+                    <p style={{fontSize: '0.85rem', color: '#64748b', margin: 0, lineHeight: '1.4'}}>Explorer tous les studios</p>
+                  </div>
+                </Link>
+              </div>
+            </div>
+          </section>
+        )}
+
+        {/* User Dashboard Section - Professional Design for GUEST users */}
+        {isLoggedIn && !isAdmin && (
+          <section style={{
+            background: 'linear-gradient(135deg, #f8fafc 0%, #e2e8f0 100%)',
+            padding: '35px 0 45px',
+            marginTop: '90px',
+            borderBottom: '2px solid #e2e8f0'
+          }}>
+            <div className="container">
+              <div style={{display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '28px', flexWrap: 'wrap', gap: '16px'}}>
+                <div style={{display: 'flex', alignItems: 'center', gap: '14px'}}>
+                  <div style={{
+                    width: '52px',
+                    height: '52px',
+                    background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
+                    borderRadius: '14px',
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    boxShadow: '0 6px 20px rgba(102, 126, 234, 0.35)'
+                  }}>
+                    <span style={{fontSize: '26px'}}>👤</span>
+                  </div>
+                  <div>
+                    <h2 style={{color: '#1e293b', fontSize: '1.5rem', fontWeight: '700', margin: 0, letterSpacing: '-0.01em'}}>
+                      Mon Espace
+                    </h2>
+                    <p style={{color: '#64748b', fontSize: '0.88rem', margin: '3px 0 0'}}>
+                      Bienvenue sur votre tableau de bord
+                    </p>
+                  </div>
+                </div>
+                <div style={{
+                  background: 'white',
+                  border: '1px solid #e2e8f0',
+                  borderRadius: '10px',
+                  padding: '10px 16px',
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: '8px',
+                  boxShadow: '0 2px 8px rgba(0,0,0,0.04)'
+                }}>
+                  <div style={{width: '8px', height: '8px', background: '#667eea', borderRadius: '50%', boxShadow: '0 0 8px rgba(102, 126, 234, 0.6)'}}></div>
+                  <span style={{color: '#475569', fontSize: '0.85rem', fontWeight: '500'}}>Utilisateur</span>
+                </div>
+              </div>
+              
+              <div style={{
+                display: 'grid',
+                gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))',
+                gap: '20px'
+              }}>
+                <Link href="/studios" style={{
+                  background: 'white',
+                  borderRadius: '16px',
+                  padding: '26px',
+                  textDecoration: 'none',
+                  color: '#1e293b',
+                  display: 'flex',
+                  flexDirection: 'column',
+                  gap: '14px',
+                  transition: 'all 0.3s cubic-bezier(0.4, 0, 0.2, 1)',
+                  boxShadow: '0 4px 15px rgba(0,0,0,0.06)',
+                  border: '1px solid #e2e8f0',
+                  position: 'relative',
+                  overflow: 'hidden'
+                }} className="hover-lift">
+                  <div style={{position: 'absolute', top: 0, left: 0, right: 0, height: '3px', background: 'linear-gradient(90deg, #667eea, #764ba2)'}}></div>
+                  <div style={{display: 'flex', alignItems: 'center', justifyContent: 'space-between'}}>
+                    <div style={{width: '48px', height: '48px', background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)', borderRadius: '12px', display: 'flex', alignItems: 'center', justifyContent: 'center', boxShadow: '0 4px 12px rgba(102, 126, 234, 0.25)'}}>
+                      <span style={{fontSize: '22px'}}>🏘️</span>
+                    </div>
+                    <span style={{fontSize: '18px', color: '#cbd5e1'}}>→</span>
+                  </div>
+                  <div>
+                    <h3 style={{fontSize: '1.1rem', fontWeight: '600', margin: '0 0 4px', color: '#1e293b'}}>Découvrir les Studios</h3>
+                    <p style={{fontSize: '0.85rem', color: '#64748b', margin: 0}}>Parcourez notre catalogue de propriétés</p>
+                  </div>
+                </Link>
+
+                <Link href="/studios/my-bookings" style={{
+                  background: 'white',
+                  borderRadius: '16px',
+                  padding: '26px',
+                  textDecoration: 'none',
+                  color: '#1e293b',
+                  display: 'flex',
+                  flexDirection: 'column',
+                  gap: '14px',
+                  transition: 'all 0.3s cubic-bezier(0.4, 0, 0.2, 1)',
+                  boxShadow: '0 4px 15px rgba(0,0,0,0.06)',
+                  border: '1px solid #e2e8f0',
+                  position: 'relative',
+                  overflow: 'hidden'
+                }} className="hover-lift">
+                  <div style={{position: 'absolute', top: 0, left: 0, right: 0, height: '3px', background: 'linear-gradient(90deg, #10b981, #059669)'}}></div>
+                  <div style={{display: 'flex', alignItems: 'center', justifyContent: 'space-between'}}>
+                    <div style={{width: '48px', height: '48px', background: 'linear-gradient(135deg, #10b981 0%, #059669 100%)', borderRadius: '12px', display: 'flex', alignItems: 'center', justifyContent: 'center', boxShadow: '0 4px 12px rgba(16, 185, 129, 0.25)'}}>
+                      <span style={{fontSize: '22px'}}>📋</span>
+                    </div>
+                    <span style={{fontSize: '18px', color: '#cbd5e1'}}>→</span>
+                  </div>
+                  <div>
+                    <h3 style={{fontSize: '1.1rem', fontWeight: '600', margin: '0 0 4px', color: '#1e293b'}}>Mes Réservations</h3>
+                    <p style={{fontSize: '0.85rem', color: '#64748b', margin: 0}}>Consultez vos réservations en cours</p>
+                  </div>
                 </Link>
               </div>
             </div>
@@ -714,7 +1011,7 @@ export default function Home() {
         )}
 
         {/* Hero Section */}
-        <section className="hero" style={isLoggedIn && isAdmin ? {marginTop: 0} : {}}>
+        <section className="hero" style={isLoggedIn ? {marginTop: 0} : {}}>
           <div className="container">
             <div className="hero-content text-center">
               <div style={{background: 'rgba(255,255,255,0.15)', padding: '10px 20px', borderRadius: '25px', display: 'inline-block', marginBottom: '30px'}}>
