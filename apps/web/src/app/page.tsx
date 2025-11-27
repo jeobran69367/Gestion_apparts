@@ -619,8 +619,102 @@ export default function Home() {
           </div>
         </nav>
 
+        {/* Admin Dashboard Section - Only visible for admins */}
+        {isLoggedIn && isAdmin && (
+          <section style={{
+            background: 'linear-gradient(135deg, #1e3a5f 0%, #2d5a87 100%)',
+            padding: '30px 0',
+            marginTop: '90px'
+          }}>
+            <div className="container">
+              <div style={{marginBottom: '25px'}}>
+                <h2 style={{color: 'white', fontSize: '1.8rem', fontWeight: '700', marginBottom: '8px'}}>
+                  🛠️ Panel Administrateur
+                </h2>
+                <p style={{color: 'rgba(255,255,255,0.8)', fontSize: '1rem'}}>
+                  Gérez vos studios, réservations et propriétés depuis cet espace
+                </p>
+              </div>
+              
+              <div style={{
+                display: 'grid',
+                gridTemplateColumns: 'repeat(auto-fit, minmax(220px, 1fr))',
+                gap: '20px'
+              }}>
+                <Link href="/studios/my-studios" style={{
+                  background: 'rgba(255,255,255,0.95)',
+                  borderRadius: '16px',
+                  padding: '24px',
+                  textDecoration: 'none',
+                  color: '#333',
+                  display: 'flex',
+                  flexDirection: 'column',
+                  gap: '12px',
+                  transition: 'transform 0.2s, box-shadow 0.2s',
+                  boxShadow: '0 4px 15px rgba(0,0,0,0.1)'
+                }} className="hover-lift">
+                  <span style={{fontSize: '2.5rem'}}>🏠</span>
+                  <h3 style={{fontSize: '1.1rem', fontWeight: '600', margin: 0}}>Mes Studios</h3>
+                  <p style={{fontSize: '0.85rem', color: '#666', margin: 0}}>Gérer vos propriétés</p>
+                </Link>
+
+                <Link href="/studios/create" style={{
+                  background: 'rgba(255,255,255,0.95)',
+                  borderRadius: '16px',
+                  padding: '24px',
+                  textDecoration: 'none',
+                  color: '#333',
+                  display: 'flex',
+                  flexDirection: 'column',
+                  gap: '12px',
+                  transition: 'transform 0.2s, box-shadow 0.2s',
+                  boxShadow: '0 4px 15px rgba(0,0,0,0.1)'
+                }} className="hover-lift">
+                  <span style={{fontSize: '2.5rem'}}>➕</span>
+                  <h3 style={{fontSize: '1.1rem', fontWeight: '600', margin: 0}}>Créer un Studio</h3>
+                  <p style={{fontSize: '0.85rem', color: '#666', margin: 0}}>Ajouter une nouvelle propriété</p>
+                </Link>
+
+                <Link href="/studios/reservations" style={{
+                  background: 'rgba(255,255,255,0.95)',
+                  borderRadius: '16px',
+                  padding: '24px',
+                  textDecoration: 'none',
+                  color: '#333',
+                  display: 'flex',
+                  flexDirection: 'column',
+                  gap: '12px',
+                  transition: 'transform 0.2s, box-shadow 0.2s',
+                  boxShadow: '0 4px 15px rgba(0,0,0,0.1)'
+                }} className="hover-lift">
+                  <span style={{fontSize: '2.5rem'}}>📅</span>
+                  <h3 style={{fontSize: '1.1rem', fontWeight: '600', margin: 0}}>Réservations</h3>
+                  <p style={{fontSize: '0.85rem', color: '#666', margin: 0}}>Voir toutes les réservations</p>
+                </Link>
+
+                <Link href="/studios" style={{
+                  background: 'rgba(255,255,255,0.95)',
+                  borderRadius: '16px',
+                  padding: '24px',
+                  textDecoration: 'none',
+                  color: '#333',
+                  display: 'flex',
+                  flexDirection: 'column',
+                  gap: '12px',
+                  transition: 'transform 0.2s, box-shadow 0.2s',
+                  boxShadow: '0 4px 15px rgba(0,0,0,0.1)'
+                }} className="hover-lift">
+                  <span style={{fontSize: '2.5rem'}}>🔍</span>
+                  <h3 style={{fontSize: '1.1rem', fontWeight: '600', margin: 0}}>Tous les Studios</h3>
+                  <p style={{fontSize: '0.85rem', color: '#666', margin: 0}}>Parcourir le catalogue</p>
+                </Link>
+              </div>
+            </div>
+          </section>
+        )}
+
         {/* Hero Section */}
-        <section className="hero">
+        <section className="hero" style={isLoggedIn && isAdmin ? {marginTop: 0} : {}}>
           <div className="container">
             <div className="hero-content text-center">
               <div style={{background: 'rgba(255,255,255,0.15)', padding: '10px 20px', borderRadius: '25px', display: 'inline-block', marginBottom: '30px'}}>
