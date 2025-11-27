@@ -19,6 +19,46 @@ export class EmailService {
     });
   }
 
+  async sendPasswordResetEmail(to: string, resetLink: string, firstName: string): Promise<void> {
+    const mailOptions = {
+      from: process.env.EMAIL_USER,
+      to,
+      subject: 'Réinitialisation de votre mot de passe — MonAppart',
+      html: `
+        <div style="font-family: Arial, sans-serif; color: #333; line-height: 1.6; max-width: 600px; margin: 0 auto;">
+          <div style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); padding: 30px; text-align: center; border-radius: 10px 10px 0 0;">
+            <h1 style="color: white; margin: 0; font-size: 24px;">🏠 MonAppart</h1>
+          </div>
+          <div style="padding: 30px; background: #f9f9f9; border-radius: 0 0 10px 10px;">
+            <h2 style="color: #333; margin-top: 0;">Bonjour ${firstName},</h2>
+            <p>Vous avez demandé la réinitialisation de votre mot de passe.</p>
+            <p>Cliquez sur le bouton ci-dessous pour créer un nouveau mot de passe :</p>
+            <div style="text-align: center; margin: 30px 0;">
+              <a href="${resetLink}" style="display: inline-block; padding: 15px 30px; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; text-decoration: none; border-radius: 8px; font-weight: bold;">
+                Réinitialiser mon mot de passe
+              </a>
+            </div>
+            <p style="color: #666; font-size: 14px;">Ce lien est valide pendant 1 heure.</p>
+            <p style="color: #666; font-size: 14px;">Si vous n'avez pas demandé cette réinitialisation, vous pouvez ignorer cet email.</p>
+            <hr style="border: none; border-top: 1px solid #e0e0e0; margin: 20px 0;">
+            <p style="color: #999; font-size: 12px; text-align: center;">
+              Si le bouton ne fonctionne pas, copiez et collez ce lien dans votre navigateur :<br>
+              <a href="${resetLink}" style="color: #667eea; word-break: break-all;">${resetLink}</a>
+            </p>
+          </div>
+        </div>
+      `,
+    };
+
+    try {
+      await this.transporter.sendMail(mailOptions);
+      console.log('✅ Email de réinitialisation envoyé à:', to);
+    } catch (error) {
+      console.error('❌ Erreur lors de l\'envoi de l\'email de réinitialisation:', error);
+      throw new Error('Impossible d\'envoyer l\'email de réinitialisation');
+    }
+  }
+
   async sendReservationConfirmation(to: string, reservationDetails: any) {
   console.log('📧 Préparation email à:', to);
   console.log('📋 Détails réservation:', reservationDetails);

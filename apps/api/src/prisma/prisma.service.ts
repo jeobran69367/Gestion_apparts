@@ -32,4 +32,8 @@ export class PrismaService implements OnModuleInit, OnModuleDestroy {
   get payment() {
     return this.prisma.payment;
   }
+
+  get passwordResetToken() {
+    return this.prisma.passwordResetToken;
+  }
 }

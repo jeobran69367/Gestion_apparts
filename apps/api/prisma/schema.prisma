@@ -213,3 +213,19 @@ enum PaymentStatus {
 
   @@map("payment_statuses")
 }
+
+// ========================================
+// MODÈLE TOKEN DE RÉINITIALISATION DE MOT DE PASSE
+// ========================================
+model PasswordResetToken {
+  id        Int      @id @default(autoincrement())
+  token     String   @unique
+  email     String
+  expiresAt DateTime
+  used      Boolean  @default(false)
+  createdAt DateTime @default(now())
+
+  @@map("password_reset_tokens")
+  @@index([token])
+  @@index([email])
+}

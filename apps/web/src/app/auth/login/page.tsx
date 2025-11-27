@@ -398,6 +398,13 @@ export default function LoginPage() {
                 placeholder={isLogin ? 'Votre mot de passe' : 'Minimum 6 caractères'}
                 minLength={6}
               />
+              {isLogin && (
+                <div style={{ marginTop: '8px', textAlign: 'right' }}>
+                  <Link href="/auth/forgot-password" style={{ color: '#667eea', fontSize: '14px', textDecoration: 'none' }}>
+                    Mot de passe oublié ?
+                  </Link>
+                </div>
+              )}
             </div>
 
             {!isLogin && (
