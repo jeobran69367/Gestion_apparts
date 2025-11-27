@@ -1,8 +1,9 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
+import { useAuth } from '../../../hooks/useAuth';
 
 interface Booking {
   id: number;
@@ -35,18 +36,9 @@ export default function MyBookingsPage() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
   const router = useRouter();
+  const { isLoggedIn, mounted, logout } = useAuth();
 
-  useEffect(() => {
-    const token = localStorage.getItem('token');
-    if (!token) {
-      router.push('/auth/login');
-      return;
-    }
-
-    fetchMyReservations();
-  }, [router]);
-
-  const fetchMyReservations = async () => {
+  const fetchMyReservations = useCallback(async () => {
     try {
       setError('');
       const token = localStorage.getItem('token');
@@ -56,7 +48,6 @@ export default function MyBookingsPage() {
         return;
       }
 
-      // CORRECTION : Utilisez l'endpoint qui récupère automatiquement les réservations de l'utilisateur connecté
       const response = await fetch('http://localhost:4000/api/reservations/my-reservations', {
         headers: {
           'Authorization': `Bearer ${token}`,
@@ -72,7 +63,7 @@ export default function MyBookingsPage() {
         switch (response.status) {
           case 401:
             setError('Session expirée - veuillez vous reconnecter');
-            localStorage.removeItem('token');
+            logout();
             router.push('/auth/login');
             break;
           case 404:
@@ -91,7 +82,18 @@ export default function MyBookingsPage() {
     } finally {
       setLoading(false);
     }
-  };
+  }, [router, logout]);
+
+  useEffect(() => {
+    if (!mounted) return;
+    
+    if (!isLoggedIn) {
+      router.push('/auth/login');
+      return;
+    }
+
+    fetchMyReservations();
+  }, [mounted, isLoggedIn, router, fetchMyReservations]);
 
   // ... le reste de votre code reste inchangé ...
   const getStatusColor = (status: string) => {
@@ -146,7 +148,7 @@ export default function MyBookingsPage() {
     fetchMyReservations();
   };
 
-  if (loading) {
+  if (!mounted || loading) {
     return (
       <div className="min-h-screen bg-gray-50 flex items-center justify-center">
         <div className="text-center">
