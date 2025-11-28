@@ -5,6 +5,9 @@ import { usePathname } from "next/navigation";
 import { useState, useEffect } from "react";
 import { useAuth } from "../hooks/useAuth";
 
+// Constants
+const NAV_HEIGHT = "72px";
+
 export default function Navigation() {
   const pathname = usePathname();
   const { isLoggedIn, isAdmin, user, mounted, logout } = useAuth();
@@ -58,7 +61,7 @@ export default function Navigation() {
           backdropFilter: "blur(20px)",
           borderBottom: "1px solid rgba(0, 0, 0, 0.08)",
           padding: "0 20px",
-          height: "72px",
+          height: NAV_HEIGHT,
         }}
       >
         <div
@@ -246,6 +249,26 @@ export default function Navigation() {
           visibility: visible;
           transform: translateY(0);
         }
+
+        .logout-btn {
+          width: 100%;
+          padding: 10px 12px;
+          display: flex;
+          align-items: center;
+          gap: 10px;
+          background: transparent;
+          border: none;
+          border-radius: 8px;
+          cursor: pointer;
+          color: #ef4444;
+          font-size: 14px;
+          font-weight: 500;
+          transition: all 0.2s ease;
+        }
+
+        .logout-btn:hover {
+          background: rgba(239, 68, 68, 0.08);
+        }
       `}</style>
 
       {/* Navigation Bar */}
@@ -260,7 +283,7 @@ export default function Navigation() {
           backdropFilter: "blur(20px)",
           borderBottom: scrolled ? "1px solid rgba(0, 0, 0, 0.1)" : "1px solid rgba(0, 0, 0, 0.06)",
           padding: "0 20px",
-          height: "72px",
+          height: NAV_HEIGHT,
           transition: "all 0.3s ease",
           boxShadow: scrolled ? "0 2px 20px rgba(0, 0, 0, 0.06)" : "none",
         }}
@@ -367,23 +390,7 @@ export default function Navigation() {
                     <div style={{ padding: "8px" }}>
                       <button
                         onClick={handleLogout}
-                        style={{
-                          width: "100%",
-                          padding: "10px 12px",
-                          display: "flex",
-                          alignItems: "center",
-                          gap: "10px",
-                          background: "transparent",
-                          border: "none",
-                          borderRadius: "8px",
-                          cursor: "pointer",
-                          color: "#ef4444",
-                          fontSize: "14px",
-                          fontWeight: "500",
-                          transition: "all 0.2s ease",
-                        }}
-                        onMouseOver={(e) => (e.currentTarget.style.background = "rgba(239, 68, 68, 0.08)")}
-                        onMouseOut={(e) => (e.currentTarget.style.background = "transparent")}
+                        className="logout-btn"
                       >
                         <span>🚪</span>
                         Déconnexion
@@ -639,7 +646,7 @@ export default function Navigation() {
       </div>
 
       {/* Spacer to prevent content from going under fixed nav */}
-      <div style={{ height: "72px" }} />
+      <div style={{ height: NAV_HEIGHT }} />
     </>
   );
 }
