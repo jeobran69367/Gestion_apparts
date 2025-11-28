@@ -1,4 +1,4 @@
-import { IsEmail, IsString, MinLength, IsOptional, IsEnum } from 'class-validator';
+import { IsEmail, IsString, MinLength, IsOptional, IsEnum, IsNumberString } from 'class-validator';
 
 export enum UserRole {
   GUEST = 'GUEST',
@@ -43,7 +43,7 @@ export class ForgotPasswordDto {
 }
 
 export class ResetPasswordDto {
-  @IsString()
+  @IsNumberString()
   token: string;
 
   @IsString()
