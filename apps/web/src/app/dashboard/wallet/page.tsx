@@ -318,15 +318,15 @@ export default function WalletPage() {
       <div
         style={{
           minHeight: "100vh",
-          background: "linear-gradient(135deg, #0f172a 0%, #1e293b 100%)",
+          background: "linear-gradient(135deg, #f8fafc 0%, #e2e8f0 100%)",
         }}
       >
         {/* Navigation Header */}
         <header
           style={{
-            background: "rgba(15, 23, 42, 0.95)",
+            background: "rgba(255, 255, 255, 0.95)",
             backdropFilter: "blur(10px)",
-            borderBottom: "1px solid rgba(255,255,255,0.1)",
+            borderBottom: "1px solid #e2e8f0",
             padding: "16px 0",
             position: "sticky",
             top: 0,
@@ -372,14 +372,14 @@ export default function WalletPage() {
                     style={{
                       fontSize: "18px",
                       fontWeight: "700",
-                      color: "white",
+                      color: "#1e293b",
                       letterSpacing: "-0.02em",
                     }}
                   >
                     StudioRent
                   </div>
                   <div
-                    style={{ fontSize: "11px", color: "rgba(255,255,255,0.6)" }}
+                    style={{ fontSize: "11px", color: "#64748b" }}
                   >
                     Wallet PawaPay
                   </div>
@@ -391,8 +391,8 @@ export default function WalletPage() {
                   href="/dashboard"
                   style={{
                     padding: "10px 16px",
-                    background: "rgba(255,255,255,0.1)",
-                    color: "white",
+                    background: "#f1f5f9",
+                    color: "#475569",
                     textDecoration: "none",
                     borderRadius: "10px",
                     fontWeight: "500",
@@ -400,7 +400,7 @@ export default function WalletPage() {
                     display: "flex",
                     alignItems: "center",
                     gap: "6px",
-                    border: "1px solid rgba(255,255,255,0.1)",
+                    border: "1px solid #e2e8f0",
                   }}
                 >
                   <span>⬅️</span> Dashboard
@@ -460,7 +460,7 @@ export default function WalletPage() {
                 <div>
                   <h1
                     style={{
-                      color: "white",
+                      color: "#1e293b",
                       fontSize: "2rem",
                       fontWeight: "800",
                       margin: 0,
@@ -471,7 +471,7 @@ export default function WalletPage() {
                   </h1>
                   <p
                     style={{
-                      color: "rgba(255,255,255,0.6)",
+                      color: "#64748b",
                       fontSize: "1rem",
                       margin: "6px 0 0",
                     }}
@@ -485,11 +485,12 @@ export default function WalletPage() {
             {/* Balances Section */}
             <div
               style={{
-                background: "rgba(255,255,255,0.05)",
+                background: "white",
                 borderRadius: "20px",
                 padding: "32px",
-                border: "1px solid rgba(255,255,255,0.1)",
+                border: "1px solid #e2e8f0",
                 marginBottom: "32px",
+                boxShadow: "0 4px 6px -1px rgba(0, 0, 0, 0.1)",
               }}
             >
               <div
@@ -502,7 +503,7 @@ export default function WalletPage() {
               >
                 <h2
                   style={{
-                    color: "white",
+                    color: "#1e293b",
                     fontSize: "1.3rem",
                     fontWeight: "700",
                     display: "flex",
@@ -517,9 +518,9 @@ export default function WalletPage() {
                   disabled={loading}
                   style={{
                     padding: "8px 16px",
-                    background: "rgba(255,255,255,0.1)",
-                    color: "white",
-                    border: "1px solid rgba(255,255,255,0.2)",
+                    background: "#f1f5f9",
+                    color: "#475569",
+                    border: "1px solid #e2e8f0",
                     borderRadius: "8px",
                     cursor: loading ? "not-allowed" : "pointer",
                     fontSize: "14px",
@@ -537,14 +538,14 @@ export default function WalletPage() {
                   style={{
                     textAlign: "center",
                     padding: "40px",
-                    color: "rgba(255,255,255,0.6)",
+                    color: "#64748b",
                   }}
                 >
                   <div
                     style={{
                       width: "40px",
                       height: "40px",
-                      border: "3px solid rgba(255,255,255,0.2)",
+                      border: "3px solid #e2e8f0",
                       borderTopColor: "#10b981",
                       borderRadius: "50%",
                       animation: "spin 1s linear infinite",
@@ -556,11 +557,11 @@ export default function WalletPage() {
               ) : error ? (
                 <div
                   style={{
-                    background: "rgba(239, 68, 68, 0.1)",
-                    border: "1px solid rgba(239, 68, 68, 0.3)",
+                    background: "#fef2f2",
+                    border: "1px solid #fecaca",
                     borderRadius: "12px",
                     padding: "20px",
-                    color: "#fca5a5",
+                    color: "#dc2626",
                     textAlign: "center",
                   }}
                 >
@@ -570,11 +571,11 @@ export default function WalletPage() {
               ) : balances.length === 0 ? (
                 <div
                   style={{
-                    background: "rgba(255,255,255,0.05)",
+                    background: "#f8fafc",
                     borderRadius: "12px",
                     padding: "40px",
                     textAlign: "center",
-                    color: "rgba(255,255,255,0.6)",
+                    color: "#64748b",
                   }}
                 >
                   <span style={{ fontSize: "48px", display: "block", marginBottom: "16px" }}>📭</span>
@@ -592,10 +593,10 @@ export default function WalletPage() {
                     <div
                       key={index}
                       style={{
-                        background: "rgba(255,255,255,0.08)",
+                        background: "linear-gradient(135deg, #f0fdf4 0%, #dcfce7 100%)",
                         borderRadius: "16px",
                         padding: "24px",
-                        border: "1px solid rgba(255,255,255,0.1)",
+                        border: "1px solid #bbf7d0",
                       }}
                     >
                       <div
@@ -612,7 +613,7 @@ export default function WalletPage() {
                         <div>
                           <div
                             style={{
-                              color: "white",
+                              color: "#1e293b",
                               fontWeight: "600",
                               fontSize: "0.95rem",
                             }}
@@ -621,7 +622,7 @@ export default function WalletPage() {
                           </div>
                           <div
                             style={{
-                              color: "rgba(255,255,255,0.5)",
+                              color: "#64748b",
                               fontSize: "0.8rem",
                               display: "flex",
                               alignItems: "center",
@@ -634,7 +635,7 @@ export default function WalletPage() {
                       </div>
                       <div
                         style={{
-                          color: "#10b981",
+                          color: "#059669",
                           fontSize: "1.5rem",
                           fontWeight: "700",
                         }}
@@ -653,10 +654,11 @@ export default function WalletPage() {
             {/* Payout Section */}
             <div
               style={{
-                background: "rgba(255,255,255,0.05)",
+                background: "white",
                 borderRadius: "20px",
                 padding: "32px",
-                border: "1px solid rgba(255,255,255,0.1)",
+                border: "1px solid #e2e8f0",
+                boxShadow: "0 4px 6px -1px rgba(0, 0, 0, 0.1)",
               }}
             >
               <div
@@ -669,7 +671,7 @@ export default function WalletPage() {
               >
                 <h2
                   style={{
-                    color: "white",
+                    color: "#1e293b",
                     fontSize: "1.3rem",
                     fontWeight: "700",
                     display: "flex",
@@ -684,10 +686,10 @@ export default function WalletPage() {
                   style={{
                     padding: "10px 20px",
                     background: showPayoutForm
-                      ? "rgba(239, 68, 68, 0.2)"
+                      ? "#fef2f2"
                       : "linear-gradient(135deg, #10b981 0%, #059669 100%)",
-                    color: "white",
-                    border: "none",
+                    color: showPayoutForm ? "#dc2626" : "white",
+                    border: showPayoutForm ? "1px solid #fecaca" : "none",
                     borderRadius: "10px",
                     cursor: "pointer",
                     fontSize: "14px",
@@ -715,9 +717,10 @@ export default function WalletPage() {
                       <label
                         style={{
                           display: "block",
-                          color: "rgba(255,255,255,0.8)",
+                          color: "#475569",
                           fontSize: "0.9rem",
                           marginBottom: "8px",
+                          fontWeight: "500",
                         }}
                       >
                         Numéro de téléphone *
@@ -737,10 +740,10 @@ export default function WalletPage() {
                         style={{
                           width: "100%",
                           padding: "12px 16px",
-                          background: "rgba(255,255,255,0.1)",
-                          border: "1px solid rgba(255,255,255,0.2)",
+                          background: "#f8fafc",
+                          border: "1px solid #e2e8f0",
                           borderRadius: "10px",
-                          color: "white",
+                          color: "#1e293b",
                           fontSize: "1rem",
                         }}
                       />
@@ -750,9 +753,10 @@ export default function WalletPage() {
                       <label
                         style={{
                           display: "block",
-                          color: "rgba(255,255,255,0.8)",
+                          color: "#475569",
                           fontSize: "0.9rem",
                           marginBottom: "8px",
+                          fontWeight: "500",
                         }}
                       >
                         Opérateur *
@@ -770,21 +774,20 @@ export default function WalletPage() {
                         style={{
                           width: "100%",
                           padding: "12px 16px",
-                          background: "rgba(255,255,255,0.1)",
-                          border: "1px solid rgba(255,255,255,0.2)",
+                          background: "#f8fafc",
+                          border: "1px solid #e2e8f0",
                           borderRadius: "10px",
-                          color: "white",
+                          color: "#1e293b",
                           fontSize: "1rem",
                         }}
                       >
-                        <option value="" style={{ background: "#1e293b" }}>
+                        <option value="">
                           Sélectionnez un opérateur
                         </option>
                         {providers.map((p) => (
                           <option
                             key={p.value}
                             value={p.value}
-                            style={{ background: "#1e293b" }}
                           >
                             {p.label}
                           </option>
@@ -796,9 +799,10 @@ export default function WalletPage() {
                       <label
                         style={{
                           display: "block",
-                          color: "rgba(255,255,255,0.8)",
+                          color: "#475569",
                           fontSize: "0.9rem",
                           marginBottom: "8px",
+                          fontWeight: "500",
                         }}
                       >
                         Montant (FCFA) *
@@ -819,10 +823,10 @@ export default function WalletPage() {
                         style={{
                           width: "100%",
                           padding: "12px 16px",
-                          background: "rgba(255,255,255,0.1)",
-                          border: "1px solid rgba(255,255,255,0.2)",
+                          background: "#f8fafc",
+                          border: "1px solid #e2e8f0",
                           borderRadius: "10px",
-                          color: "white",
+                          color: "#1e293b",
                           fontSize: "1rem",
                         }}
                       />
@@ -832,9 +836,10 @@ export default function WalletPage() {
                       <label
                         style={{
                           display: "block",
-                          color: "rgba(255,255,255,0.8)",
+                          color: "#475569",
                           fontSize: "0.9rem",
                           marginBottom: "8px",
+                          fontWeight: "500",
                         }}
                       >
                         Message (optionnel)
@@ -854,10 +859,10 @@ export default function WalletPage() {
                         style={{
                           width: "100%",
                           padding: "12px 16px",
-                          background: "rgba(255,255,255,0.1)",
-                          border: "1px solid rgba(255,255,255,0.2)",
+                          background: "#f8fafc",
+                          border: "1px solid #e2e8f0",
                           borderRadius: "10px",
-                          color: "white",
+                          color: "#1e293b",
                           fontSize: "1rem",
                         }}
                       />
@@ -868,17 +873,17 @@ export default function WalletPage() {
                     <div
                       style={{
                         background: payoutResult.success
-                          ? "rgba(16, 185, 129, 0.1)"
-                          : "rgba(239, 68, 68, 0.1)",
+                          ? "#f0fdf4"
+                          : "#fef2f2",
                         border: `1px solid ${
                           payoutResult.success
-                            ? "rgba(16, 185, 129, 0.3)"
-                            : "rgba(239, 68, 68, 0.3)"
+                            ? "#bbf7d0"
+                            : "#fecaca"
                         }`,
                         borderRadius: "12px",
                         padding: "16px",
                         marginBottom: "20px",
-                        color: payoutResult.success ? "#6ee7b7" : "#fca5a5",
+                        color: payoutResult.success ? "#059669" : "#dc2626",
                       }}
                     >
                       {payoutResult.success ? "✅" : "❌"} {payoutResult.message}
@@ -900,9 +905,15 @@ export default function WalletPage() {
                         !payoutForm.phoneNumber ||
                         !payoutForm.provider ||
                         !payoutForm.amount
-                          ? "rgba(255,255,255,0.1)"
+                          ? "#e2e8f0"
                           : "linear-gradient(135deg, #f59e0b 0%, #d97706 100%)",
-                      color: "white",
+                      color:
+                        payoutLoading ||
+                        !payoutForm.phoneNumber ||
+                        !payoutForm.provider ||
+                        !payoutForm.amount
+                          ? "#94a3b8"
+                          : "white",
                       border: "none",
                       borderRadius: "12px",
                       cursor:
@@ -951,11 +962,11 @@ export default function WalletPage() {
               {!showPayoutForm && (
                 <div
                   style={{
-                    background: "rgba(255,255,255,0.05)",
+                    background: "#f8fafc",
                     borderRadius: "12px",
                     padding: "30px",
                     textAlign: "center",
-                    color: "rgba(255,255,255,0.6)",
+                    color: "#64748b",
                   }}
                 >
                   <span
@@ -980,8 +991,8 @@ export default function WalletPage() {
         {/* Footer */}
         <footer
           style={{
-            background: "rgba(0,0,0,0.3)",
-            borderTop: "1px solid rgba(255,255,255,0.1)",
+            background: "white",
+            borderTop: "1px solid #e2e8f0",
             padding: "24px 0",
           }}
         >
@@ -997,7 +1008,7 @@ export default function WalletPage() {
             >
               <p
                 style={{
-                  color: "rgba(255,255,255,0.5)",
+                  color: "#94a3b8",
                   fontSize: "0.85rem",
                   margin: 0,
                 }}
@@ -1007,7 +1018,7 @@ export default function WalletPage() {
               <Link
                 href="/dashboard"
                 style={{
-                  color: "rgba(255,255,255,0.6)",
+                  color: "#64748b",
                   fontSize: "0.85rem",
                   textDecoration: "none",
                 }}
