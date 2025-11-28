@@ -35,14 +35,11 @@ export default function Navigation() {
   // Navigation items for authenticated users
   const navItems = isAdmin
     ? [
-        { href: "/dashboard", label: "Dashboard", icon: "📊" },
         { href: "/studios", label: "Studios", icon: "🏘️" },
         { href: "/studios/my-studios", label: "Mes Studios", icon: "🏠" },
-        { href: "/studios/create", label: "Nouveau", icon: "✨" },
-        { href: "/studios/reservations", label: "Réservations", icon: "📋" },
+        { href: "/studios/studio-payments", label: "Bookings", icon: "💰" },
       ]
     : [
-        { href: "/dashboard", label: "Mon Espace", icon: "👤" },
         { href: "/studios", label: "Studios", icon: "🏘️" },
         { href: "/studios/my-bookings", label: "Mes Réservations", icon: "📋" },
       ];
@@ -387,6 +384,10 @@ export default function Navigation() {
                       </div>
                       <div style={{ fontSize: "12px", color: "#64748b" }}>{user?.email}</div>
                     </div>
+                    <Link href="/dashboard" className={`nav-link-item ${pathname === "/dashboard" ? "active" : ""}`}>
+                      <span>📊</span>
+                      Dashboard
+                    </Link>
                     <div style={{ padding: "8px" }}>
                       <button
                         onClick={handleLogout}
