@@ -2,18 +2,119 @@
 
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import { useAuth } from "../../hooks/useAuth";
 
 export default function DashboardPage() {
-  const { isLoggedIn, isAdmin, user, mounted } = useAuth();
+  const { isLoggedIn, isAdmin, user, mounted, login } = useAuth();
   const router = useRouter();
+  
+  // Form state for profile editing
+  const [isEditing, setIsEditing] = useState(false);
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState('');
+  const [success, setSuccess] = useState('');
+  const [formData, setFormData] = useState({
+    firstName: '',
+    lastName: '',
+    email: '',
+    phone: '',
+  });
+
+  // Initialize form data when user is loaded
+  useEffect(() => {
+    if (user) {
+      setFormData({
+        firstName: user.firstName || '',
+        lastName: user.lastName || '',
+        email: user.email || '',
+        phone: user.phone || '',
+      });
+    }
+  }, [user]);
 
   useEffect(() => {
     if (mounted && !isLoggedIn) {
       router.push("/auth/login");
     }
   }, [mounted, isLoggedIn, router]);
+
+  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    setFormData({
+      ...formData,
+      [e.target.name]: e.target.value,
+    });
+    // Clear messages when user starts typing
+    setError('');
+    setSuccess('');
+  };
+
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setLoading(true);
+    setError('');
+    setSuccess('');
+
+    try {
+      const token = localStorage.getItem('token');
+      if (!token || !user) {
+        throw new Error('Vous devez être connecté pour modifier votre profil');
+      }
+
+      const response = await fetch(`http://localhost:4000/users/${user.id}`, {
+        method: 'PUT',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${token}`,
+        },
+        body: JSON.stringify({
+          firstName: formData.firstName,
+          lastName: formData.lastName,
+          email: formData.email,
+          phone: formData.phone || undefined,
+        }),
+      });
+
+      const data = await response.json();
+
+      if (!response.ok) {
+        throw new Error(data.message || 'Une erreur est survenue lors de la mise à jour');
+      }
+
+      // Update user in localStorage and auth state
+      const updatedUser = {
+        ...user,
+        firstName: formData.firstName,
+        lastName: formData.lastName,
+        email: formData.email,
+        phone: formData.phone || undefined,
+      };
+      login(token, updatedUser);
+      
+      setSuccess('Profil mis à jour avec succès !');
+      setIsEditing(false);
+    } catch (err: unknown) {
+      const errorMessage = err instanceof Error ? err.message : 'Une erreur est survenue';
+      setError(errorMessage);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleCancel = () => {
+    // Reset form data to original user data
+    if (user) {
+      setFormData({
+        firstName: user.firstName || '',
+        lastName: user.lastName || '',
+        email: user.email || '',
+        phone: user.phone || '',
+      });
+    }
+    setIsEditing(false);
+    setError('');
+    setSuccess('');
+  };
 
   if (!mounted) {
     return (
@@ -64,421 +165,431 @@ export default function DashboardPage() {
           color: #333;
         }
 
-        .hover-lift {
-          transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-        }
-        
-        .hover-lift:hover {
-          transform: translateY(-6px);
-          box-shadow: 0 20px 40px rgba(0, 0, 0, 0.15);
-        }
-
         .container {
-          max-width: 1200px;
+          max-width: 800px;
           margin: 0 auto;
           padding: 0 20px;
         }
+
+        .form-input {
+          width: 100%;
+          padding: 14px 16px;
+          border: 2px solid #e2e8f0;
+          border-radius: 12px;
+          font-size: 16px;
+          transition: all 0.3s ease;
+          box-sizing: border-box;
+          background: white;
+        }
+
+        .form-input:focus {
+          outline: none;
+          border-color: #667eea;
+          box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+        }
+
+        .form-input:disabled {
+          background: #f8fafc;
+          color: #64748b;
+          cursor: not-allowed;
+        }
+
+        .form-label {
+          display: block;
+          margin-bottom: 8px;
+          font-weight: 600;
+          color: #374151;
+          font-size: 14px;
+        }
+
+        .form-group {
+          margin-bottom: 20px;
+        }
+
+        .btn-primary {
+          padding: 14px 28px;
+          background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+          color: white;
+          border: none;
+          border-radius: 12px;
+          font-size: 16px;
+          font-weight: 600;
+          cursor: pointer;
+          transition: all 0.3s ease;
+        }
+
+        .btn-primary:hover:not(:disabled) {
+          transform: translateY(-2px);
+          box-shadow: 0 10px 20px rgba(102, 126, 234, 0.3);
+        }
+
+        .btn-primary:disabled {
+          opacity: 0.6;
+          cursor: not-allowed;
+        }
+
+        .btn-secondary {
+          padding: 14px 28px;
+          background: white;
+          color: #64748b;
+          border: 2px solid #e2e8f0;
+          border-radius: 12px;
+          font-size: 16px;
+          font-weight: 600;
+          cursor: pointer;
+          transition: all 0.3s ease;
+        }
+
+        .btn-secondary:hover {
+          background: #f8fafc;
+          border-color: #cbd5e1;
+        }
+
+        .loading-spinner {
+          width: 20px;
+          height: 20px;
+          border: 2px solid #ffffff;
+          border-top: 2px solid transparent;
+          border-radius: 50%;
+          animation: spin 1s linear infinite;
+          display: inline-block;
+        }
+
+        @keyframes spin {
+          0% { transform: rotate(0deg); }
+          100% { transform: rotate(360deg); }
+        }
       `}</style>
 
-      <div style={{minHeight: '100vh', background: isAdmin ? 'linear-gradient(135deg, #0f172a 0%, #1e293b 100%)' : 'linear-gradient(135deg, #f8fafc 0%, #e2e8f0 100%)'}}>
+      <div style={{minHeight: '100vh', background: 'linear-gradient(135deg, #f8fafc 0%, #e2e8f0 100%)'}}>
         {/* Main Content */}
         <main style={{padding: '40px 0 60px'}}>
           <div className="container">
-            {/* Welcome Section */}
-            <div style={{marginBottom: '40px'}}>
-              <div style={{display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: '20px'}}>
-                <div style={{display: 'flex', alignItems: 'center', gap: '18px'}}>
-                  <div style={{
-                    width: '70px',
-                    height: '70px',
-                    background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
-                    borderRadius: '18px',
-                    display: 'flex',
-                    alignItems: 'center',
-                    justifyContent: 'center',
-                    boxShadow: '0 10px 30px rgba(102, 126, 234, 0.4)'
-                  }}>
-                    <span style={{fontSize: '36px'}}>{isAdmin ? '⚙️' : '👤'}</span>
-                  </div>
-                  <div>
-                    <h1 style={{
-                      color: isAdmin ? 'white' : '#1e293b',
-                      fontSize: '2rem',
-                      fontWeight: '800',
-                      margin: 0,
-                      letterSpacing: '-0.03em'
-                    }}>
-                      {isAdmin ? 'Espace Administrateur' : 'Mon Espace Personnel'}
-                    </h1>
-                    <p style={{
-                      color: isAdmin ? 'rgba(255,255,255,0.6)' : '#64748b',
-                      fontSize: '1rem',
-                      margin: '6px 0 0'
-                    }}>
-                      Bienvenue, {user?.firstName || 'Utilisateur'} • {isAdmin ? 'Gestion complète de la plateforme' : 'Gérez vos réservations'}
-                    </p>
-                  </div>
-                </div>
-                <div style={{
-                  background: isAdmin ? 'rgba(16, 185, 129, 0.15)' : 'white',
-                  border: isAdmin ? '1px solid rgba(16, 185, 129, 0.3)' : '1px solid #e2e8f0',
-                  borderRadius: '12px',
-                  padding: '12px 20px',
-                  display: 'flex',
-                  alignItems: 'center',
-                  gap: '10px',
-                  boxShadow: isAdmin ? 'none' : '0 2px 8px rgba(0,0,0,0.04)'
-                }}>
-                  <div style={{
-                    width: '10px',
-                    height: '10px',
-                    background: isAdmin ? '#10b981' : '#667eea',
-                    borderRadius: '50%',
-                    boxShadow: `0 0 10px ${isAdmin ? '#10b981' : 'rgba(102, 126, 234, 0.6)'}`
-                  }}></div>
-                  <span style={{
-                    color: isAdmin ? '#10b981' : '#475569',
-                    fontSize: '0.9rem',
-                    fontWeight: '600'
-                  }}>
-                    {isAdmin ? 'Admin connecté' : 'Utilisateur connecté'}
-                  </span>
-                </div>
+            {/* Header Section */}
+            <div style={{marginBottom: '40px', textAlign: 'center'}}>
+              <div style={{
+                width: '100px',
+                height: '100px',
+                background: isAdmin 
+                  ? 'linear-gradient(135deg, #10b981 0%, #059669 100%)'
+                  : 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
+                borderRadius: '25px',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                boxShadow: isAdmin 
+                  ? '0 15px 40px rgba(16, 185, 129, 0.4)'
+                  : '0 15px 40px rgba(102, 126, 234, 0.4)',
+                margin: '0 auto 24px'
+              }}>
+                <span style={{fontSize: '48px'}}>👤</span>
               </div>
+              <h1 style={{
+                color: '#1e293b',
+                fontSize: '2rem',
+                fontWeight: '800',
+                margin: '0 0 8px',
+                letterSpacing: '-0.03em'
+              }}>
+                Mon Profil
+              </h1>
+              <p style={{
+                color: '#64748b',
+                fontSize: '1rem',
+                margin: 0
+              }}>
+                Gérez vos informations personnelles
+              </p>
+              {isAdmin && (
+                <div style={{
+                  display: 'inline-flex',
+                  alignItems: 'center',
+                  gap: '8px',
+                  marginTop: '12px',
+                  padding: '8px 16px',
+                  background: 'rgba(16, 185, 129, 0.1)',
+                  borderRadius: '20px',
+                  border: '1px solid rgba(16, 185, 129, 0.3)'
+                }}>
+                  <span style={{fontSize: '14px'}}>⚙️</span>
+                  <span style={{color: '#10b981', fontSize: '0.85rem', fontWeight: '600'}}>Administrateur</span>
+                </div>
+              )}
             </div>
 
-            {/* Dashboard Cards */}
-            {isAdmin ? (
-              /* Admin Dashboard */
-              <div style={{
-                display: 'grid',
-                gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))',
-                gap: '24px'
-              }}>
-                <Link href="/studios/my-studios" style={{
-                  background: 'linear-gradient(135deg, rgba(255,255,255,0.98) 0%, rgba(248,250,252,0.98) 100%)',
-                  borderRadius: '20px',
-                  padding: '32px',
-                  textDecoration: 'none',
-                  color: '#1e293b',
-                  display: 'flex',
-                  flexDirection: 'column',
-                  gap: '16px',
-                  boxShadow: '0 8px 30px rgba(0,0,0,0.12), 0 0 0 1px rgba(255,255,255,0.1)',
-                  position: 'relative',
-                  overflow: 'hidden'
-                }} className="hover-lift">
-                  <div style={{position: 'absolute', top: 0, left: 0, right: 0, height: '5px', background: 'linear-gradient(90deg, #3b82f6, #8b5cf6)'}}></div>
-                  <div style={{display: 'flex', alignItems: 'center', justifyContent: 'space-between'}}>
-                    <div style={{
-                      width: '60px',
-                      height: '60px',
-                      background: 'linear-gradient(135deg, #3b82f6 0%, #1d4ed8 100%)',
-                      borderRadius: '16px',
-                      display: 'flex',
-                      alignItems: 'center',
-                      justifyContent: 'center',
-                      boxShadow: '0 6px 20px rgba(59, 130, 246, 0.35)'
-                    }}>
-                      <span style={{fontSize: '28px'}}>🏠</span>
-                    </div>
-                    <span style={{fontSize: '24px', color: '#94a3b8'}}>→</span>
-                  </div>
-                  <div>
-                    <h3 style={{fontSize: '1.3rem', fontWeight: '700', margin: '0 0 6px', color: '#1e293b'}}>Mes Studios</h3>
-                    <p style={{fontSize: '0.9rem', color: '#64748b', margin: 0, lineHeight: '1.5'}}>Gérez et modifiez vos propriétés existantes</p>
-                  </div>
-                </Link>
-                <Link href="/studios/reservations" style={{
-                  background: 'linear-gradient(135deg, rgba(255,255,255,0.98) 0%, rgba(248,250,252,0.98) 100%)',
-                  borderRadius: '20px',
-                  padding: '32px',
-                  textDecoration: 'none',
-                  color: '#1e293b',
-                  display: 'flex',
-                  flexDirection: 'column',
-                  gap: '16px',
-                  boxShadow: '0 8px 30px rgba(0,0,0,0.12), 0 0 0 1px rgba(255,255,255,0.1)',
-                  position: 'relative',
-                  overflow: 'hidden'
-                }} className="hover-lift">
-                  <div style={{position: 'absolute', top: 0, left: 0, right: 0, height: '5px', background: 'linear-gradient(90deg, #f59e0b, #d97706)'}}></div>
-                  <div style={{display: 'flex', alignItems: 'center', justifyContent: 'space-between'}}>
-                    <div style={{
-                      width: '60px',
-                      height: '60px',
-                      background: 'linear-gradient(135deg, #f59e0b 0%, #d97706 100%)',
-                      borderRadius: '16px',
-                      display: 'flex',
-                      alignItems: 'center',
-                      justifyContent: 'center',
-                      boxShadow: '0 6px 20px rgba(245, 158, 11, 0.35)'
-                    }}>
-                      <span style={{fontSize: '28px'}}>📊</span>
-                    </div>
-                    <span style={{fontSize: '24px', color: '#94a3b8'}}>→</span>
-                  </div>
-                  <div>
-                    <h3 style={{fontSize: '1.3rem', fontWeight: '700', margin: '0 0 6px', color: '#1e293b'}}>Gestion des Réservations</h3>
-                    <p style={{fontSize: '0.9rem', color: '#64748b', margin: 0, lineHeight: '1.5'}}>Suivez et gérez toutes les réservations</p>
-                  </div>
-                </Link>
-
-                <Link href="/studios/create" style={{
-                  background: 'linear-gradient(135deg, rgba(255,255,255,0.98) 0%, rgba(248,250,252,0.98) 100%)',
-                  borderRadius: '20px',
-                  padding: '32px',
-                  textDecoration: 'none',
-                  color: '#1e293b',
-                  display: 'flex',
-                  flexDirection: 'column',
-                  gap: '16px',
-                  boxShadow: '0 8px 30px rgba(0,0,0,0.12), 0 0 0 1px rgba(255,255,255,0.1)',
-                  position: 'relative',
-                  overflow: 'hidden'
-                }} className="hover-lift">
-                  <div style={{position: 'absolute', top: 0, left: 0, right: 0, height: '5px', background: 'linear-gradient(90deg, #10b981, #059669)'}}></div>
-                  <div style={{display: 'flex', alignItems: 'center', justifyContent: 'space-between'}}>
-                    <div style={{
-                      width: '60px',
-                      height: '60px',
-                      background: 'linear-gradient(135deg, #10b981 0%, #059669 100%)',
-                      borderRadius: '16px',
-                      display: 'flex',
-                      alignItems: 'center',
-                      justifyContent: 'center',
-                      boxShadow: '0 6px 20px rgba(16, 185, 129, 0.35)'
-                    }}>
-                      <span style={{fontSize: '28px'}}>✨</span>
-                    </div>
-                    <span style={{fontSize: '24px', color: '#94a3b8'}}>→</span>
-                  </div>
-                  <div>
-                    <h3 style={{fontSize: '1.3rem', fontWeight: '700', margin: '0 0 6px', color: '#1e293b'}}>Nouveau Studio</h3>
-                    <p style={{fontSize: '0.9rem', color: '#64748b', margin: 0, lineHeight: '1.5'}}>Créez et publiez une nouvelle propriété</p>
-                  </div>
-                </Link>
-
-                <Link href="/studios/studio-payments" style={{
-                  background: 'linear-gradient(135deg, rgba(255,255,255,0.98) 0%, rgba(248,250,252,0.98) 100%)',
-                  borderRadius: '20px',
-                  padding: '32px',
-                  textDecoration: 'none',
-                  color: '#1e293b',
-                  display: 'flex',
-                  flexDirection: 'column',
-                  gap: '16px',
-                  boxShadow: '0 8px 30px rgba(0,0,0,0.12), 0 0 0 1px rgba(255,255,255,0.1)',
-                  position: 'relative',
-                  overflow: 'hidden'
-                }} className="hover-lift">
-                  <div style={{position: 'absolute', top: 0, left: 0, right: 0, height: '5px', background: 'linear-gradient(90deg, #f59e0b, #d97706)'}}></div>
-                  <div style={{display: 'flex', alignItems: 'center', justifyContent: 'space-between'}}>
-                    <div style={{
-                      width: '60px',
-                      height: '60px',
-                      background: 'linear-gradient(135deg, #f59e0b 0%, #d97706 100%)',
-                      borderRadius: '16px',
-                      display: 'flex',
-                      alignItems: 'center',
-                      justifyContent: 'center',
-                      boxShadow: '0 6px 20px rgba(245, 158, 11, 0.35)'
-                    }}>
-                      <span style={{fontSize: '28px'}}>📊</span>
-                    </div>
-                    <span style={{fontSize: '24px', color: '#94a3b8'}}>→</span>
-                  </div>
-                  <div>
-                    <h3 style={{fontSize: '1.3rem', fontWeight: '700', margin: '0 0 6px', color: '#1e293b'}}>Gestion Paiement des Réservations</h3>
-                      <p style={{fontSize: '0.9rem', color: '#64748b', margin: 0, lineHeight: '1.5'}}>Suivez et gérez toutes les paiements des réservations</p>
-                    </div>
-                </Link>
-
-                <Link href="/studios" style={{
-                  background: 'linear-gradient(135deg, rgba(255,255,255,0.98) 0%, rgba(248,250,252,0.98) 100%)',
-                  borderRadius: '20px',
-                  padding: '32px',
-                  textDecoration: 'none',
-                  color: '#1e293b',
-                  display: 'flex',
-                  flexDirection: 'column',
-                  gap: '16px',
-                  boxShadow: '0 8px 30px rgba(0,0,0,0.12), 0 0 0 1px rgba(255,255,255,0.1)',
-                  position: 'relative',
-                  overflow: 'hidden'
-                }} className="hover-lift">
-                  <div style={{position: 'absolute', top: 0, left: 0, right: 0, height: '5px', background: 'linear-gradient(90deg, #8b5cf6, #7c3aed)'}}></div>
-                  <div style={{display: 'flex', alignItems: 'center', justifyContent: 'space-between'}}>
-                    <div style={{
-                      width: '60px',
-                      height: '60px',
-                      background: 'linear-gradient(135deg, #8b5cf6 0%, #7c3aed 100%)',
-                      borderRadius: '16px',
-                      display: 'flex',
-                      alignItems: 'center',
-                      justifyContent: 'center',
-                      boxShadow: '0 6px 20px rgba(139, 92, 246, 0.35)'
-                    }}>
-                      <span style={{fontSize: '28px'}}>🔍</span>
-                    </div>
-                    <span style={{fontSize: '24px', color: '#94a3b8'}}>→</span>
-                  </div>
-                  <div>
-                    <h3 style={{fontSize: '1.3rem', fontWeight: '700', margin: '0 0 6px', color: '#1e293b'}}>Catalogue Studios</h3>
-                    <p style={{fontSize: '0.9rem', color: '#64748b', margin: 0, lineHeight: '1.5'}}>Explorez tous les studios disponibles</p>
-                  </div>
-                </Link>
-
-                <Link href="/studios/my-bookings" style={{
-                  background: 'linear-gradient(135deg, rgba(255,255,255,0.98) 0%, rgba(248,250,252,0.98) 100%)',
-                  borderRadius: '20px',
-                  padding: '32px',
-                  textDecoration: 'none',
-                  color: '#1e293b',
-                  display: 'flex',
-                  flexDirection: 'column',
-                  gap: '16px',
-                  boxShadow: '0 8px 30px rgba(0,0,0,0.12), 0 0 0 1px rgba(255,255,255,0.1)',
-                  position: 'relative',
-                  overflow: 'hidden'
-                }} className="hover-lift">
-                  <div style={{position: 'absolute', top: 0, left: 0, right: 0, height: '5px', background: 'linear-gradient(90deg, #ec4899, #db2777)'}}></div>
-                  <div style={{display: 'flex', alignItems: 'center', justifyContent: 'space-between'}}>
-                    <div style={{
-                      width: '60px',
-                      height: '60px',
-                      background: 'linear-gradient(135deg, #ec4899 0%, #db2777 100%)',
-                      borderRadius: '16px',
-                      display: 'flex',
-                      alignItems: 'center',
-                      justifyContent: 'center',
-                      boxShadow: '0 6px 20px rgba(236, 72, 153, 0.35)'
-                    }}>
-                      <span style={{fontSize: '28px'}}>🎫</span>
-                    </div>
-                    <span style={{fontSize: '24px', color: '#94a3b8'}}>→</span>
-                  </div>
-                  <div>
-                    <h3 style={{fontSize: '1.3rem', fontWeight: '700', margin: '0 0 6px', color: '#1e293b'}}>Mes Réservations</h3>
-                    <p style={{fontSize: '0.9rem', color: '#64748b', margin: 0, lineHeight: '1.5'}}>Consultez vos réservations personnelles</p>
-                  </div>
-                </Link>
-              </div>
-            ) : (
-              /* User Dashboard */
-              <div style={{
-                display: 'grid',
-                gridTemplateColumns: 'repeat(auto-fit, minmax(300px, 1fr))',
-                gap: '24px'
-              }}>
-                <Link href="/studios" style={{
-                  background: 'white',
-                  borderRadius: '20px',
-                  padding: '32px',
-                  textDecoration: 'none',
-                  color: '#1e293b',
-                  display: 'flex',
-                  flexDirection: 'column',
-                  gap: '16px',
-                  boxShadow: '0 8px 30px rgba(0,0,0,0.08)',
-                  border: '1px solid #e2e8f0',
-                  position: 'relative',
-                  overflow: 'hidden'
-                }} className="hover-lift">
-                  <div style={{position: 'absolute', top: 0, left: 0, right: 0, height: '4px', background: 'linear-gradient(90deg, #667eea, #764ba2)'}}></div>
-                  <div style={{display: 'flex', alignItems: 'center', justifyContent: 'space-between'}}>
-                    <div style={{
-                      width: '60px',
-                      height: '60px',
-                      background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
-                      borderRadius: '16px',
-                      display: 'flex',
-                      alignItems: 'center',
-                      justifyContent: 'center',
-                      boxShadow: '0 6px 20px rgba(102, 126, 234, 0.3)'
-                    }}>
-                      <span style={{fontSize: '28px'}}>🏘️</span>
-                    </div>
-                    <span style={{fontSize: '22px', color: '#cbd5e1'}}>→</span>
-                  </div>
-                  <div>
-                    <h3 style={{fontSize: '1.3rem', fontWeight: '700', margin: '0 0 6px', color: '#1e293b'}}>Découvrir les Studios</h3>
-                    <p style={{fontSize: '0.9rem', color: '#64748b', margin: 0, lineHeight: '1.5'}}>Parcourez notre catalogue de propriétés et réservez votre prochain séjour</p>
-                  </div>
-                </Link>
-
-                <Link href="/studios/my-bookings" style={{
-                  background: 'white',
-                  borderRadius: '20px',
-                  padding: '32px',
-                  textDecoration: 'none',
-                  color: '#1e293b',
-                  display: 'flex',
-                  flexDirection: 'column',
-                  gap: '16px',
-                  boxShadow: '0 8px 30px rgba(0,0,0,0.08)',
-                  border: '1px solid #e2e8f0',
-                  position: 'relative',
-                  overflow: 'hidden'
-                }} className="hover-lift">
-                  <div style={{position: 'absolute', top: 0, left: 0, right: 0, height: '4px', background: 'linear-gradient(90deg, #10b981, #059669)'}}></div>
-                  <div style={{display: 'flex', alignItems: 'center', justifyContent: 'space-between'}}>
-                    <div style={{
-                      width: '60px',
-                      height: '60px',
-                      background: 'linear-gradient(135deg, #10b981 0%, #059669 100%)',
-                      borderRadius: '16px',
-                      display: 'flex',
-                      alignItems: 'center',
-                      justifyContent: 'center',
-                      boxShadow: '0 6px 20px rgba(16, 185, 129, 0.3)'
-                    }}>
-                      <span style={{fontSize: '28px'}}>📋</span>
-                    </div>
-                    <span style={{fontSize: '22px', color: '#cbd5e1'}}>→</span>
-                  </div>
-                  <div>
-                    <h3 style={{fontSize: '1.3rem', fontWeight: '700', margin: '0 0 6px', color: '#1e293b'}}>Mes Réservations</h3>
-                    <p style={{fontSize: '0.9rem', color: '#64748b', margin: 0, lineHeight: '1.5'}}>Consultez et gérez toutes vos réservations en cours et passées</p>
-                  </div>
-                </Link>
-              </div>
-            )}
-
-            {/* Quick Stats for Admin */}
-            {isAdmin && (
-              <div style={{marginTop: '40px'}}>
-                <h2 style={{
-                  color: 'white',
-                  fontSize: '1.3rem',
-                  fontWeight: '700',
-                  marginBottom: '20px',
+            {/* Profile Card */}
+            <div style={{
+              background: 'white',
+              borderRadius: '24px',
+              padding: '40px',
+              boxShadow: '0 10px 40px rgba(0,0,0,0.08)',
+              border: '1px solid #e2e8f0',
+              marginBottom: '24px'
+            }}>
+              {/* Messages */}
+              {error && (
+                <div style={{
+                  background: '#fef2f2',
+                  border: '1px solid #fecaca',
+                  color: '#dc2626',
+                  padding: '14px 18px',
+                  borderRadius: '12px',
+                  marginBottom: '24px',
+                  fontSize: '14px',
                   display: 'flex',
                   alignItems: 'center',
                   gap: '10px'
                 }}>
-                  <span>📈</span> Accès Rapide
-                </h2>
-                <div style={{
-                  background: 'rgba(255,255,255,0.05)',
-                  borderRadius: '16px',
-                  padding: '24px',
-                  border: '1px solid rgba(255,255,255,0.1)'
-                }}>
-                  <p style={{color: 'rgba(255,255,255,0.7)', fontSize: '0.95rem', margin: 0, lineHeight: '1.6'}}>
-                    En tant qu'administrateur, vous avez accès à toutes les fonctionnalités de gestion de la plateforme. 
-                    Utilisez les cartes ci-dessus pour naviguer rapidement vers les différentes sections.
-                  </p>
+                  <span>❌</span>
+                  {error}
                 </div>
+              )}
+
+              {success && (
+                <div style={{
+                  background: '#f0fdf4',
+                  border: '1px solid #bbf7d0',
+                  color: '#16a34a',
+                  padding: '14px 18px',
+                  borderRadius: '12px',
+                  marginBottom: '24px',
+                  fontSize: '14px',
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: '10px'
+                }}>
+                  <span>✅</span>
+                  {success}
+                </div>
+              )}
+
+              <form onSubmit={handleSubmit}>
+                {/* Name Row */}
+                <div style={{display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '20px'}}>
+                  <div className="form-group">
+                    <label className="form-label">Prénom</label>
+                    <input
+                      type="text"
+                      name="firstName"
+                      className="form-input"
+                      value={formData.firstName}
+                      onChange={handleInputChange}
+                      disabled={!isEditing}
+                      required
+                      placeholder="Votre prénom"
+                    />
+                  </div>
+                  <div className="form-group">
+                    <label className="form-label">Nom</label>
+                    <input
+                      type="text"
+                      name="lastName"
+                      className="form-input"
+                      value={formData.lastName}
+                      onChange={handleInputChange}
+                      disabled={!isEditing}
+                      required
+                      placeholder="Votre nom"
+                    />
+                  </div>
+                </div>
+
+                {/* Email */}
+                <div className="form-group">
+                  <label className="form-label">Email</label>
+                  <input
+                    type="email"
+                    name="email"
+                    className="form-input"
+                    value={formData.email}
+                    onChange={handleInputChange}
+                    disabled={!isEditing}
+                    required
+                    placeholder="votre@email.com"
+                  />
+                </div>
+
+                {/* Phone */}
+                <div className="form-group">
+                  <label className="form-label">Téléphone</label>
+                  <input
+                    type="tel"
+                    name="phone"
+                    className="form-input"
+                    value={formData.phone}
+                    onChange={handleInputChange}
+                    disabled={!isEditing}
+                    placeholder="+33 6 12 34 56 78"
+                  />
+                </div>
+
+                {/* Role (Read-only) */}
+                <div className="form-group">
+                  <label className="form-label">Rôle</label>
+                  <input
+                    type="text"
+                    className="form-input"
+                    value={user?.role === 'ADMIN' || user?.role === 'SUPER_ADMIN' ? 'Administrateur' : 'Utilisateur'}
+                    disabled
+                    style={{background: '#f1f5f9'}}
+                  />
+                </div>
+
+                {/* Account Creation Date (Read-only) */}
+                <div className="form-group">
+                  <label className="form-label">Membre depuis</label>
+                  <input
+                    type="text"
+                    className="form-input"
+                    value={user?.createdAt ? new Date(user.createdAt).toLocaleDateString('fr-FR', {
+                      year: 'numeric',
+                      month: 'long',
+                      day: 'numeric'
+                    }) : 'Non disponible'}
+                    disabled
+                    style={{background: '#f1f5f9'}}
+                  />
+                </div>
+
+                {/* Action Buttons */}
+                <div style={{
+                  display: 'flex',
+                  gap: '16px',
+                  marginTop: '32px',
+                  justifyContent: 'flex-end'
+                }}>
+                  {isEditing ? (
+                    <>
+                      <button
+                        type="button"
+                        className="btn-secondary"
+                        onClick={handleCancel}
+                        disabled={loading}
+                      >
+                        Annuler
+                      </button>
+                      <button
+                        type="submit"
+                        className="btn-primary"
+                        disabled={loading}
+                      >
+                        {loading ? (
+                          <span className="loading-spinner"></span>
+                        ) : (
+                          'Enregistrer'
+                        )}
+                      </button>
+                    </>
+                  ) : (
+                    <button
+                      type="button"
+                      className="btn-primary"
+                      onClick={() => setIsEditing(true)}
+                    >
+                      ✏️ Modifier le profil
+                    </button>
+                  )}
+                </div>
+              </form>
+            </div>
+
+            {/* Quick Links */}
+            <div style={{
+              background: 'white',
+              borderRadius: '24px',
+              padding: '32px',
+              boxShadow: '0 10px 40px rgba(0,0,0,0.08)',
+              border: '1px solid #e2e8f0'
+            }}>
+              <h2 style={{
+                color: '#1e293b',
+                fontSize: '1.2rem',
+                fontWeight: '700',
+                marginBottom: '20px',
+                display: 'flex',
+                alignItems: 'center',
+                gap: '10px'
+              }}>
+                <span>🔗</span> Accès rapide
+              </h2>
+              <div style={{
+                display: 'grid',
+                gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))',
+                gap: '12px'
+              }}>
+                <Link href="/studios" style={{
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: '12px',
+                  padding: '16px',
+                  background: '#f8fafc',
+                  borderRadius: '12px',
+                  textDecoration: 'none',
+                  color: '#475569',
+                  transition: 'all 0.2s ease',
+                  border: '1px solid transparent'
+                }}>
+                  <span style={{fontSize: '20px'}}>🏘️</span>
+                  <span style={{fontWeight: '500'}}>Explorer les studios</span>
+                </Link>
+                <Link href="/studios/my-bookings" style={{
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: '12px',
+                  padding: '16px',
+                  background: '#f8fafc',
+                  borderRadius: '12px',
+                  textDecoration: 'none',
+                  color: '#475569',
+                  transition: 'all 0.2s ease',
+                  border: '1px solid transparent'
+                }}>
+                  <span style={{fontSize: '20px'}}>📋</span>
+                  <span style={{fontWeight: '500'}}>Mes réservations</span>
+                </Link>
+                {isAdmin && (
+                  <>
+                    <Link href="/studios/my-studios" style={{
+                      display: 'flex',
+                      alignItems: 'center',
+                      gap: '12px',
+                      padding: '16px',
+                      background: '#f8fafc',
+                      borderRadius: '12px',
+                      textDecoration: 'none',
+                      color: '#475569',
+                      transition: 'all 0.2s ease',
+                      border: '1px solid transparent'
+                    }}>
+                      <span style={{fontSize: '20px'}}>🏠</span>
+                      <span style={{fontWeight: '500'}}>Mes studios</span>
+                    </Link>
+                    <Link href="/studios/reservations" style={{
+                      display: 'flex',
+                      alignItems: 'center',
+                      gap: '12px',
+                      padding: '16px',
+                      background: '#f8fafc',
+                      borderRadius: '12px',
+                      textDecoration: 'none',
+                      color: '#475569',
+                      transition: 'all 0.2s ease',
+                      border: '1px solid transparent'
+                    }}>
+                      <span style={{fontSize: '20px'}}>📊</span>
+                      <span style={{fontWeight: '500'}}>Gestion réservations</span>
+                    </Link>
+                  </>
+                )}
               </div>
-            )}
+            </div>
           </div>
         </main>
 
         {/* Footer */}
         <footer style={{
-          background: isAdmin ? 'rgba(0,0,0,0.3)' : 'white',
-          borderTop: isAdmin ? '1px solid rgba(255,255,255,0.1)' : '1px solid #e2e8f0',
+          background: 'white',
+          borderTop: '1px solid #e2e8f0',
           padding: '24px 0'
         }}>
           <div className="container">
@@ -490,14 +601,14 @@ export default function DashboardPage() {
               gap: '16px'
             }}>
               <p style={{
-                color: isAdmin ? 'rgba(255,255,255,0.5)' : '#94a3b8',
+                color: '#94a3b8',
                 fontSize: '0.85rem',
                 margin: 0
               }}>
                 © 2024 StudioRent. Tous droits réservés.
               </p>
               <Link href="/" style={{
-                color: isAdmin ? 'rgba(255,255,255,0.6)' : '#64748b',
+                color: '#64748b',
                 fontSize: '0.85rem',
                 textDecoration: 'none'
               }}>

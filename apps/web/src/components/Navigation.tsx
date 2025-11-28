@@ -385,8 +385,8 @@ export default function Navigation() {
                       <div style={{ fontSize: "12px", color: "#64748b" }}>{user?.email}</div>
                     </div>
                     <Link href="/dashboard" className={`nav-link-item ${pathname === "/dashboard" ? "active" : ""}`}>
-                      <span>📊</span>
-                      Dashboard
+                      <span>👤</span>
+                      Mon Profil
                     </Link>
                     <div style={{ padding: "8px" }}>
                       <button
