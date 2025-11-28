@@ -188,13 +188,15 @@ export default function WalletPage() {
     }).format(numAmount) + ` ${currency}`;
   };
 
-  const getProviderIcon = (correspondent: string) => {
+  const getProviderIcon = (correspondent: string | undefined | null) => {
+    if (!correspondent) return "📱";
     if (correspondent.includes("ORANGE")) return "🟠";
     if (correspondent.includes("MTN")) return "🟡";
     return "📱";
   };
 
-  const getCountryFlag = (country: string) => {
+  const getCountryFlag = (country: string | undefined | null) => {
+    if (!country) return "🌍";
     const flags: Record<string, string> = {
       CMR: "🇨🇲",
       CIV: "🇨🇮",
