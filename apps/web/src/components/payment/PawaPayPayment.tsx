@@ -8,6 +8,8 @@ interface PawaPayPaymentProps {
     onPaymentSuccess?: (paymentData: any) => void;
     onPaymentError?: (error: string) => void;
     onPaymentStatusChange?: (status: string) => void;
+    /** When true, only shows input fields without the payment button (for use in PaymentMethodSelector) */
+    inputOnly?: boolean;
 }
 
 const getPawaPayCountryCode = (phone: string): string => {
@@ -25,7 +27,8 @@ const PawaPayPayment: React.FC<PawaPayPaymentProps> = ({
     amount, 
     onPaymentSuccess,
     onPaymentError,
-    onPaymentStatusChange
+    onPaymentStatusChange,
+    inputOnly = false
 }) => {
     const [currency] = useState('XAF');
     const [phoneNumber, setPhoneNumber] = useState(paymentInfo?.phoneNumber || '');
@@ -353,6 +356,80 @@ const PawaPayPayment: React.FC<PawaPayPaymentProps> = ({
 
     // Statuts en cours qui affichent le composant de progression
     const isPaymentInProgress = status && ['INITIALISATION', 'PENDING', 'ACCEPTED', 'INITIATED'].includes(status);
+
+    // Input-only mode: show only the input fields without payment button
+    // Used in PaymentMethodSelector for collecting payment info before confirmation
+    if (inputOnly) {
+        return (
+            <div className="space-y-6">
+                <div className="border-b pb-4">
+                    <h2 className="text-xl font-semibold text-gray-900">Paiement Mobile avec PawaPay</h2>
+                    <p className="text-sm text-gray-600 mt-1">
+                        Payez facilement et sécurisé avec votre mobile money
+                    </p>
+                    <div className="inline-flex items-center px-3 py-1 rounded-full text-xs font-medium bg-blue-100 text-blue-800 mt-2">
+                        {process.env.NODE_ENV === 'production' ? 'Production' : 'Sandbox (Test)'}
+                    </div>
+                </div>
+
+                <div className="space-y-4">
+                    <div>
+                        <label className="block text-sm font-medium text-gray-700 mb-2">
+                            Montant à payer
+                        </label>
+                        <div className="px-4 py-3 bg-gray-50 border border-gray-300 rounded-lg text-gray-700 font-semibold">
+                            {formatFCFA(Math.round(displayAmount))}
+                        </div>
+                    </div>
+
+                    <div>
+                        <label className="block text-sm font-medium text-gray-700 mb-2">
+                            Numéro de téléphone *
+                        </label>
+                        <input
+                            type="tel"
+                            value={phoneNumber || ''}
+                            onChange={handlePhoneNumberChange}
+                            className={`w-full px-4 py-3 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent ${phoneNumber && !isPhoneValid
+                                ? 'border-red-300 bg-red-50'
+                                : 'border-gray-300'
+                                }`}
+                            placeholder="237699123456 ou +237699123456"
+                        />
+                        <div className="text-xs text-gray-500 mt-1 space-y-1">
+                            <p>Format accepté: 237699123456 ou +237699123456</p>
+                            {phoneNumber && (
+                                <>
+                                    <p className={isPhoneValid ? 'text-green-600' : 'text-red-600'}>
+                                        {isPhoneValid ? '✓ Format valide' : '✗ Format invalide'}
+                                    </p>
+                                    <p>Pays détecté: <span className="font-medium">{getCountryFromPhoneNumber(phoneNumber)}</span></p>
+                                </>
+                            )}
+                        </div>
+                    </div>
+
+                    <div>
+                        <label className="block text-sm font-medium text-gray-700 mb-2">
+                            Opérateur mobile *
+                        </label>
+                        <select
+                            value={provider || ''}
+                            onChange={handleProviderChange}
+                            className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                        >
+                            <option value="">Sélectionnez votre opérateur</option>
+                            {filteredProviders.map((providerOption) => (
+                                <option key={providerOption.value} value={providerOption.value}>
+                                    {providerOption.label}
+                                </option>
+                            ))}
+                        </select>
+                    </div>
+                </div>
+            </div>
+        );
+    }
 
     return (
         <div className="space-y-6">
