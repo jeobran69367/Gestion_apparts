@@ -83,7 +83,7 @@ export default function DashboardPage() {
         throw new Error('Vous devez être connecté pour modifier votre profil');
       }
 
-      const response = await fetch(`${API_URL}/users/${user.id}`, {
+      const response = await fetch(`${API_URL}/api/users/${user.id}`, {
         method: 'PUT',
         headers: {
           'Content-Type': 'application/json',
