@@ -3,13 +3,13 @@
 import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
+import { useAuth } from '../../../hooks/useAuth';
 
 export default function CreateStudioPage() {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
-  const [user, setUser] = useState<any>(null);
-  const [mounted, setMounted] = useState(false);
   const router = useRouter();
+  const { user, isLoggedIn, isAdmin, mounted } = useAuth();
 
   const [formData, setFormData] = useState({
     name: '',
@@ -31,18 +31,18 @@ export default function CreateStudioPage() {
   });
 
   useEffect(() => {
-    setMounted(true);
-    // Vérifier l'authentification
-    const token = localStorage.getItem('token');
-    const userData = localStorage.getItem('user');
+    if (!mounted) return;
 
-    if (!token || !userData) {
+    if (!isLoggedIn) {
       router.push('/auth/login');
       return;
     }
 
-    setUser(JSON.parse(userData));
-  }, [router]);
+    if (!isAdmin) {
+      router.push('/studios');
+      return;
+    }
+  }, [mounted, isLoggedIn, isAdmin, router]);
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
     setFormData({

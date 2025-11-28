@@ -1,21 +1,13 @@
 "use client";
 
 import Link from "next/link";
-import { useState, useEffect } from "react";
+import { useAuth } from "../hooks/useAuth";
 
 export default function Home() {
-  const [isLoggedIn, setIsLoggedIn] = useState(false);
-  const [mounted, setMounted] = useState(false);
-
-  useEffect(() => {
-    setMounted(true);
-    const token = localStorage.getItem('token');
-    setIsLoggedIn(!!token);
-  }, []);
+  const { isLoggedIn, isAdmin, mounted, logout } = useAuth();
 
   const handleLogout = () => {
-    localStorage.removeItem('token');
-    setIsLoggedIn(false);
+    logout();
   };
 
   const testimonials = [
@@ -579,42 +571,102 @@ export default function Home() {
         <nav className="nav-bar">
           <div className="container">
             <div className="nav-content">
-              <a href="#" className="logo">
+              <Link href="/" className="logo">
                 <div className="logo-icon">🏠</div>
                 <div>
-                  <div style={{fontSize: '24px', fontWeight: '700'}}>StudioRent</div>
-                  <div style={{fontSize: '12px', color: '#666'}}>Location Premium</div>
+                  <div style={{fontSize: '22px', fontWeight: '700', letterSpacing: '-0.02em'}}>StudioRent</div>
+                  <div style={{fontSize: '11px', color: '#64748b', fontWeight: '500'}}>Location Premium</div>
                 </div>
-              </a>
-                            <div className="nav-links">
+              </Link>
+              <div className="nav-links">
                 {isLoggedIn ? (
                   <>
-                    <Link href="/studios" className="nav-link">
-                      🏘️ Studios
+                    <Link href="/dashboard" style={{
+                      padding: '10px 20px',
+                      background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
+                      color: 'white',
+                      textDecoration: 'none',
+                      borderRadius: '10px',
+                      fontWeight: '600',
+                      fontSize: '14px',
+                      transition: 'all 0.2s ease',
+                      display: 'flex',
+                      alignItems: 'center',
+                      gap: '8px',
+                      boxShadow: '0 4px 12px rgba(102, 126, 234, 0.3)'
+                    }}>
+                      <span>📊</span> {isAdmin ? 'Dashboard Admin' : 'Mon Espace'}
                     </Link>
-                    <Link href="/studios/my-studios" className="nav-link">
-                      📋 Mes Studios
+                    <Link href="/studios" style={{
+                      padding: '10px 18px',
+                      background: 'linear-gradient(135deg, #f1f5f9 0%, #e2e8f0 100%)',
+                      color: '#334155',
+                      textDecoration: 'none',
+                      borderRadius: '10px',
+                      fontWeight: '500',
+                      fontSize: '14px',
+                      transition: 'all 0.2s ease',
+                      display: 'flex',
+                      alignItems: 'center',
+                      gap: '8px',
+                      border: '1px solid #e2e8f0'
+                    }}>
+                      <span>🏘️</span> Studios
                     </Link>
-                    <button onClick={handleLogout} className="nav-link" style={{background: 'none', border: 'none', cursor: 'pointer'}}>
-                      🚪 Déconnexion
+                    <button onClick={handleLogout} style={{
+                      padding: '10px 18px',
+                      background: 'linear-gradient(135deg, #ef4444 0%, #dc2626 100%)',
+                      color: 'white',
+                      border: 'none',
+                      borderRadius: '10px',
+                      fontWeight: '500',
+                      fontSize: '14px',
+                      cursor: 'pointer',
+                      transition: 'all 0.2s ease',
+                      display: 'flex',
+                      alignItems: 'center',
+                      gap: '8px',
+                      boxShadow: '0 2px 8px rgba(239, 68, 68, 0.25)'
+                    }}>
+                      <span>🚪</span> Déconnexion
                     </button>
                   </>
                 ) : (
                   <>
-                    <Link href="/properties" className="nav-link">
-                      🏘️ Propriétés
+                    <Link href="/studios" style={{
+                      padding: '10px 18px',
+                      background: 'linear-gradient(135deg, #f1f5f9 0%, #e2e8f0 100%)',
+                      color: '#334155',
+                      textDecoration: 'none',
+                      borderRadius: '10px',
+                      fontWeight: '500',
+                      fontSize: '14px',
+                      transition: 'all 0.2s ease',
+                      display: 'flex',
+                      alignItems: 'center',
+                      gap: '8px',
+                      border: '1px solid #e2e8f0'
+                    }}>
+                      <span>🏘️</span> Studios
                     </Link>
-                    <Link href="/auth/login" className="nav-link">
-                      🔑 Connexion
+                    <Link href="/auth/login" style={{
+                      padding: '10px 20px',
+                      background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
+                      color: 'white',
+                      textDecoration: 'none',
+                      borderRadius: '10px',
+                      fontWeight: '600',
+                      fontSize: '14px',
+                      transition: 'all 0.2s ease',
+                      display: 'flex',
+                      alignItems: 'center',
+                      gap: '8px',
+                      boxShadow: '0 4px 12px rgba(102, 126, 234, 0.3)'
+                    }}>
+                      <span>🔑</span> Connexion
                     </Link>
                   </>
                 )}
-                <a href="http://localhost:5555" target="_blank" className="nav-link">
-                  🗄️ Base de Données
-                </a>
-                <a href="http://localhost:4000" target="_blank" className="nav-link">
-                  🚀 API
-                </a>
               </div>
             </div>
           </div>

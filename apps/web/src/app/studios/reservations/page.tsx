@@ -2,6 +2,8 @@
 
 import { useState, useEffect, ChangeEvent, FormEvent } from 'react';
 import Link from 'next/link';
+import { useRouter } from 'next/navigation';
+import { useAuth } from '../../../hooks/useAuth';
 
 interface Reservation {
   id: string;
@@ -44,12 +46,26 @@ export default function ReservationsPage() {
   const [error, setError] = useState('');
   const [success, setSuccess] = useState('');
   const [loading, setLoading] = useState(true);
+  const router = useRouter();
+  const { isLoggedIn, isAdmin, mounted } = useAuth();
 
   useEffect(() => {
+    if (!mounted) return;
+
+    if (!isLoggedIn) {
+      router.push('/auth/login');
+      return;
+    }
+
+    if (!isAdmin) {
+      router.push('/studios');
+      return;
+    }
+
     fetchReservations();
     fetchStudios(); 
     fetchGuests();
-  }, []);
+  }, [mounted, isLoggedIn, isAdmin, router]);
 
   const fetchReservations = async () => {
     try {

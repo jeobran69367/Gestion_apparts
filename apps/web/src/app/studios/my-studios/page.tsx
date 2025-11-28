@@ -4,26 +4,34 @@ import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 import CardMaisonLocation, { MaisonLocation } from '../../../components/CardMaisonLocation';
+import { useAuth } from '../../../hooks/useAuth';
 
 export default function MyStudiosPage() {
   const [studios, setStudios] = useState<MaisonLocation[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
-  const [mounted, setMounted] = useState(false);
   const [operationLoading, setOperationLoading] = useState<number | null>(null);
   const router = useRouter();
+  const { isLoggedIn, isAdmin, mounted } = useAuth();
 
   useEffect(() => {
-    setMounted(true);
-    const token = localStorage.getItem('token');
-    if (!token) {
-      console.error('No token found in localStorage. Redirecting to login.');
+    if (!mounted) return;
+    
+    if (!isLoggedIn) {
       router.push('/auth/login');
       return;
     }
 
-    fetchMyStudios(token);
-  }, [router]);
+    if (!isAdmin) {
+      router.push('/studios');
+      return;
+    }
+
+    const token = localStorage.getItem('token');
+    if (token) {
+      fetchMyStudios(token);
+    }
+  }, [mounted, isLoggedIn, isAdmin, router]);
 
   const fetchMyStudios = async (token: string) => {
     try {
