@@ -267,6 +267,40 @@ export default function DashboardPage() {
                     <p style={{fontSize: '0.9rem', color: '#64748b', margin: 0, lineHeight: '1.5'}}>Gérez et modifiez vos propriétés existantes</p>
                   </div>
                 </Link>
+                <Link href="/studios/reservations" style={{
+                  background: 'linear-gradient(135deg, rgba(255,255,255,0.98) 0%, rgba(248,250,252,0.98) 100%)',
+                  borderRadius: '20px',
+                  padding: '32px',
+                  textDecoration: 'none',
+                  color: '#1e293b',
+                  display: 'flex',
+                  flexDirection: 'column',
+                  gap: '16px',
+                  boxShadow: '0 8px 30px rgba(0,0,0,0.12), 0 0 0 1px rgba(255,255,255,0.1)',
+                  position: 'relative',
+                  overflow: 'hidden'
+                }} className="hover-lift">
+                  <div style={{position: 'absolute', top: 0, left: 0, right: 0, height: '5px', background: 'linear-gradient(90deg, #f59e0b, #d97706)'}}></div>
+                  <div style={{display: 'flex', alignItems: 'center', justifyContent: 'space-between'}}>
+                    <div style={{
+                      width: '60px',
+                      height: '60px',
+                      background: 'linear-gradient(135deg, #f59e0b 0%, #d97706 100%)',
+                      borderRadius: '16px',
+                      display: 'flex',
+                      alignItems: 'center',
+                      justifyContent: 'center',
+                      boxShadow: '0 6px 20px rgba(245, 158, 11, 0.35)'
+                    }}>
+                      <span style={{fontSize: '28px'}}>📊</span>
+                    </div>
+                    <span style={{fontSize: '24px', color: '#94a3b8'}}>→</span>
+                  </div>
+                  <div>
+                    <h3 style={{fontSize: '1.3rem', fontWeight: '700', margin: '0 0 6px', color: '#1e293b'}}>Gestion des Réservations</h3>
+                    <p style={{fontSize: '0.9rem', color: '#64748b', margin: 0, lineHeight: '1.5'}}>Suivez et gérez toutes les réservations</p>
+                  </div>
+                </Link>
 
                 <Link href="/studios/create" style={{
                   background: 'linear-gradient(135deg, rgba(255,255,255,0.98) 0%, rgba(248,250,252,0.98) 100%)',
@@ -303,7 +337,7 @@ export default function DashboardPage() {
                   </div>
                 </Link>
 
-                <Link href="/studios/reservations" style={{
+                <Link href="/studios/studio-payments" style={{
                   background: 'linear-gradient(135deg, rgba(255,255,255,0.98) 0%, rgba(248,250,252,0.98) 100%)',
                   borderRadius: '20px',
                   padding: '32px',
@@ -333,9 +367,9 @@ export default function DashboardPage() {
                     <span style={{fontSize: '24px', color: '#94a3b8'}}>→</span>
                   </div>
                   <div>
-                    <h3 style={{fontSize: '1.3rem', fontWeight: '700', margin: '0 0 6px', color: '#1e293b'}}>Toutes les Réservations</h3>
-                    <p style={{fontSize: '0.9rem', color: '#64748b', margin: 0, lineHeight: '1.5'}}>Suivez et gérez toutes les réservations</p>
-                  </div>
+                    <h3 style={{fontSize: '1.3rem', fontWeight: '700', margin: '0 0 6px', color: '#1e293b'}}>Gestion Paiement des Réservations</h3>
+                      <p style={{fontSize: '0.9rem', color: '#64748b', margin: 0, lineHeight: '1.5'}}>Suivez et gérez toutes les paiements des réservations</p>
+                    </div>
                 </Link>
 
                 <Link href="/studios" style={{
