@@ -1,6 +1,10 @@
 // app/api/pawapay/payout/route.ts
 import { NextRequest, NextResponse } from 'next/server';
 
+// Configuration constants
+const CUSTOMER_MESSAGE_MAX_LENGTH = 22; // PawaPay limit
+const REQUEST_TIMEOUT_MS = 15000; // 15 seconds
+
 export async function POST(request: NextRequest) {
   const apiKey = process.env.PAWAPAY_API_KEY;
   const environment = process.env.PAWAPAY_ENVIRONMENT || 'sandbox';
@@ -164,7 +168,7 @@ export async function POST(request: NextRequest) {
     },
     clientReferenceId: clientReferenceId || `PAYOUT-${Date.now()}`,
     customerMessage: customerMessage
-      ? customerMessage.substring(0, 22)
+      ? customerMessage.substring(0, CUSTOMER_MESSAGE_MAX_LENGTH)
       : 'Transfert wallet',
     metadata:
       metadata && Array.isArray(metadata)
@@ -182,9 +186,9 @@ export async function POST(request: NextRequest) {
       ? 'https://api.pawapay.io/v2/payouts'
       : 'https://api.sandbox.pawapay.io/v2/payouts';
 
-  // Timeout de 15 secondes
+  // Timeout
   const controller = new AbortController();
-  const timeout = setTimeout(() => controller.abort(), 15000);
+  const timeout = setTimeout(() => controller.abort(), REQUEST_TIMEOUT_MS);
 
   try {
     console.log('💸 Initiation du payout PawaPay:', JSON.stringify(pawapayPayload, null, 2));

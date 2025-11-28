@@ -5,6 +5,9 @@ import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 import { useAuth } from "../../../hooks/useAuth";
 
+// Configuration constants
+const BALANCE_REFRESH_DELAY_MS = 2000;
+
 interface WalletBalance {
   correspondent: string;
   country: string;
@@ -159,7 +162,7 @@ export default function WalletPage() {
       // Refresh balances after successful payout
       setTimeout(() => {
         fetchWalletBalances();
-      }, 2000);
+      }, BALANCE_REFRESH_DELAY_MS);
     } catch (err) {
       console.error("Erreur payout:", err);
       setPayoutResult({
