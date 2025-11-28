@@ -16,6 +16,13 @@ function getRoleDisplayText(role: UserRole | undefined): string {
   return 'Utilisateur';
 }
 
+// Helper function to get user initials
+function getUserInitials(firstName: string | undefined, lastName: string | undefined): string {
+  const first = firstName?.charAt(0)?.toUpperCase() || '';
+  const last = lastName?.charAt(0)?.toUpperCase() || '';
+  return first + last || '?';
+}
+
 export default function DashboardPage() {
   const { isLoggedIn, isAdmin, user, mounted, login } = useAuth();
   const router = useRouter();
@@ -55,7 +62,6 @@ export default function DashboardPage() {
       ...formData,
       [e.target.name]: e.target.value,
     });
-    // Clear messages when user starts typing
     setError('');
     setSuccess('');
   };
@@ -92,7 +98,6 @@ export default function DashboardPage() {
         throw new Error(data.message || 'Une erreur est survenue lors de la mise à jour');
       }
 
-      // Update user in localStorage and auth state
       const updatedUser = {
         ...user,
         firstName: formData.firstName,
@@ -113,7 +118,6 @@ export default function DashboardPage() {
   };
 
   const handleCancel = () => {
-    // Reset form data to original user data
     if (user) {
       setFormData({
         firstName: user.firstName || '',
@@ -131,22 +135,22 @@ export default function DashboardPage() {
     return (
       <div style={{
         minHeight: '100vh',
-        background: 'linear-gradient(135deg, #f8fafc 0%, #e2e8f0 100%)',
+        background: 'linear-gradient(180deg, #0f172a 0%, #1e293b 50%, #334155 100%)',
         display: 'flex',
         alignItems: 'center',
         justifyContent: 'center'
       }}>
         <div style={{textAlign: 'center'}}>
           <div style={{
-            width: '50px',
-            height: '50px',
-            border: '4px solid #e2e8f0',
-            borderTopColor: '#667eea',
+            width: '60px',
+            height: '60px',
+            border: '3px solid rgba(255,255,255,0.1)',
+            borderTopColor: '#8b5cf6',
             borderRadius: '50%',
             animation: 'spin 1s linear infinite',
-            margin: '0 auto 16px'
+            margin: '0 auto 20px'
           }}></div>
-          <p style={{color: '#64748b', fontSize: '1rem'}}>Chargement...</p>
+          <p style={{color: 'rgba(255,255,255,0.6)', fontSize: '1rem', fontWeight: '500'}}>Chargement de votre profil...</p>
         </div>
         <style jsx>{`
           @keyframes spin {
@@ -161,6 +165,11 @@ export default function DashboardPage() {
     return null;
   }
 
+  const primaryColor = isAdmin ? '#10b981' : '#8b5cf6';
+  const primaryGradient = isAdmin 
+    ? 'linear-gradient(135deg, #10b981 0%, #059669 100%)'
+    : 'linear-gradient(135deg, #8b5cf6 0%, #6366f1 100%)';
+
   return (
     <>
       <style jsx global>{`
@@ -171,218 +180,427 @@ export default function DashboardPage() {
         }
         
         body {
-          font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+          font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
           line-height: 1.6;
-          color: #333;
+          color: #1e293b;
         }
 
-        .container {
-          max-width: 800px;
+        .profile-container {
+          max-width: 900px;
           margin: 0 auto;
-          padding: 0 20px;
+          padding: 0 24px;
         }
 
-        .form-input {
+        .profile-input {
           width: 100%;
-          padding: 14px 16px;
+          padding: 16px 20px;
           border: 2px solid #e2e8f0;
-          border-radius: 12px;
-          font-size: 16px;
-          transition: all 0.3s ease;
+          border-radius: 14px;
+          font-size: 15px;
+          font-weight: 500;
+          transition: all 0.25s ease;
           box-sizing: border-box;
-          background: white;
+          background: #ffffff;
+          color: #1e293b;
         }
 
-        .form-input:focus {
+        .profile-input:focus {
           outline: none;
-          border-color: #667eea;
-          box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+          border-color: ${primaryColor};
+          box-shadow: 0 0 0 4px ${isAdmin ? 'rgba(16, 185, 129, 0.12)' : 'rgba(139, 92, 246, 0.12)'};
         }
 
-        .form-input:disabled {
+        .profile-input:disabled {
           background: #f8fafc;
           color: #64748b;
-          cursor: not-allowed;
+          cursor: default;
+          border-color: #f1f5f9;
         }
 
-        .form-label {
-          display: block;
-          margin-bottom: 8px;
+        .profile-input::placeholder {
+          color: #94a3b8;
+        }
+
+        .profile-label {
+          display: flex;
+          align-items: center;
+          gap: 8px;
+          margin-bottom: 10px;
           font-weight: 600;
-          color: #374151;
-          font-size: 14px;
+          color: #475569;
+          font-size: 13px;
+          text-transform: uppercase;
+          letter-spacing: 0.05em;
         }
 
-        .form-group {
-          margin-bottom: 20px;
+        .profile-group {
+          margin-bottom: 24px;
         }
 
-        .btn-primary {
-          padding: 14px 28px;
-          background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        .btn-gradient {
+          padding: 16px 32px;
+          background: ${primaryGradient};
           color: white;
           border: none;
-          border-radius: 12px;
-          font-size: 16px;
+          border-radius: 14px;
+          font-size: 15px;
           font-weight: 600;
           cursor: pointer;
-          transition: all 0.3s ease;
+          transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+          display: inline-flex;
+          align-items: center;
+          gap: 10px;
+          box-shadow: 0 4px 14px ${isAdmin ? 'rgba(16, 185, 129, 0.35)' : 'rgba(139, 92, 246, 0.35)'};
         }
 
-        .btn-primary:hover:not(:disabled) {
-          transform: translateY(-2px);
-          box-shadow: 0 10px 20px rgba(102, 126, 234, 0.3);
+        .btn-gradient:hover:not(:disabled) {
+          transform: translateY(-3px);
+          box-shadow: 0 8px 25px ${isAdmin ? 'rgba(16, 185, 129, 0.45)' : 'rgba(139, 92, 246, 0.45)'};
         }
 
-        .btn-primary:disabled {
-          opacity: 0.6;
+        .btn-gradient:active:not(:disabled) {
+          transform: translateY(-1px);
+        }
+
+        .btn-gradient:disabled {
+          opacity: 0.7;
           cursor: not-allowed;
+          transform: none;
         }
 
-        .btn-secondary {
-          padding: 14px 28px;
+        .btn-outline {
+          padding: 16px 32px;
           background: white;
           color: #64748b;
           border: 2px solid #e2e8f0;
-          border-radius: 12px;
-          font-size: 16px;
+          border-radius: 14px;
+          font-size: 15px;
           font-weight: 600;
           cursor: pointer;
-          transition: all 0.3s ease;
+          transition: all 0.25s ease;
+          display: inline-flex;
+          align-items: center;
+          gap: 10px;
         }
 
-        .btn-secondary:hover {
+        .btn-outline:hover {
           background: #f8fafc;
           border-color: #cbd5e1;
+          color: #475569;
         }
 
         .loading-spinner {
           width: 20px;
           height: 20px;
-          border: 2px solid #ffffff;
-          border-top: 2px solid transparent;
+          border: 2px solid rgba(255,255,255,0.3);
+          border-top: 2px solid white;
           border-radius: 50%;
-          animation: spin 1s linear infinite;
+          animation: spin 0.8s linear infinite;
           display: inline-block;
+        }
+
+        .quick-link {
+          display: flex;
+          align-items: center;
+          gap: 16px;
+          padding: 20px 24px;
+          background: white;
+          border-radius: 16px;
+          text-decoration: none;
+          color: #1e293b;
+          transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+          border: 1px solid #e2e8f0;
+          box-shadow: 0 1px 3px rgba(0,0,0,0.04);
+        }
+
+        .quick-link:hover {
+          transform: translateY(-4px);
+          box-shadow: 0 12px 30px rgba(0,0,0,0.12);
+          border-color: transparent;
+        }
+
+        .quick-link-icon {
+          width: 50px;
+          height: 50px;
+          border-radius: 14px;
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          font-size: 24px;
+          flex-shrink: 0;
         }
 
         @keyframes spin {
           0% { transform: rotate(0deg); }
           100% { transform: rotate(360deg); }
         }
+
+        @keyframes fadeInUp {
+          from {
+            opacity: 0;
+            transform: translateY(20px);
+          }
+          to {
+            opacity: 1;
+            transform: translateY(0);
+          }
+        }
+
+        .animate-fade-in {
+          animation: fadeInUp 0.5s ease forwards;
+        }
+
+        .animate-delay-1 { animation-delay: 0.1s; opacity: 0; }
+        .animate-delay-2 { animation-delay: 0.2s; opacity: 0; }
+        .animate-delay-3 { animation-delay: 0.3s; opacity: 0; }
       `}</style>
 
-      <div style={{minHeight: '100vh', background: 'linear-gradient(135deg, #f8fafc 0%, #e2e8f0 100%)'}}>
-        {/* Main Content */}
-        <main style={{padding: '40px 0 60px'}}>
-          <div className="container">
-            {/* Header Section */}
-            <div style={{marginBottom: '40px', textAlign: 'center'}}>
-              <div style={{
-                width: '100px',
-                height: '100px',
-                background: isAdmin 
-                  ? 'linear-gradient(135deg, #10b981 0%, #059669 100%)'
-                  : 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
-                borderRadius: '25px',
-                display: 'flex',
-                alignItems: 'center',
-                justifyContent: 'center',
-                boxShadow: isAdmin 
-                  ? '0 15px 40px rgba(16, 185, 129, 0.4)'
-                  : '0 15px 40px rgba(102, 126, 234, 0.4)',
-                margin: '0 auto 24px'
-              }}>
-                <span style={{fontSize: '48px'}}>👤</span>
-              </div>
-              <h1 style={{
-                color: '#1e293b',
-                fontSize: '2rem',
-                fontWeight: '800',
-                margin: '0 0 8px',
-                letterSpacing: '-0.03em'
-              }}>
-                Mon Profil
-              </h1>
-              <p style={{
-                color: '#64748b',
-                fontSize: '1rem',
-                margin: 0
-              }}>
-                Gérez vos informations personnelles
-              </p>
-              {isAdmin && (
+      <div style={{minHeight: '100vh', background: '#f8fafc'}}>
+        {/* Hero Header */}
+        <div style={{
+          background: 'linear-gradient(180deg, #0f172a 0%, #1e293b 100%)',
+          padding: '60px 0 120px',
+          position: 'relative',
+          overflow: 'hidden'
+        }}>
+          {/* Decorative elements */}
+          <div style={{
+            position: 'absolute',
+            top: '-50%',
+            right: '-10%',
+            width: '500px',
+            height: '500px',
+            background: `radial-gradient(circle, ${isAdmin ? 'rgba(16, 185, 129, 0.15)' : 'rgba(139, 92, 246, 0.15)'} 0%, transparent 70%)`,
+            borderRadius: '50%'
+          }}></div>
+          <div style={{
+            position: 'absolute',
+            bottom: '-30%',
+            left: '-5%',
+            width: '400px',
+            height: '400px',
+            background: `radial-gradient(circle, ${isAdmin ? 'rgba(16, 185, 129, 0.1)' : 'rgba(99, 102, 241, 0.1)'} 0%, transparent 70%)`,
+            borderRadius: '50%'
+          }}></div>
+          
+          <div className="profile-container" style={{position: 'relative', zIndex: 1}}>
+            <div style={{display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: '24px'}}>
+              <div style={{display: 'flex', alignItems: 'center', gap: '24px'}}>
+                {/* Avatar with initials */}
                 <div style={{
-                  display: 'inline-flex',
+                  width: '100px',
+                  height: '100px',
+                  background: primaryGradient,
+                  borderRadius: '24px',
+                  display: 'flex',
                   alignItems: 'center',
-                  gap: '8px',
-                  marginTop: '12px',
-                  padding: '8px 16px',
-                  background: 'rgba(16, 185, 129, 0.1)',
-                  borderRadius: '20px',
-                  border: '1px solid rgba(16, 185, 129, 0.3)'
+                  justifyContent: 'center',
+                  boxShadow: `0 20px 40px ${isAdmin ? 'rgba(16, 185, 129, 0.4)' : 'rgba(139, 92, 246, 0.4)'}`,
+                  border: '4px solid rgba(255,255,255,0.2)',
+                  fontSize: '36px',
+                  fontWeight: '700',
+                  color: 'white',
+                  letterSpacing: '-0.02em'
                 }}>
-                  <span style={{fontSize: '14px'}}>⚙️</span>
-                  <span style={{color: '#10b981', fontSize: '0.85rem', fontWeight: '600'}}>Administrateur</span>
+                  {getUserInitials(user?.firstName, user?.lastName)}
                 </div>
-              )}
+                <div>
+                  <div style={{display: 'flex', alignItems: 'center', gap: '12px', marginBottom: '8px'}}>
+                    <h1 style={{
+                      color: 'white',
+                      fontSize: '2rem',
+                      fontWeight: '700',
+                      margin: 0,
+                      letterSpacing: '-0.02em'
+                    }}>
+                      {user?.firstName} {user?.lastName}
+                    </h1>
+                    {isAdmin && (
+                      <span style={{
+                        background: 'rgba(16, 185, 129, 0.2)',
+                        color: '#34d399',
+                        padding: '6px 14px',
+                        borderRadius: '20px',
+                        fontSize: '12px',
+                        fontWeight: '600',
+                        border: '1px solid rgba(16, 185, 129, 0.3)',
+                        display: 'flex',
+                        alignItems: 'center',
+                        gap: '6px'
+                      }}>
+                        <span>✓</span> Admin vérifié
+                      </span>
+                    )}
+                  </div>
+                  <p style={{
+                    color: 'rgba(255,255,255,0.6)',
+                    fontSize: '1rem',
+                    margin: 0,
+                    display: 'flex',
+                    alignItems: 'center',
+                    gap: '8px'
+                  }}>
+                    <span style={{color: primaryColor}}>●</span>
+                    {user?.email}
+                  </p>
+                </div>
+              </div>
+              
+              {/* Stats badges */}
+              <div style={{display: 'flex', gap: '12px'}}>
+                <div style={{
+                  background: 'rgba(255,255,255,0.08)',
+                  backdropFilter: 'blur(10px)',
+                  borderRadius: '16px',
+                  padding: '16px 24px',
+                  border: '1px solid rgba(255,255,255,0.1)',
+                  textAlign: 'center'
+                }}>
+                  <div style={{color: 'rgba(255,255,255,0.5)', fontSize: '12px', fontWeight: '500', textTransform: 'uppercase', letterSpacing: '0.05em', marginBottom: '4px'}}>Membre depuis</div>
+                  <div style={{color: 'white', fontSize: '16px', fontWeight: '600'}}>
+                    {user?.createdAt ? new Date(user.createdAt).toLocaleDateString('fr-FR', {
+                      month: 'short',
+                      year: 'numeric'
+                    }) : '-'}
+                  </div>
+                </div>
+                <div style={{
+                  background: 'rgba(255,255,255,0.08)',
+                  backdropFilter: 'blur(10px)',
+                  borderRadius: '16px',
+                  padding: '16px 24px',
+                  border: '1px solid rgba(255,255,255,0.1)',
+                  textAlign: 'center'
+                }}>
+                  <div style={{color: 'rgba(255,255,255,0.5)', fontSize: '12px', fontWeight: '500', textTransform: 'uppercase', letterSpacing: '0.05em', marginBottom: '4px'}}>Statut</div>
+                  <div style={{color: primaryColor, fontSize: '16px', fontWeight: '600'}}>{getRoleDisplayText(user?.role)}</div>
+                </div>
+              </div>
             </div>
+          </div>
+        </div>
 
+        {/* Main Content - overlapping cards */}
+        <main style={{marginTop: '-60px', paddingBottom: '60px'}}>
+          <div className="profile-container">
             {/* Profile Card */}
-            <div style={{
+            <div className="animate-fade-in animate-delay-1" style={{
               background: 'white',
               borderRadius: '24px',
               padding: '40px',
-              boxShadow: '0 10px 40px rgba(0,0,0,0.08)',
-              border: '1px solid #e2e8f0',
-              marginBottom: '24px'
+              boxShadow: '0 25px 50px rgba(0,0,0,0.1)',
+              marginBottom: '24px',
+              border: '1px solid rgba(0,0,0,0.05)'
             }}>
+              {/* Section Header */}
+              <div style={{
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'space-between',
+                marginBottom: '32px',
+                paddingBottom: '20px',
+                borderBottom: '1px solid #f1f5f9'
+              }}>
+                <div style={{display: 'flex', alignItems: 'center', gap: '14px'}}>
+                  <div style={{
+                    width: '48px',
+                    height: '48px',
+                    background: `linear-gradient(135deg, ${isAdmin ? 'rgba(16, 185, 129, 0.1)' : 'rgba(139, 92, 246, 0.1)'} 0%, ${isAdmin ? 'rgba(16, 185, 129, 0.05)' : 'rgba(139, 92, 246, 0.05)'} 100%)`,
+                    borderRadius: '14px',
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    fontSize: '22px'
+                  }}>
+                    👤
+                  </div>
+                  <div>
+                    <h2 style={{color: '#1e293b', fontSize: '1.25rem', fontWeight: '700', margin: 0}}>
+                      Informations personnelles
+                    </h2>
+                    <p style={{color: '#64748b', fontSize: '0.875rem', margin: '2px 0 0'}}>
+                      Gérez vos données de profil
+                    </p>
+                  </div>
+                </div>
+                {!isEditing && (
+                  <button
+                    type="button"
+                    className="btn-gradient"
+                    onClick={() => setIsEditing(true)}
+                  >
+                    <span>✏️</span>
+                    Modifier
+                  </button>
+                )}
+              </div>
+
               {/* Messages */}
               {error && (
                 <div style={{
-                  background: '#fef2f2',
+                  background: 'linear-gradient(135deg, #fef2f2 0%, #fff5f5 100%)',
                   border: '1px solid #fecaca',
                   color: '#dc2626',
-                  padding: '14px 18px',
-                  borderRadius: '12px',
+                  padding: '16px 20px',
+                  borderRadius: '14px',
                   marginBottom: '24px',
                   fontSize: '14px',
+                  fontWeight: '500',
                   display: 'flex',
                   alignItems: 'center',
-                  gap: '10px'
+                  gap: '12px'
                 }}>
-                  <span>❌</span>
+                  <span style={{
+                    width: '32px',
+                    height: '32px',
+                    background: '#fee2e2',
+                    borderRadius: '10px',
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center'
+                  }}>❌</span>
                   {error}
                 </div>
               )}
 
               {success && (
                 <div style={{
-                  background: '#f0fdf4',
+                  background: 'linear-gradient(135deg, #f0fdf4 0%, #f0fff4 100%)',
                   border: '1px solid #bbf7d0',
                   color: '#16a34a',
-                  padding: '14px 18px',
-                  borderRadius: '12px',
+                  padding: '16px 20px',
+                  borderRadius: '14px',
                   marginBottom: '24px',
                   fontSize: '14px',
+                  fontWeight: '500',
                   display: 'flex',
                   alignItems: 'center',
-                  gap: '10px'
+                  gap: '12px'
                 }}>
-                  <span>✅</span>
+                  <span style={{
+                    width: '32px',
+                    height: '32px',
+                    background: '#dcfce7',
+                    borderRadius: '10px',
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center'
+                  }}>✓</span>
                   {success}
                 </div>
               )}
 
               <form onSubmit={handleSubmit}>
                 {/* Name Row */}
-                <div style={{display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '20px'}}>
-                  <div className="form-group">
-                    <label className="form-label">Prénom</label>
+                <div style={{display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '24px'}}>
+                  <div className="profile-group">
+                    <label className="profile-label">
+                      <span style={{opacity: 0.7}}>👤</span> Prénom
+                    </label>
                     <input
                       type="text"
                       name="firstName"
-                      className="form-input"
+                      className="profile-input"
                       value={formData.firstName}
                       onChange={handleInputChange}
                       disabled={!isEditing}
@@ -390,12 +608,14 @@ export default function DashboardPage() {
                       placeholder="Votre prénom"
                     />
                   </div>
-                  <div className="form-group">
-                    <label className="form-label">Nom</label>
+                  <div className="profile-group">
+                    <label className="profile-label">
+                      <span style={{opacity: 0.7}}>👤</span> Nom
+                    </label>
                     <input
                       type="text"
                       name="lastName"
-                      className="form-input"
+                      className="profile-input"
                       value={formData.lastName}
                       onChange={handleInputChange}
                       disabled={!isEditing}
@@ -405,190 +625,178 @@ export default function DashboardPage() {
                   </div>
                 </div>
 
-                {/* Email */}
-                <div className="form-group">
-                  <label className="form-label">Email</label>
-                  <input
-                    type="email"
-                    name="email"
-                    className="form-input"
-                    value={formData.email}
-                    onChange={handleInputChange}
-                    disabled={!isEditing}
-                    required
-                    placeholder="votre@email.com"
-                  />
+                {/* Email & Phone Row */}
+                <div style={{display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '24px'}}>
+                  <div className="profile-group">
+                    <label className="profile-label">
+                      <span style={{opacity: 0.7}}>✉️</span> Email
+                    </label>
+                    <input
+                      type="email"
+                      name="email"
+                      className="profile-input"
+                      value={formData.email}
+                      onChange={handleInputChange}
+                      disabled={!isEditing}
+                      required
+                      placeholder="votre@email.com"
+                    />
+                  </div>
+                  <div className="profile-group">
+                    <label className="profile-label">
+                      <span style={{opacity: 0.7}}>📱</span> Téléphone
+                    </label>
+                    <input
+                      type="tel"
+                      name="phone"
+                      className="profile-input"
+                      value={formData.phone}
+                      onChange={handleInputChange}
+                      disabled={!isEditing}
+                      placeholder="+33 6 12 34 56 78"
+                    />
+                  </div>
                 </div>
 
-                {/* Phone */}
-                <div className="form-group">
-                  <label className="form-label">Téléphone</label>
-                  <input
-                    type="tel"
-                    name="phone"
-                    className="form-input"
-                    value={formData.phone}
-                    onChange={handleInputChange}
-                    disabled={!isEditing}
-                    placeholder="+33 6 12 34 56 78"
-                  />
-                </div>
-
-                {/* Role (Read-only) */}
-                <div className="form-group">
-                  <label className="form-label">Rôle</label>
-                  <input
-                    type="text"
-                    className="form-input"
-                    value={getRoleDisplayText(user?.role)}
-                    disabled
-                    style={{background: '#f1f5f9'}}
-                  />
-                </div>
-
-                {/* Account Creation Date (Read-only) */}
-                <div className="form-group">
-                  <label className="form-label">Membre depuis</label>
-                  <input
-                    type="text"
-                    className="form-input"
-                    value={user?.createdAt ? new Date(user.createdAt).toLocaleDateString('fr-FR', {
-                      year: 'numeric',
-                      month: 'long',
-                      day: 'numeric'
-                    }) : 'Non disponible'}
-                    disabled
-                    style={{background: '#f1f5f9'}}
-                  />
-                </div>
-
-                {/* Action Buttons */}
-                <div style={{
-                  display: 'flex',
-                  gap: '16px',
-                  marginTop: '32px',
-                  justifyContent: 'flex-end'
-                }}>
-                  {isEditing ? (
-                    <>
-                      <button
-                        type="button"
-                        className="btn-secondary"
-                        onClick={handleCancel}
-                        disabled={loading}
-                      >
-                        Annuler
-                      </button>
-                      <button
-                        type="submit"
-                        className="btn-primary"
-                        disabled={loading}
-                      >
-                        {loading ? (
-                          <span className="loading-spinner"></span>
-                        ) : (
-                          'Enregistrer'
-                        )}
-                      </button>
-                    </>
-                  ) : (
+                {/* Action Buttons when editing */}
+                {isEditing && (
+                  <div style={{
+                    display: 'flex',
+                    gap: '16px',
+                    marginTop: '32px',
+                    paddingTop: '24px',
+                    borderTop: '1px solid #f1f5f9',
+                    justifyContent: 'flex-end'
+                  }}>
                     <button
                       type="button"
-                      className="btn-primary"
-                      onClick={() => setIsEditing(true)}
+                      className="btn-outline"
+                      onClick={handleCancel}
+                      disabled={loading}
                     >
-                      ✏️ Modifier le profil
+                      <span>✕</span>
+                      Annuler
                     </button>
-                  )}
-                </div>
+                    <button
+                      type="submit"
+                      className="btn-gradient"
+                      disabled={loading}
+                    >
+                      {loading ? (
+                        <span className="loading-spinner"></span>
+                      ) : (
+                        <>
+                          <span>✓</span>
+                          Enregistrer les modifications
+                        </>
+                      )}
+                    </button>
+                  </div>
+                )}
               </form>
             </div>
 
-            {/* Quick Links */}
-            <div style={{
+            {/* Quick Links Grid */}
+            <div className="animate-fade-in animate-delay-2" style={{
               background: 'white',
               borderRadius: '24px',
               padding: '32px',
-              boxShadow: '0 10px 40px rgba(0,0,0,0.08)',
-              border: '1px solid #e2e8f0'
+              boxShadow: '0 25px 50px rgba(0,0,0,0.08)',
+              border: '1px solid rgba(0,0,0,0.05)'
             }}>
-              <h2 style={{
-                color: '#1e293b',
-                fontSize: '1.2rem',
-                fontWeight: '700',
-                marginBottom: '20px',
+              <div style={{
                 display: 'flex',
                 alignItems: 'center',
-                gap: '10px'
+                gap: '14px',
+                marginBottom: '24px'
               }}>
-                <span>🔗</span> Accès rapide
-              </h2>
+                <div style={{
+                  width: '48px',
+                  height: '48px',
+                  background: 'linear-gradient(135deg, rgba(59, 130, 246, 0.1) 0%, rgba(59, 130, 246, 0.05) 100%)',
+                  borderRadius: '14px',
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  fontSize: '22px'
+                }}>
+                  🚀
+                </div>
+                <div>
+                  <h2 style={{color: '#1e293b', fontSize: '1.25rem', fontWeight: '700', margin: 0}}>
+                    Actions rapides
+                  </h2>
+                  <p style={{color: '#64748b', fontSize: '0.875rem', margin: '2px 0 0'}}>
+                    Accédez rapidement à vos fonctionnalités
+                  </p>
+                </div>
+              </div>
+              
               <div style={{
                 display: 'grid',
-                gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))',
-                gap: '12px'
+                gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))',
+                gap: '16px'
               }}>
-                <Link href="/studios" style={{
-                  display: 'flex',
-                  alignItems: 'center',
-                  gap: '12px',
-                  padding: '16px',
-                  background: '#f8fafc',
-                  borderRadius: '12px',
-                  textDecoration: 'none',
-                  color: '#475569',
-                  transition: 'all 0.2s ease',
-                  border: '1px solid transparent'
-                }}>
-                  <span style={{fontSize: '20px'}}>🏘️</span>
-                  <span style={{fontWeight: '500'}}>Explorer les studios</span>
+                <Link href="/studios" className="quick-link">
+                  <div className="quick-link-icon" style={{background: 'linear-gradient(135deg, #dbeafe 0%, #e0e7ff 100%)'}}>
+                    🏘️
+                  </div>
+                  <div>
+                    <div style={{fontWeight: '600', fontSize: '15px', marginBottom: '4px'}}>Explorer les studios</div>
+                    <div style={{color: '#64748b', fontSize: '13px'}}>Découvrez tous les studios disponibles</div>
+                  </div>
                 </Link>
-                <Link href="/studios/my-bookings" style={{
-                  display: 'flex',
-                  alignItems: 'center',
-                  gap: '12px',
-                  padding: '16px',
-                  background: '#f8fafc',
-                  borderRadius: '12px',
-                  textDecoration: 'none',
-                  color: '#475569',
-                  transition: 'all 0.2s ease',
-                  border: '1px solid transparent'
-                }}>
-                  <span style={{fontSize: '20px'}}>📋</span>
-                  <span style={{fontWeight: '500'}}>Mes réservations</span>
+                
+                <Link href="/studios/my-bookings" className="quick-link">
+                  <div className="quick-link-icon" style={{background: 'linear-gradient(135deg, #d1fae5 0%, #dcfce7 100%)'}}>
+                    📋
+                  </div>
+                  <div>
+                    <div style={{fontWeight: '600', fontSize: '15px', marginBottom: '4px'}}>Mes réservations</div>
+                    <div style={{color: '#64748b', fontSize: '13px'}}>Gérez vos réservations en cours</div>
+                  </div>
                 </Link>
+                
                 {isAdmin && (
                   <>
-                    <Link href="/studios/my-studios" style={{
-                      display: 'flex',
-                      alignItems: 'center',
-                      gap: '12px',
-                      padding: '16px',
-                      background: '#f8fafc',
-                      borderRadius: '12px',
-                      textDecoration: 'none',
-                      color: '#475569',
-                      transition: 'all 0.2s ease',
-                      border: '1px solid transparent'
-                    }}>
-                      <span style={{fontSize: '20px'}}>🏠</span>
-                      <span style={{fontWeight: '500'}}>Mes studios</span>
+                    <Link href="/studios/my-studios" className="quick-link">
+                      <div className="quick-link-icon" style={{background: 'linear-gradient(135deg, #fef3c7 0%, #fef9c3 100%)'}}>
+                        🏠
+                      </div>
+                      <div>
+                        <div style={{fontWeight: '600', fontSize: '15px', marginBottom: '4px'}}>Mes studios</div>
+                        <div style={{color: '#64748b', fontSize: '13px'}}>Gérez vos propriétés</div>
+                      </div>
                     </Link>
-                    <Link href="/studios/reservations" style={{
-                      display: 'flex',
-                      alignItems: 'center',
-                      gap: '12px',
-                      padding: '16px',
-                      background: '#f8fafc',
-                      borderRadius: '12px',
-                      textDecoration: 'none',
-                      color: '#475569',
-                      transition: 'all 0.2s ease',
-                      border: '1px solid transparent'
-                    }}>
-                      <span style={{fontSize: '20px'}}>📊</span>
-                      <span style={{fontWeight: '500'}}>Gestion réservations</span>
+                    
+                    <Link href="/studios/reservations" className="quick-link">
+                      <div className="quick-link-icon" style={{background: 'linear-gradient(135deg, #ede9fe 0%, #e9d5ff 100%)'}}>
+                        📊
+                      </div>
+                      <div>
+                        <div style={{fontWeight: '600', fontSize: '15px', marginBottom: '4px'}}>Gestion réservations</div>
+                        <div style={{color: '#64748b', fontSize: '13px'}}>Administrez toutes les réservations</div>
+                      </div>
+                    </Link>
+                    
+                    <Link href="/studios/create" className="quick-link">
+                      <div className="quick-link-icon" style={{background: 'linear-gradient(135deg, #fce7f3 0%, #fbcfe8 100%)'}}>
+                        ✨
+                      </div>
+                      <div>
+                        <div style={{fontWeight: '600', fontSize: '15px', marginBottom: '4px'}}>Créer un studio</div>
+                        <div style={{color: '#64748b', fontSize: '13px'}}>Ajoutez une nouvelle propriété</div>
+                      </div>
+                    </Link>
+                    
+                    <Link href="/studios/studio-payments" className="quick-link">
+                      <div className="quick-link-icon" style={{background: 'linear-gradient(135deg, #ccfbf1 0%, #a7f3d0 100%)'}}>
+                        💰
+                      </div>
+                      <div>
+                        <div style={{fontWeight: '600', fontSize: '15px', marginBottom: '4px'}}>Paiements</div>
+                        <div style={{color: '#64748b', fontSize: '13px'}}>Suivez les transactions</div>
+                      </div>
                     </Link>
                   </>
                 )}
@@ -599,11 +807,11 @@ export default function DashboardPage() {
 
         {/* Footer */}
         <footer style={{
-          background: 'white',
-          borderTop: '1px solid #e2e8f0',
-          padding: '24px 0'
+          background: '#0f172a',
+          padding: '32px 0',
+          marginTop: '40px'
         }}>
-          <div className="container">
+          <div className="profile-container">
             <div style={{
               display: 'flex',
               alignItems: 'center',
@@ -611,19 +819,38 @@ export default function DashboardPage() {
               flexWrap: 'wrap',
               gap: '16px'
             }}>
+              <div style={{display: 'flex', alignItems: 'center', gap: '12px'}}>
+                <div style={{
+                  width: '36px',
+                  height: '36px',
+                  background: primaryGradient,
+                  borderRadius: '10px',
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  fontSize: '18px'
+                }}>
+                  🏠
+                </div>
+                <span style={{color: 'white', fontWeight: '600', fontSize: '15px'}}>StudioRent</span>
+              </div>
               <p style={{
-                color: '#94a3b8',
-                fontSize: '0.85rem',
+                color: 'rgba(255,255,255,0.4)',
+                fontSize: '0.875rem',
                 margin: 0
               }}>
                 © 2024 StudioRent. Tous droits réservés.
               </p>
               <Link href="/" style={{
-                color: '#64748b',
-                fontSize: '0.85rem',
-                textDecoration: 'none'
+                color: 'rgba(255,255,255,0.6)',
+                fontSize: '0.875rem',
+                textDecoration: 'none',
+                display: 'flex',
+                alignItems: 'center',
+                gap: '6px',
+                transition: 'color 0.2s ease'
               }}>
-                Retour à l'accueil →
+                Retour à l'accueil <span>→</span>
               </Link>
             </div>
           </div>
