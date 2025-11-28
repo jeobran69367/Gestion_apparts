@@ -3,7 +3,18 @@
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
-import { useAuth } from "../../hooks/useAuth";
+import { useAuth, UserRole } from "../../hooks/useAuth";
+
+// API URL - matches existing codebase pattern
+const API_URL = 'http://localhost:4000';
+
+// Helper function to get display text for user role
+function getRoleDisplayText(role: UserRole | undefined): string {
+  if (role === 'ADMIN' || role === 'SUPER_ADMIN') {
+    return 'Administrateur';
+  }
+  return 'Utilisateur';
+}
 
 export default function DashboardPage() {
   const { isLoggedIn, isAdmin, user, mounted, login } = useAuth();
@@ -61,7 +72,7 @@ export default function DashboardPage() {
         throw new Error('Vous devez être connecté pour modifier votre profil');
       }
 
-      const response = await fetch(`http://localhost:4000/users/${user.id}`, {
+      const response = await fetch(`${API_URL}/users/${user.id}`, {
         method: 'PUT',
         headers: {
           'Content-Type': 'application/json',
@@ -429,7 +440,7 @@ export default function DashboardPage() {
                   <input
                     type="text"
                     className="form-input"
-                    value={user?.role === 'ADMIN' || user?.role === 'SUPER_ADMIN' ? 'Administrateur' : 'Utilisateur'}
+                    value={getRoleDisplayText(user?.role)}
                     disabled
                     style={{background: '#f1f5f9'}}
                   />
