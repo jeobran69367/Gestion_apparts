@@ -6,7 +6,7 @@ import { useEffect } from "react";
 import { useAuth } from "../../hooks/useAuth";
 
 export default function DashboardPage() {
-  const { isLoggedIn, isAdmin, user, mounted, logout } = useAuth();
+  const { isLoggedIn, isAdmin, user, mounted } = useAuth();
   const router = useRouter();
 
   useEffect(() => {
@@ -14,11 +14,6 @@ export default function DashboardPage() {
       router.push("/auth/login");
     }
   }, [mounted, isLoggedIn, router]);
-
-  const handleLogout = () => {
-    logout();
-    router.push("/");
-  };
 
   if (!mounted) {
     return (
@@ -86,79 +81,6 @@ export default function DashboardPage() {
       `}</style>
 
       <div style={{minHeight: '100vh', background: isAdmin ? 'linear-gradient(135deg, #0f172a 0%, #1e293b 100%)' : 'linear-gradient(135deg, #f8fafc 0%, #e2e8f0 100%)'}}>
-        {/* Navigation Header */}
-        <header style={{
-          background: isAdmin ? 'rgba(15, 23, 42, 0.95)' : 'rgba(255, 255, 255, 0.95)',
-          backdropFilter: 'blur(10px)',
-          borderBottom: isAdmin ? '1px solid rgba(255,255,255,0.1)' : '1px solid #e2e8f0',
-          padding: '16px 0',
-          position: 'sticky',
-          top: 0,
-          zIndex: 100
-        }}>
-          <div className="container">
-            <div style={{display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: '16px'}}>
-              <Link href="/" style={{
-                display: 'flex',
-                alignItems: 'center',
-                gap: '12px',
-                textDecoration: 'none'
-              }}>
-                <div style={{
-                  width: '45px',
-                  height: '45px',
-                  background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
-                  borderRadius: '12px',
-                  display: 'flex',
-                  alignItems: 'center',
-                  justifyContent: 'center',
-                  boxShadow: '0 4px 12px rgba(102, 126, 234, 0.3)'
-                }}>
-                  <span style={{fontSize: '22px'}}>🏠</span>
-                </div>
-                <div>
-                  <div style={{fontSize: '18px', fontWeight: '700', color: isAdmin ? 'white' : '#1e293b', letterSpacing: '-0.02em'}}>StudioRent</div>
-                  <div style={{fontSize: '11px', color: isAdmin ? 'rgba(255,255,255,0.6)' : '#64748b'}}>Tableau de bord</div>
-                </div>
-              </Link>
-
-              <div style={{display: 'flex', alignItems: 'center', gap: '12px'}}>
-                <Link href="/" style={{
-                  padding: '10px 16px',
-                  background: isAdmin ? 'rgba(255,255,255,0.1)' : '#f1f5f9',
-                  color: isAdmin ? 'white' : '#475569',
-                  textDecoration: 'none',
-                  borderRadius: '10px',
-                  fontWeight: '500',
-                  fontSize: '14px',
-                  display: 'flex',
-                  alignItems: 'center',
-                  gap: '6px',
-                  border: isAdmin ? '1px solid rgba(255,255,255,0.1)' : '1px solid #e2e8f0'
-                }}>
-                  <span>🏡</span> Accueil
-                </Link>
-                <button onClick={handleLogout} style={{
-                  padding: '10px 16px',
-                  background: 'linear-gradient(135deg, #ef4444 0%, #dc2626 100%)',
-                  color: 'white',
-                  border: 'none',
-                  borderRadius: '10px',
-                  fontWeight: '500',
-                  fontSize: '14px',
-                  cursor: 'pointer',
-                  display: 'flex',
-                  alignItems: 'center',
-                  gap: '6px',
-                  boxShadow: '0 2px 8px rgba(239, 68, 68, 0.25)'
-                }}>
-                  <span>🚪</span> Déconnexion
-                </button>
-              </div>
-            </div>
-          </div>
-        </header>
-
         {/* Main Content */}
         <main style={{padding: '40px 0 60px'}}>
           <div className="container">

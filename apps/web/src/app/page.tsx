@@ -4,11 +4,7 @@ import Link from "next/link";
 import { useAuth } from "../hooks/useAuth";
 
 export default function Home() {
-  const { isLoggedIn, isAdmin, mounted, logout } = useAuth();
-
-  const handleLogout = () => {
-    logout();
-  };
+  const { mounted } = useAuth();
 
   const testimonials = [
     {
@@ -218,71 +214,10 @@ export default function Home() {
           border: 1px solid rgba(0, 0, 0, 0.05);
         }
         
-        .nav-bar {
-          position: fixed;
-          top: 0;
-          left: 0;
-          right: 0;
-          z-index: 1000;
-          background: rgba(255, 255, 255, 0.95);
-          backdrop-filter: blur(10px);
-          border-bottom: 1px solid rgba(0, 0, 0, 0.1);
-          padding: 20px 0;
-        }
-        
-        .nav-content {
-          display: flex;
-          justify-content: space-between;
-          align-items: center;
-        }
-        
-        .logo {
-          display: flex;
-          align-items: center;
-          gap: 15px;
-          font-size: 24px;
-          font-weight: 700;
-          color: #333;
-          text-decoration: none;
-        }
-        
-        .logo-icon {
-          width: 50px;
-          height: 50px;
-          background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-          border-radius: 12px;
-          display: flex;
-          align-items: center;
-          justify-content: center;
-          font-size: 24px;
-          box-shadow: 0 5px 15px rgba(102, 126, 234, 0.3);
-        }
-        
-        .nav-links {
-          display: flex;
-          gap: 15px;
-        }
-        
-        .nav-link {
-          padding: 10px 20px;
-          background: #f8f9fa;
-          color: #333;
-          text-decoration: none;
-          border-radius: 8px;
-          font-weight: 500;
-          transition: all 0.3s ease;
-        }
-        
-        .nav-link:hover {
-          background: #e9ecef;
-          transform: translateY(-1px);
-        }
-        
         .hero {
           background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
           color: white;
-          padding: 120px 0 80px;
-          margin-top: 80px;
+          padding: 100px 0 80px;
           position: relative;
           overflow: hidden;
         }
@@ -553,125 +488,10 @@ export default function Home() {
             flex-direction: column;
             align-items: center;
           }
-          
-          .nav-content {
-            flex-direction: column;
-            gap: 20px;
-          }
-          
-          .nav-links {
-            flex-wrap: wrap;
-            justify-content: center;
-          }
         }
       `}</style>
 
       <div>
-        {/* Navigation */}
-        <nav className="nav-bar">
-          <div className="container">
-            <div className="nav-content">
-              <Link href="/" className="logo">
-                <div className="logo-icon">🏠</div>
-                <div>
-                  <div style={{fontSize: '22px', fontWeight: '700', letterSpacing: '-0.02em'}}>StudioRent</div>
-                  <div style={{fontSize: '11px', color: '#64748b', fontWeight: '500'}}>Location Premium</div>
-                </div>
-              </Link>
-              <div className="nav-links">
-                {isLoggedIn ? (
-                  <>
-                    <Link href="/dashboard" style={{
-                      padding: '10px 20px',
-                      background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
-                      color: 'white',
-                      textDecoration: 'none',
-                      borderRadius: '10px',
-                      fontWeight: '600',
-                      fontSize: '14px',
-                      transition: 'all 0.2s ease',
-                      display: 'flex',
-                      alignItems: 'center',
-                      gap: '8px',
-                      boxShadow: '0 4px 12px rgba(102, 126, 234, 0.3)'
-                    }}>
-                      <span>📊</span> {isAdmin ? 'Dashboard Admin' : 'Mon Espace'}
-                    </Link>
-                    <Link href="/studios" style={{
-                      padding: '10px 18px',
-                      background: 'linear-gradient(135deg, #f1f5f9 0%, #e2e8f0 100%)',
-                      color: '#334155',
-                      textDecoration: 'none',
-                      borderRadius: '10px',
-                      fontWeight: '500',
-                      fontSize: '14px',
-                      transition: 'all 0.2s ease',
-                      display: 'flex',
-                      alignItems: 'center',
-                      gap: '8px',
-                      border: '1px solid #e2e8f0'
-                    }}>
-                      <span>🏘️</span> Studios
-                    </Link>
-                    <button onClick={handleLogout} style={{
-                      padding: '10px 18px',
-                      background: 'linear-gradient(135deg, #ef4444 0%, #dc2626 100%)',
-                      color: 'white',
-                      border: 'none',
-                      borderRadius: '10px',
-                      fontWeight: '500',
-                      fontSize: '14px',
-                      cursor: 'pointer',
-                      transition: 'all 0.2s ease',
-                      display: 'flex',
-                      alignItems: 'center',
-                      gap: '8px',
-                      boxShadow: '0 2px 8px rgba(239, 68, 68, 0.25)'
-                    }}>
-                      <span>🚪</span> Déconnexion
-                    </button>
-                  </>
-                ) : (
-                  <>
-                    <Link href="/studios" style={{
-                      padding: '10px 18px',
-                      background: 'linear-gradient(135deg, #f1f5f9 0%, #e2e8f0 100%)',
-                      color: '#334155',
-                      textDecoration: 'none',
-                      borderRadius: '10px',
-                      fontWeight: '500',
-                      fontSize: '14px',
-                      transition: 'all 0.2s ease',
-                      display: 'flex',
-                      alignItems: 'center',
-                      gap: '8px',
-                      border: '1px solid #e2e8f0'
-                    }}>
-                      <span>🏘️</span> Studios
-                    </Link>
-                    <Link href="/auth/login" style={{
-                      padding: '10px 20px',
-                      background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
-                      color: 'white',
-                      textDecoration: 'none',
-                      borderRadius: '10px',
-                      fontWeight: '600',
-                      fontSize: '14px',
-                      transition: 'all 0.2s ease',
-                      display: 'flex',
-                      alignItems: 'center',
-                      gap: '8px',
-                      boxShadow: '0 4px 12px rgba(102, 126, 234, 0.3)'
-                    }}>
-                      <span>🔑</span> Connexion
-                    </Link>
-                  </>
-                )}
-              </div>
-            </div>
-          </div>
-        </nav>
-
         {/* Hero Section */}
         <section className="hero">
           <div className="container">
