@@ -1,11 +1,21 @@
 // app/api/pawapay/check-deposit/route.ts
 import { NextRequest, NextResponse } from 'next/server';
 
-if (!process.env.PAWAPAY_API_KEY) {
-  throw new Error('❌ PAWAPAY_API_KEY is missing.');
-}
-
 export async function GET(request: NextRequest) {
+  const apiKey = process.env.PAWAPAY_API_KEY;
+  const environment = process.env.PAWAPAY_ENVIRONMENT || 'sandbox';
+
+  if (!apiKey) {
+    console.error('❌ PAWAPAY_API_KEY manquante');
+    return NextResponse.json(
+      {
+        error: 'Configuration manquante',
+        message: 'Service de paiement temporairement indisponible',
+      },
+      { status: 503 }
+    );
+  }
+
   const depositId = request.nextUrl.searchParams.get("depositId");
 
   if (!depositId) {
@@ -14,9 +24,6 @@ export async function GET(request: NextRequest) {
       { status: 400 }
     );
   }
-
-  const apiKey = process.env.PAWAPAY_API_KEY;
-  const environment = process.env.PAWAPAY_ENVIRONMENT || 'sandbox';
 
   const apiUrl = environment === 'production' 
     ? `https://api.pawapay.io/v2/deposits/${depositId}`
