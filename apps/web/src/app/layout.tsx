@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import "./globals.css";
+import NavigationWrapper from "../components/NavigationWrapper";
 
 export const metadata: Metadata = {
   title: "StudioRent - Location Premium",
@@ -18,6 +19,7 @@ export default function RootLayout({
         style={{ fontFamily: '-apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif' }}
         suppressHydrationWarning={true}
       >
+        <NavigationWrapper />
         {children}
       </body>
     </html>
