@@ -97,6 +97,7 @@ export default function PaymentMethodSelector({
             paymentInfo={paymentInfo}
             onInputChange={handlePaymentInputChange}
             amount={amount}
+            inputOnly={true}
           />
         );
       
