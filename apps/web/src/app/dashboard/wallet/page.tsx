@@ -74,14 +74,19 @@ export default function WalletPage() {
 
       const data = await response.json();
       // PawaPay returns an array of balances or an object with balances
+      let allBalances: WalletBalance[] = [];
       if (Array.isArray(data)) {
-        setBalances(data);
+        allBalances = data;
       } else if (data.balances && Array.isArray(data.balances)) {
-        setBalances(data.balances);
-      } else {
-        // Empty balances or unexpected format
-        setBalances([]);
+        allBalances = data.balances;
       }
+      
+      // Filter to only show Cameroon (CMR) balances
+      const cameroonBalances = allBalances.filter(
+        (balance) => balance.country === "CMR" || 
+                     (balance.correspondent && balance.correspondent.includes("CMR"))
+      );
+      setBalances(cameroonBalances);
     } catch (err) {
       console.error("Erreur:", err);
       setError(err instanceof Error ? err.message : "Erreur inconnue");
@@ -196,19 +201,10 @@ export default function WalletPage() {
   };
 
   const getCountryFlag = (country: string | undefined | null) => {
-    if (!country) return "🌍";
-    const flags: Record<string, string> = {
-      CMR: "🇨🇲",
-      CIV: "🇨🇮",
-      SEN: "🇸🇳",
-      GHA: "🇬🇭",
-      NGA: "🇳🇬",
-      UGA: "🇺🇬",
-      RWA: "🇷🇼",
-      MWI: "🇲🇼",
-      ZMB: "🇿🇲",
-    };
-    return flags[country] || "🌍";
+    // Only Cameroon is supported
+    if (!country) return "🇨🇲";
+    if (country === "CMR") return "🇨🇲";
+    return "🇨🇲";
   };
 
   if (!mounted) {
