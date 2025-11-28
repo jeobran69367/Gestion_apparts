@@ -19,13 +19,11 @@ export async function GET() {
     );
   }
 
-  // PawaPay wallet balances endpoint
-  const baseUrl =
+  // PawaPay wallet balances endpoint (v2 API)
+  const apiUrl =
     environment === 'production'
-      ? 'https://api.pawapay.io'
-      : 'https://api.sandbox.pawapay.io';
-  
-  const apiUrl = `${baseUrl}/wallet-balances`;
+      ? 'https://api.pawapay.io/v2/wallet-balances'
+      : 'https://api.sandbox.pawapay.io/v2/wallet-balances';
 
   // Timeout
   const controller = new AbortController();
