@@ -16,7 +16,12 @@ function getRoleDisplayText(role: UserRole | undefined): string {
   return 'Utilisateur';
 }
 
-// Helper function to get user initials
+/**
+ * Get user initials from first and last name
+ * @param firstName - User's first name
+ * @param lastName - User's last name
+ * @returns Two-letter initials or '?' if names are not available
+ */
 function getUserInitials(firstName: string | undefined, lastName: string | undefined): string {
   const first = firstName?.charAt(0)?.toUpperCase() || '';
   const last = lastName?.charAt(0)?.toUpperCase() || '';
@@ -352,7 +357,6 @@ export default function DashboardPage() {
 
         .animate-delay-1 { animation-delay: 0.1s; opacity: 0; }
         .animate-delay-2 { animation-delay: 0.2s; opacity: 0; }
-        .animate-delay-3 { animation-delay: 0.3s; opacity: 0; }
       `}</style>
 
       <div style={{minHeight: '100vh', background: '#f8fafc'}}>
@@ -428,7 +432,7 @@ export default function DashboardPage() {
                         alignItems: 'center',
                         gap: '6px'
                       }}>
-                        <span>✓</span> Admin vérifié
+                        <span aria-hidden="true">✓</span> Admin vérifié
                       </span>
                     )}
                   </div>
