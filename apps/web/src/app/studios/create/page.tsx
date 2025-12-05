@@ -130,7 +130,7 @@ export default function CreateStudioPage() {
       }
 
       const data = await response.json();
-      return data.urls || [];
+      return data.base64Images || [];
     } catch (err: any) {
       throw new Error(`Erreur d'upload: ${err.message}`);
     } finally {

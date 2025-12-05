@@ -31,7 +31,6 @@ export const API_ENDPOINTS = {
   // Uploads endpoints
   UPLOADS: {
     STUDIO_IMAGES: `${API_BASE_URL}/api/uploads/studios/images`,
-    STUDIO_IMAGE: (filename: string) => `${API_BASE_URL}/api/uploads/studios/${filename}`,
   },
   
   // Email endpoints

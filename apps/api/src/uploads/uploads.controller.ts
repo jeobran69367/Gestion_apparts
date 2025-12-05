@@ -1,24 +1,15 @@
 import {
   Controller,
   Post,
-  Delete,
-  UseInterceptors,
-  UploadedFiles,
   UseGuards,
+  UploadedFiles,
+  UseInterceptors,
+  BadRequestException,
   Request,
-  Get,
-  Param,
-  Res,
-  NotFoundException,
-  Body,
 } from '@nestjs/common';
 import { FilesInterceptor } from '@nestjs/platform-express';
-import { diskStorage } from 'multer';
-import { extname, join } from 'path';
-import { UploadsService } from './uploads.service';
 import { JwtAuthGuard } from '../auth/jwt-auth.guard';
-import type { Response } from 'express';
-import { existsSync } from 'fs';
+import { UploadsService } from './uploads.service';
 
 @Controller('uploads')
 export class UploadsController {
@@ -28,17 +19,6 @@ export class UploadsController {
   @UseGuards(JwtAuthGuard)
   @UseInterceptors(
     FilesInterceptor('images', 10, {
-      storage: diskStorage({
-        destination: (req, file, cb) => {
-          const uploadPath = join(process.cwd(), 'uploads', 'studios');
-          cb(null, uploadPath);
-        },
-        filename: (req, file, cb) => {
-          const uniqueSuffix = Date.now() + '-' + Math.round(Math.random() * 1e9);
-          const ext = extname(file.originalname);
-          cb(null, `studio-${uniqueSuffix}${ext}`);
-        },
-      }),
       fileFilter: (req, file, cb) => {
         const allowedTypes = ['image/jpeg', 'image/jpg', 'image/png', 'image/webp'];
         if (!allowedTypes.includes(file.mimetype)) {
@@ -56,58 +36,22 @@ export class UploadsController {
     @Request() req,
   ) {
     if (!files || files.length === 0) {
-      return { urls: [] };
+      return { base64Images: [] };
     }
 
     // Validate all files
     files.forEach((file) => this.uploadsService.validateImage(file));
 
-    // Generate URLs for all uploaded files
-    const urls = files.map((file) =>
-      this.uploadsService.getImageUrl(file.filename, req),
-    );
-
-    return {
-      urls,
-      message: `${files.length} image(s) uploadée(s) avec succès`,
-    };
-  }
-
-  @Get('studios/:filename')
-  async getImage(@Param('filename') filename: string, @Res() res: Response) {
-    // Security: Prevent path traversal attacks
-    const sanitizedFilename = filename.replace(/[^a-zA-Z0-9.-]/g, '');
-    if (sanitizedFilename !== filename || filename.includes('..') || filename.includes('/') || filename.includes('\\')) {
-      throw new NotFoundException('Image non trouvée');
-    }
-
-    const filePath = join(process.cwd(), 'uploads', 'studios', sanitizedFilename);
-
-    if (!existsSync(filePath)) {
-      throw new NotFoundException('Image non trouvée');
-    }
-
-    return res.sendFile(filePath);
-  }
-
-  @Delete('studios/images')
-  @UseGuards(JwtAuthGuard)
-  async deleteImages(@Body('urls') urls: string[]) {
-    if (!urls || urls.length === 0) {
-      return { message: 'Aucune image à supprimer' };
-    }
-
-    let deletedCount = 0;
-    urls.forEach((url) => {
-      const filename = this.uploadsService.extractFilenameFromUrl(url);
-      if (filename) {
-        this.uploadsService.deleteImage(filename);
-        deletedCount++;
-      }
+    // Convert all files to Base64
+    const base64Images = files.map((file) => {
+      const base64 = file.buffer.toString('base64');
+      const mimeType = file.mimetype;
+      return `data:${mimeType};base64,${base64}`;
     });
 
     return {
-      message: `${deletedCount} image(s) supprimée(s) avec succès`,
+      base64Images,
+      message: `${files.length} image(s) uploadée(s) avec succès`,
     };
   }
 }
