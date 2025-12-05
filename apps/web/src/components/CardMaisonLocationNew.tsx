@@ -48,7 +48,7 @@ interface CardMaisonLocationProps {
   onContact?: (id: number) => void;
 }
 
-export default function CardMaisonLocation({
+export default function CardMaisonLocationNew({
   maison,
   showActions = true,
   variant = 'default',
