@@ -1,10 +1,14 @@
 import { Injectable, NotFoundException, ForbiddenException } from '@nestjs/common';
 import { PrismaService } from '../prisma/prisma.service';
 import { CreateStudioDto, UpdateStudioDto } from './dto/studio.dto';
+import { UploadsService } from '../uploads/uploads.service';
 
 @Injectable()
 export class StudiosService {
-  constructor(private prisma: PrismaService) {}
+  constructor(
+    private prisma: PrismaService,
+    private uploadsService: UploadsService,
+  ) {}
 
   async create(createStudioDto: CreateStudioDto, ownerId: number) {
     return this.prisma.studio.create({
@@ -177,6 +181,16 @@ export class StudiosService {
 
     if (studio.ownerId !== userId) {
       throw new ForbiddenException('Vous ne pouvez supprimer que vos propres studios');
+    }
+
+    // Delete associated images from storage
+    if (studio.photos && studio.photos.length > 0) {
+      studio.photos.forEach((photoUrl) => {
+        const filename = this.uploadsService.extractFilenameFromUrl(photoUrl);
+        if (filename) {
+          this.uploadsService.deleteImage(filename);
+        }
+      });
     }
 
     return this.prisma.studio.delete({
