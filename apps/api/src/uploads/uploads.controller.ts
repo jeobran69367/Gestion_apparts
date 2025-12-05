@@ -75,7 +75,13 @@ export class UploadsController {
 
   @Get('studios/:filename')
   async getImage(@Param('filename') filename: string, @Res() res: Response) {
-    const filePath = join(process.cwd(), 'uploads', 'studios', filename);
+    // Security: Prevent path traversal attacks
+    const sanitizedFilename = filename.replace(/[^a-zA-Z0-9.-]/g, '');
+    if (sanitizedFilename !== filename || filename.includes('..') || filename.includes('/') || filename.includes('\\')) {
+      throw new NotFoundException('Image non trouvée');
+    }
+
+    const filePath = join(process.cwd(), 'uploads', 'studios', sanitizedFilename);
 
     if (!existsSync(filePath)) {
       throw new NotFoundException('Image non trouvée');
