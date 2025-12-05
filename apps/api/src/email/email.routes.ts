@@ -2,7 +2,7 @@ import { Router } from 'express';
 import { EmailService } from './email.service';
 import { EmailController } from './email.controller';
 
-const emailRouter = Router();
+const emailRouter: Router = Router();
 const emailService = new EmailService();
 const emailController = new EmailController(emailService);
 

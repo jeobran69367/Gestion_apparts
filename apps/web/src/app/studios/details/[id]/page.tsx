@@ -192,17 +192,21 @@ export default function StudioDetailsPage() {
       return true;
     }
     
-    // Bloquer les dates réservées
-    if (
-      reservedDates.some((reservedDate) => {
-        const reserved = new Date(reservedDate);
-        reserved.setHours(0, 0, 0, 0);
-        const dateToCheck = new Date(date);
-        dateToCheck.setHours(0, 0, 0, 0);
-        return reserved.getTime() === dateToCheck.getTime();
-      })
-    ) {
+    // Bloquer uniquement les dates issues de réservations dont le status est "CONFIRMED"
+    for (const res of reservations) {
+      if (res.status !== 'CONFIRMED') continue;
+
+      const start = new Date(res.checkIn);
+      const end = new Date(res.checkOut);
+      start.setHours(0, 0, 0, 0);
+      end.setHours(0, 0, 0, 0);
+
+      const d = new Date(date);
+      d.setHours(0, 0, 0, 0);
+
+      if (d >= start && d <= end) {
       return true;
+      }
     }
 
     // Bloquer les dates après le plus proche `checkIn` dans les réservations
