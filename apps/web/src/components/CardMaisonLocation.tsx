@@ -21,6 +21,7 @@ export interface MaisonLocation {
   minStay: number;
   maxStay: number;
   photos: string[];
+  primaryPhoto?: string;  // Photo principale pour affichage prioritaire
   amenities: string[];
   rules?: string[];
   owner?: {
@@ -69,9 +70,33 @@ export default function CardMaisonLocation({
     'https://images.unsplash.com/photo-1586023492125-27b2c045efd7?w=800&h=600&fit=crop'
   ];
 
-  const images = maison.photos?.length > 0 
-    ? maison.photos 
-    : (maison.images && maison.images.length > 0 ? maison.images : defaultImages);
+  // Images prioritized: primaryPhoto first, then other photos, fallback to defaults
+  const getPrioritizedImages = () => {
+    const photoList: string[] = [];
+    
+    // Add primary photo first if it exists
+    if (maison.primaryPhoto) {
+      photoList.push(maison.primaryPhoto);
+    }
+    
+    // Add other photos (excluding primary photo if it's also in the photos array)
+    if (maison.photos && maison.photos.length > 0) {
+      maison.photos.forEach(photo => {
+        if (photo !== maison.primaryPhoto) {
+          photoList.push(photo);
+        }
+      });
+    }
+    
+    // Fallback to default images if no photos
+    if (photoList.length === 0) {
+      return defaultImages;
+    }
+    
+    return photoList;
+  };
+
+  const images = getPrioritizedImages();
   const priceInEuros = maison.pricePerNight;
   const rating = maison.rating || (4.0 + Math.random() * 1.0);
   const reviewCount = maison.reviews || (Math.floor(Math.random() * 80) + 20);

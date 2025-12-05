@@ -69,6 +69,7 @@ model Studio {
 
   // Média et services
   photos        String[] // URLs des photos
+  primaryPhoto  String?  // URL de la photo principale (première à afficher)
   amenities     String[] // ["wifi", "kitchen", "parking", etc.]
   rules         String[] // Règles de la maison
 

@@ -11,9 +11,15 @@ export class StudiosService {
   ) {}
 
   async create(createStudioDto: CreateStudioDto, ownerId: number) {
+    // Set primary photo to first photo if not specified
+    const studioData = {
+      ...createStudioDto,
+      primaryPhoto: createStudioDto.primaryPhoto || createStudioDto.photos?.[0] || null,
+    };
+
     return this.prisma.studio.create({
       data: {
-        ...createStudioDto,
+        ...studioData,
         ownerId,
       },
       include: {
@@ -154,9 +160,18 @@ export class StudiosService {
       throw new ForbiddenException('Vous ne pouvez modifier que vos propres studios');
     }
 
+    // Update primary photo logic
+    const updateData = { ...updateStudioDto };
+    if (updateStudioDto.photos && updateStudioDto.photos.length > 0) {
+      // If photos are updated but primaryPhoto is not specified, use first photo
+      if (!updateStudioDto.primaryPhoto) {
+        updateData.primaryPhoto = updateStudioDto.photos[0];
+      }
+    }
+
     return this.prisma.studio.update({
       where: { id },
-      data: updateStudioDto,
+      data: updateData,
       include: {
         owner: {
           select: {

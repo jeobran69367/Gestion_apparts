@@ -81,6 +81,10 @@ export class CreateStudioDto {
   photos?: string[] = [];
 
   @IsOptional()
+  @IsString()
+  primaryPhoto?: string;
+
+  @IsOptional()
   @IsArray()
   @IsString({ each: true })
   amenities?: string[] = [];
@@ -158,6 +162,10 @@ export class UpdateStudioDto {
   @IsArray()
   @IsString({ each: true })
   photos?: string[];
+
+  @IsOptional()
+  @IsString()
+  primaryPhoto?: string;
 
   @IsOptional()
   @IsArray()

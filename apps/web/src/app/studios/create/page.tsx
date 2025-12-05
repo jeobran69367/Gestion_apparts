@@ -28,12 +28,14 @@ export default function CreateStudioPage() {
     minStay: '1',
     maxStay: '30',
     photos: [] as string[],
+    primaryPhoto: '' as string,
     amenities: '',
     rules: '',
   });
 
   const [selectedFiles, setSelectedFiles] = useState<File[]>([]);
   const [previewUrls, setPreviewUrls] = useState<string[]>([]);
+  const [primaryPhotoIndex, setPrimaryPhotoIndex] = useState<number>(0);
 
   useEffect(() => {
     if (!mounted) return;
@@ -94,6 +96,13 @@ export default function CreateStudioPage() {
       URL.revokeObjectURL(prev[index]);
       return prev.filter((_, i) => i !== index);
     });
+    
+    // Adjust primaryPhotoIndex if necessary
+    if (primaryPhotoIndex === index) {
+      setPrimaryPhotoIndex(0);
+    } else if (primaryPhotoIndex > index) {
+      setPrimaryPhotoIndex(primaryPhotoIndex - 1);
+    }
   };
 
   const uploadImages = async (): Promise<string[]> => {
@@ -151,6 +160,7 @@ export default function CreateStudioPage() {
         minStay: parseInt(formData.minStay),
         maxStay: parseInt(formData.maxStay),
         photos: uploadedPhotoUrls,
+        primaryPhoto: uploadedPhotoUrls[primaryPhotoIndex] || uploadedPhotoUrls[0],
         amenities: formData.amenities ? formData.amenities.split(',').map(a => a.trim()).filter(a => a) : [],
         rules: formData.rules ? formData.rules.split(',').map(r => r.trim()).filter(r => r) : [],
       };
@@ -674,7 +684,9 @@ export default function CreateStudioPage() {
                     marginTop: '15px'
                   }}>
                     {previewUrls.map((url, index) => (
-                      <div key={index} style={{ position: 'relative' }}>
+                      <div key={index} style={{ position: 'relative', cursor: 'pointer' }}
+                        onClick={() => setPrimaryPhotoIndex(index)}
+                      >
                         <img
                           src={url}
                           alt={`Preview ${index + 1}`}
@@ -683,12 +695,30 @@ export default function CreateStudioPage() {
                             height: '150px',
                             objectFit: 'cover',
                             borderRadius: '12px',
-                            border: '2px solid #e9ecef'
+                            border: primaryPhotoIndex === index ? '4px solid #667eea' : '2px solid #e9ecef'
                           }}
                         />
+                        {primaryPhotoIndex === index && (
+                          <div style={{
+                            position: 'absolute',
+                            top: '5px',
+                            left: '5px',
+                            background: '#667eea',
+                            color: 'white',
+                            padding: '4px 8px',
+                            borderRadius: '6px',
+                            fontSize: '12px',
+                            fontWeight: '600'
+                          }}>
+                            ★ Principale
+                          </div>
+                        )}
                         <button
                           type="button"
-                          onClick={() => removeImage(index)}
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            removeImage(index);
+                          }}
                           style={{
                             position: 'absolute',
                             top: '5px',
@@ -711,6 +741,9 @@ export default function CreateStudioPage() {
                         </button>
                       </div>
                     ))}
+                  </div>
+                  <div className="help-text" style={{ marginTop: '10px' }}>
+                    💡 Cliquez sur une image pour la définir comme photo principale
                   </div>
                 </div>
               )}

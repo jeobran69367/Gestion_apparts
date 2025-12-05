@@ -30,6 +30,7 @@ export default function EditStudioPage() {
     pricePerNight: '',
     isAvailable: false,
     photos: [] as string[],
+    primaryPhoto: '' as string,
     amenities: [] as string[],
     rules: '',
     owner: '',
@@ -479,22 +480,43 @@ export default function EditStudioPage() {
                 <h3 className="text-sm font-medium text-gray-700 mb-2">Photos actuelles</h3>
                 <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
                   {formData.photos.map((photo, index) => (
-                    <div key={index} className="relative">
+                    <div key={index} className="relative group">
                       <img
                         src={photo}
                         alt={`Photo ${index + 1}`}
-                        className="w-full h-32 object-cover rounded-lg shadow-md"
+                        className={`w-full h-32 object-cover rounded-lg shadow-md ${
+                          photo === formData.primaryPhoto ? 'ring-4 ring-blue-500' : ''
+                        }`}
                       />
-                      <button
-                        type="button"
-                        onClick={() => handlePhotoDelete(index)}
-                        className="absolute top-2 right-2 bg-red-600 text-white rounded-full w-6 h-6 flex items-center justify-center text-xs hover:bg-red-700"
-                      >
-                        ✕
-                      </button>
+                      {photo === formData.primaryPhoto && (
+                        <div className="absolute top-1 left-1 bg-blue-500 text-white text-xs px-2 py-1 rounded">
+                          ★ Principale
+                        </div>
+                      )}
+                      <div className="absolute top-2 right-2 flex gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
+                        <button
+                          type="button"
+                          onClick={() => setFormData({ ...formData, primaryPhoto: photo })}
+                          className="bg-blue-600 text-white rounded-full w-6 h-6 flex items-center justify-center text-xs hover:bg-blue-700"
+                          title="Marquer comme principale"
+                        >
+                          ★
+                        </button>
+                        <button
+                          type="button"
+                          onClick={() => handlePhotoDelete(index)}
+                          className="bg-red-600 text-white rounded-full w-6 h-6 flex items-center justify-center text-xs hover:bg-red-700"
+                          title="Supprimer"
+                        >
+                          ✕
+                        </button>
+                      </div>
                     </div>
                   ))}
                 </div>
+                <p className="text-xs text-gray-500 mt-2">
+                  💡 Cliquez sur ★ pour définir la photo principale
+                </p>
               </div>
             )}
 
