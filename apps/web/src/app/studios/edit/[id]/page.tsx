@@ -3,6 +3,7 @@
 import { useState, useEffect } from 'react';
 import { useRouter, useParams } from 'next/navigation';
 import { use } from 'react';
+import { API_ENDPOINTS } from '../../../../config/api';
 
 type ValuePiece = Date | null;
 type Value = ValuePiece | [ValuePiece, ValuePiece];
@@ -13,6 +14,7 @@ export default function EditStudioPage() {
   const router = useRouter();
 
   const [loading, setLoading] = useState(true);
+  const [uploadingImages, setUploadingImages] = useState(false);
   const [error, setError] = useState('');
   const [formData, setFormData] = useState({
     name: '',
@@ -28,6 +30,7 @@ export default function EditStudioPage() {
     pricePerNight: '',
     isAvailable: false,
     photos: [] as string[],
+    primaryPhoto: '' as string,
     amenities: [] as string[],
     rules: '',
     owner: '',
@@ -37,6 +40,9 @@ export default function EditStudioPage() {
     updatedAt: '',
     reservations: [] as string[],
   });
+
+  const [newPhotosToUpload, setNewPhotosToUpload] = useState<File[]>([]);
+  const [newPhotosPreviews, setNewPhotosPreviews] = useState<string[]>([]);
 
   // Liste des équipements possibles
   const availableAmenities = [
@@ -60,7 +66,7 @@ export default function EditStudioPage() {
 
   const fetchStudio = async () => {
     try {
-      const response = await fetch(`http://localhost:4000/api/studios/${id}`);
+      const response = await fetch(API_ENDPOINTS.STUDIOS.BY_ID(id as string));
       if (response.ok) {
         const data = await response.json();
         setFormData(prev => ({ ...prev, ...data }));
@@ -105,13 +111,77 @@ export default function EditStudioPage() {
     }));
   };
 
-  const handlePhotoUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
+  const handleNewPhotoUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
     const files = Array.from(e.target.files || []);
-    const newPhotos = files.map((file) => URL.createObjectURL(file));
-    setFormData((prev) => ({
-      ...prev,
-      photos: [...prev.photos, ...newPhotos],
-    }));
+    
+    // Validate file types and sizes
+    const validFiles = files.filter((file) => {
+      const validTypes = ['image/jpeg', 'image/jpg', 'image/png', 'image/webp'];
+      const maxSize = 5 * 1024 * 1024; // 5MB
+      
+      if (!validTypes.includes(file.type)) {
+        setError(`${file.name}: Type de fichier non supporté. Utilisez JPEG, PNG ou WEBP.`);
+        return false;
+      }
+      
+      if (file.size > maxSize) {
+        setError(`${file.name}: La taille du fichier dépasse 5MB.`);
+        return false;
+      }
+      
+      return true;
+    });
+
+    if (validFiles.length > 0) {
+      setNewPhotosToUpload((prev) => [...prev, ...validFiles]);
+      
+      // Create preview URLs
+      const newPreviewUrls = validFiles.map((file) => URL.createObjectURL(file));
+      setNewPhotosPreviews((prev) => [...prev, ...newPreviewUrls]);
+      setError('');
+    }
+  };
+
+  const removeNewPhoto = (index: number) => {
+    setNewPhotosToUpload((prev) => prev.filter((_, i) => i !== index));
+    setNewPhotosPreviews((prev) => {
+      // Revoke the object URL to free memory
+      URL.revokeObjectURL(prev[index]);
+      return prev.filter((_, i) => i !== index);
+    });
+  };
+
+  const uploadNewImages = async (): Promise<string[]> => {
+    if (newPhotosToUpload.length === 0) return [];
+
+    setUploadingImages(true);
+    try {
+      const token = localStorage.getItem('token');
+      const uploadFormData = new FormData();
+      
+      newPhotosToUpload.forEach((file) => {
+        uploadFormData.append('images', file);
+      });
+
+      const response = await fetch(API_ENDPOINTS.UPLOADS.STUDIO_IMAGES, {
+        method: 'POST',
+        headers: {
+          'Authorization': `Bearer ${token}`,
+        },
+        body: uploadFormData,
+      });
+
+      if (!response.ok) {
+        throw new Error('Erreur lors de l\'upload des images');
+      }
+
+      const data = await response.json();
+      return data.base64Images || [];
+    } catch (err: any) {
+      throw new Error(`Erreur d'upload: ${err.message}`);
+    } finally {
+      setUploadingImages(false);
+    }
   };
 
   const handleCalendarChange = (value: Value) => {
@@ -137,9 +207,6 @@ export default function EditStudioPage() {
       return;
     }
 
-    // Filtrer les propriétés non autorisées avant l'envoi
-    const { id, ownerId, createdAt, updatedAt, owner, reservations, ...filteredData } = formData;
-
     try {
       const token = localStorage.getItem('token');
       if (!token) {
@@ -147,13 +214,22 @@ export default function EditStudioPage() {
         return;
       }
 
-      const response = await fetch(`http://localhost:4000/api/studios/${id}`, {
+      // Upload new images if any
+      const uploadedPhotoUrls = await uploadNewImages();
+      
+      // Combine existing photos with new uploads
+      const allPhotos = [...formData.photos, ...uploadedPhotoUrls];
+
+      // Filtrer les propriétés non autorisées avant l'envoi
+      const { id, ownerId, createdAt, updatedAt, owner, reservations, ...filteredData } = formData;
+
+      const response = await fetch(API_ENDPOINTS.STUDIOS.BY_ID(id as string), {
         method: 'PATCH',
         headers: {
           'Content-Type': 'application/json',
           'Authorization': `Bearer ${token}`,
         },
-        body: JSON.stringify({ ...filteredData, pricePerNight: price }),
+        body: JSON.stringify({ ...filteredData, photos: allPhotos, pricePerNight: price }),
       });
 
       if (response.ok) {
@@ -400,23 +476,72 @@ export default function EditStudioPage() {
           <div className="space-y-4">
             {/* Afficher les photos existantes */}
             {formData.photos.length > 0 && (
-              <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
-                {formData.photos.map((photo, index) => (
-                  <div key={index} className="relative">
-                    <img
-                      src={photo}
-                      alt={`Photo ${index + 1}`}
-                      className="w-full h-32 object-cover rounded-lg shadow-md"
-                    />
-                    <button
-                      type="button"
-                      onClick={() => handlePhotoDelete(index)}
-                      className="absolute top-2 right-2 bg-red-600 text-white rounded-full w-6 h-6 flex items-center justify-center text-xs hover:bg-red-700"
-                    >
-                      ✕
-                    </button>
-                  </div>
-                ))}
+              <div>
+                <h3 className="text-sm font-medium text-gray-700 mb-2">Photos actuelles</h3>
+                <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
+                  {formData.photos.map((photo, index) => (
+                    <div key={index} className="relative group">
+                      <img
+                        src={photo}
+                        alt={`Photo ${index + 1}`}
+                        className={`w-full h-32 object-cover rounded-lg shadow-md ${
+                          photo === formData.primaryPhoto ? 'ring-4 ring-blue-500' : ''
+                        }`}
+                      />
+                      {photo === formData.primaryPhoto && (
+                        <div className="absolute top-1 left-1 bg-blue-500 text-white text-xs px-2 py-1 rounded">
+                          ★ Principale
+                        </div>
+                      )}
+                      <div className="absolute top-2 right-2 flex gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
+                        <button
+                          type="button"
+                          onClick={() => setFormData({ ...formData, primaryPhoto: photo })}
+                          className="bg-blue-600 text-white rounded-full w-6 h-6 flex items-center justify-center text-xs hover:bg-blue-700"
+                          title="Marquer comme principale"
+                        >
+                          ★
+                        </button>
+                        <button
+                          type="button"
+                          onClick={() => handlePhotoDelete(index)}
+                          className="bg-red-600 text-white rounded-full w-6 h-6 flex items-center justify-center text-xs hover:bg-red-700"
+                          title="Supprimer"
+                        >
+                          ✕
+                        </button>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+                <p className="text-xs text-gray-500 mt-2">
+                  💡 Cliquez sur ★ pour définir la photo principale
+                </p>
+              </div>
+            )}
+
+            {/* Afficher les nouvelles photos à uploader */}
+            {newPhotosPreviews.length > 0 && (
+              <div>
+                <h3 className="text-sm font-medium text-gray-700 mb-2">Nouvelles photos à ajouter</h3>
+                <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
+                  {newPhotosPreviews.map((preview, index) => (
+                    <div key={index} className="relative">
+                      <img
+                        src={preview}
+                        alt={`Nouvelle photo ${index + 1}`}
+                        className="w-full h-32 object-cover rounded-lg shadow-md border-2 border-blue-400"
+                      />
+                      <button
+                        type="button"
+                        onClick={() => removeNewPhoto(index)}
+                        className="absolute top-2 right-2 bg-red-600 text-white rounded-full w-6 h-6 flex items-center justify-center text-xs hover:bg-red-700"
+                      >
+                        ✕
+                      </button>
+                    </div>
+                  ))}
+                </div>
               </div>
             )}
 
@@ -428,10 +553,13 @@ export default function EditStudioPage() {
               <input
                 type="file"
                 multiple
-                accept="image/*"
-                onChange={handlePhotoUpload}
+                accept="image/jpeg,image/jpg,image/png,image/webp"
+                onChange={handleNewPhotoUpload}
                 className="block w-full text-sm text-gray-500 file:mr-4 file:py-2 file:px-4 file:rounded file:border file:border-gray-300 file:text-sm file:font-semibold file:bg-gray-100 file:text-gray-700 hover:file:bg-gray-200"
               />
+              <p className="text-xs text-gray-500 mt-1">
+                Formats acceptés: JPEG, PNG, WEBP. Taille max: 5MB par fichier.
+              </p>
             </div>
           </div>
         </div>
@@ -442,14 +570,16 @@ export default function EditStudioPage() {
             type="button"
             onClick={() => router.push('/studios')}
             className="px-6 py-3 bg-gray-200 text-gray-700 rounded-lg hover:bg-gray-300 transition-colors"
+            disabled={uploadingImages}
           >
             Annuler
           </button>
           <button
             type="submit"
-            className="px-6 py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
+            className="px-6 py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+            disabled={uploadingImages}
           >
-            Enregistrer les modifications
+            {uploadingImages ? 'Upload des images...' : 'Enregistrer les modifications'}
           </button>
         </div>
       </form>
