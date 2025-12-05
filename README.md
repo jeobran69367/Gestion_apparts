@@ -18,6 +18,16 @@ cd Gestion_apparts
 
 2. **Configurer les variables d'environnement** :
 
+Créer `.env` à la racine du projet (copiez depuis `.env.example`) :
+```env
+JWT_SECRET=your-secret-key-change-in-production
+FRONTEND_URL=http://localhost:3000
+NEXT_PUBLIC_API_URL=http://localhost:4000/api
+PAWAPAY_API_KEY=your-pawapay-api-key
+```
+
+OU créer les fichiers .env individuels :
+
 Créer `apps/api/.env` :
 ```env
 DATABASE_URL="postgresql://postgres:postgres@postgres:5432/gestion_apparts?schema=public"
