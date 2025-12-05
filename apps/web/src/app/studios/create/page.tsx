@@ -7,6 +7,7 @@ import { useAuth } from '../../../hooks/useAuth';
 
 export default function CreateStudioPage() {
   const [loading, setLoading] = useState(false);
+  const [uploadingImages, setUploadingImages] = useState(false);
   const [error, setError] = useState('');
   const router = useRouter();
   const { user, isLoggedIn, isAdmin, mounted } = useAuth();
@@ -25,10 +26,13 @@ export default function CreateStudioPage() {
     pricePerNight: '',
     minStay: '1',
     maxStay: '30',
-    photos: '',
+    photos: [] as string[],
     amenities: '',
     rules: '',
   });
+
+  const [selectedFiles, setSelectedFiles] = useState<File[]>([]);
+  const [previewUrls, setPreviewUrls] = useState<string[]>([]);
 
   useEffect(() => {
     if (!mounted) return;
@@ -51,6 +55,79 @@ export default function CreateStudioPage() {
     });
   };
 
+  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const files = Array.from(e.target.files || []);
+    
+    // Validate file types and sizes
+    const validFiles = files.filter((file) => {
+      const validTypes = ['image/jpeg', 'image/jpg', 'image/png', 'image/webp'];
+      const maxSize = 5 * 1024 * 1024; // 5MB
+      
+      if (!validTypes.includes(file.type)) {
+        setError(`${file.name}: Type de fichier non supporté. Utilisez JPEG, PNG ou WEBP.`);
+        return false;
+      }
+      
+      if (file.size > maxSize) {
+        setError(`${file.name}: La taille du fichier dépasse 5MB.`);
+        return false;
+      }
+      
+      return true;
+    });
+
+    if (validFiles.length > 0) {
+      setSelectedFiles((prev) => [...prev, ...validFiles]);
+      
+      // Create preview URLs
+      const newPreviewUrls = validFiles.map((file) => URL.createObjectURL(file));
+      setPreviewUrls((prev) => [...prev, ...newPreviewUrls]);
+      setError('');
+    }
+  };
+
+  const removeImage = (index: number) => {
+    setSelectedFiles((prev) => prev.filter((_, i) => i !== index));
+    setPreviewUrls((prev) => {
+      // Revoke the object URL to free memory
+      URL.revokeObjectURL(prev[index]);
+      return prev.filter((_, i) => i !== index);
+    });
+  };
+
+  const uploadImages = async (): Promise<string[]> => {
+    if (selectedFiles.length === 0) return [];
+
+    setUploadingImages(true);
+    try {
+      const token = localStorage.getItem('token');
+      const formData = new FormData();
+      
+      selectedFiles.forEach((file) => {
+        formData.append('images', file);
+      });
+
+      const response = await fetch('http://localhost:4000/api/uploads/studios/images', {
+        method: 'POST',
+        headers: {
+          'Authorization': `Bearer ${token}`,
+        },
+        body: formData,
+      });
+
+      if (!response.ok) {
+        throw new Error('Erreur lors de l\'upload des images');
+      }
+
+      const data = await response.json();
+      return data.urls || [];
+    } catch (err: any) {
+      throw new Error(`Erreur d'upload: ${err.message}`);
+    } finally {
+      setUploadingImages(false);
+    }
+  };
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setLoading(true);
@@ -58,6 +135,9 @@ export default function CreateStudioPage() {
 
     try {
       const token = localStorage.getItem('token');
+      
+      // Upload images first
+      const uploadedPhotoUrls = await uploadImages();
       
       // Préparer les données
       const studioData = {
@@ -69,7 +149,7 @@ export default function CreateStudioPage() {
         pricePerNight: parseInt(formData.pricePerNight),
         minStay: parseInt(formData.minStay),
         maxStay: parseInt(formData.maxStay),
-        photos: formData.photos ? formData.photos.split(',').map(p => p.trim()).filter(p => p) : [],
+        photos: uploadedPhotoUrls,
         amenities: formData.amenities ? formData.amenities.split(',').map(a => a.trim()).filter(a => a) : [],
         rules: formData.rules ? formData.rules.split(',').map(r => r.trim()).filter(r => r) : [],
       };
@@ -569,16 +649,70 @@ export default function CreateStudioPage() {
               <h2 className="section-title">📸 Photos et équipements</h2>
               
               <div className="form-group">
-                <label className="form-label">URLs des photos</label>
-                <textarea
-                  name="photos"
-                  className="form-textarea"
-                  value={formData.photos}
-                  onChange={handleInputChange}
-                  placeholder="https://exemple.com/photo1.jpg, https://exemple.com/photo2.jpg"
+                <label className="form-label">Photos du studio</label>
+                <input
+                  type="file"
+                  multiple
+                  accept="image/jpeg,image/jpg,image/png,image/webp"
+                  onChange={handleFileChange}
+                  className="form-input"
+                  style={{ padding: '10px' }}
                 />
-                <div className="help-text">Séparez les URLs par des virgules</div>
+                <div className="help-text">
+                  Formats acceptés: JPEG, PNG, WEBP. Taille max: 5MB par fichier. Maximum 10 images.
+                </div>
               </div>
+
+              {/* Preview des images */}
+              {previewUrls.length > 0 && (
+                <div className="form-group">
+                  <div style={{ 
+                    display: 'grid', 
+                    gridTemplateColumns: 'repeat(auto-fill, minmax(150px, 1fr))', 
+                    gap: '15px',
+                    marginTop: '15px'
+                  }}>
+                    {previewUrls.map((url, index) => (
+                      <div key={index} style={{ position: 'relative' }}>
+                        <img
+                          src={url}
+                          alt={`Preview ${index + 1}`}
+                          style={{
+                            width: '100%',
+                            height: '150px',
+                            objectFit: 'cover',
+                            borderRadius: '12px',
+                            border: '2px solid #e9ecef'
+                          }}
+                        />
+                        <button
+                          type="button"
+                          onClick={() => removeImage(index)}
+                          style={{
+                            position: 'absolute',
+                            top: '5px',
+                            right: '5px',
+                            background: '#ff4444',
+                            color: 'white',
+                            border: 'none',
+                            borderRadius: '50%',
+                            width: '28px',
+                            height: '28px',
+                            cursor: 'pointer',
+                            fontSize: '16px',
+                            fontWeight: 'bold',
+                            display: 'flex',
+                            alignItems: 'center',
+                            justifyContent: 'center'
+                          }}
+                        >
+                          ×
+                        </button>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              )}
 
               <div className="form-group">
                 <label className="form-label">Équipements</label>
@@ -609,8 +743,13 @@ export default function CreateStudioPage() {
               <Link href="/" className="btn-cancel">
                 Annuler
               </Link>
-              <button type="submit" className="btn-submit" disabled={loading}>
-                {loading ? (
+              <button type="submit" className="btn-submit" disabled={loading || uploadingImages}>
+                {uploadingImages ? (
+                  <>
+                    <div className="loading-spinner"></div>
+                    Upload des images...
+                  </>
+                ) : loading ? (
                   <>
                     <div className="loading-spinner"></div>
                     Création en cours...
