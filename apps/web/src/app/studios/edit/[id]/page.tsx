@@ -3,6 +3,7 @@
 import { useState, useEffect } from 'react';
 import { useRouter, useParams } from 'next/navigation';
 import { use } from 'react';
+import { API_ENDPOINTS } from '../../../../config/api';
 
 type ValuePiece = Date | null;
 type Value = ValuePiece | [ValuePiece, ValuePiece];
@@ -64,7 +65,7 @@ export default function EditStudioPage() {
 
   const fetchStudio = async () => {
     try {
-      const response = await fetch(`http://localhost:4000/api/studios/${id}`);
+      const response = await fetch(API_ENDPOINTS.STUDIOS.BY_ID(id as string));
       if (response.ok) {
         const data = await response.json();
         setFormData(prev => ({ ...prev, ...data }));
@@ -161,7 +162,7 @@ export default function EditStudioPage() {
         uploadFormData.append('images', file);
       });
 
-      const response = await fetch('http://localhost:4000/api/uploads/studios/images', {
+      const response = await fetch(API_ENDPOINTS.UPLOADS.STUDIO_IMAGES, {
         method: 'POST',
         headers: {
           'Authorization': `Bearer ${token}`,
@@ -221,7 +222,7 @@ export default function EditStudioPage() {
       // Filtrer les propriétés non autorisées avant l'envoi
       const { id, ownerId, createdAt, updatedAt, owner, reservations, ...filteredData } = formData;
 
-      const response = await fetch(`http://localhost:4000/api/studios/${id}`, {
+      const response = await fetch(API_ENDPOINTS.STUDIOS.BY_ID(id as string), {
         method: 'PATCH',
         headers: {
           'Content-Type': 'application/json',

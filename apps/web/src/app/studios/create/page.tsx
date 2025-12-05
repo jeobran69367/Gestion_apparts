@@ -4,6 +4,7 @@ import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 import { useAuth } from '../../../hooks/useAuth';
+import { API_ENDPOINTS } from '../../../config/api';
 
 export default function CreateStudioPage() {
   const [loading, setLoading] = useState(false);
@@ -107,7 +108,7 @@ export default function CreateStudioPage() {
         formData.append('images', file);
       });
 
-      const response = await fetch('http://localhost:4000/api/uploads/studios/images', {
+      const response = await fetch(API_ENDPOINTS.UPLOADS.STUDIO_IMAGES, {
         method: 'POST',
         headers: {
           'Authorization': `Bearer ${token}`,
@@ -154,7 +155,7 @@ export default function CreateStudioPage() {
         rules: formData.rules ? formData.rules.split(',').map(r => r.trim()).filter(r => r) : [],
       };
 
-      const response = await fetch('http://localhost:4000/api/studios', {
+      const response = await fetch(API_ENDPOINTS.STUDIOS.BASE, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
