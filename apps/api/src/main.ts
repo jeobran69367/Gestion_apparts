@@ -10,8 +10,22 @@ async function bootstrap() {
   
   // Increase body size limit for Base64 image uploads
   // Allow up to 50MB for JSON (to handle multiple Base64 encoded images)
-  app.use(json({ limit: '50mb' }));
-  app.use(urlencoded({ limit: '50mb', extended: true }));
+  // IMPORTANT: Exclude multipart routes (uploads) to avoid conflicts with multer
+  app.use((req, res, next) => {
+    // Skip body parsing for multipart/form-data (file uploads)
+    if (req.headers['content-type']?.includes('multipart/form-data')) {
+      return next();
+    }
+    json({ limit: '50mb' })(req, res, next);
+  });
+  
+  app.use((req, res, next) => {
+    // Skip body parsing for multipart/form-data (file uploads)
+    if (req.headers['content-type']?.includes('multipart/form-data')) {
+      return next();
+    }
+    urlencoded({ limit: '50mb', extended: true })(req, res, next);
+  });
   
   // Configuration CORS pour le développement
   app.enableCors({
