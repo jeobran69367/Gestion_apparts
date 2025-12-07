@@ -3,9 +3,29 @@ import { NestFactory } from '@nestjs/core';
 import { ValidationPipe } from '@nestjs/common';
 import { AppModule } from './app.module';
 import emailRouter from './email/email.routes';
+import { json, urlencoded } from 'express';
 
 async function bootstrap() {
   const app = await NestFactory.create(AppModule);
+  
+  // Increase body size limit for Base64 image uploads
+  // Allow up to 100MB for JSON (to handle 10 images × 5MB each = ~67MB after Base64 encoding)
+  // IMPORTANT: Exclude multipart routes (uploads) to avoid conflicts with multer
+  app.use((req, res, next) => {
+    // Skip body parsing for multipart/form-data (file uploads)
+    if (req.headers['content-type']?.includes('multipart/form-data')) {
+      return next();
+    }
+    json({ limit: '100mb' })(req, res, next);
+  });
+  
+  app.use((req, res, next) => {
+    // Skip body parsing for multipart/form-data (file uploads)
+    if (req.headers['content-type']?.includes('multipart/form-data')) {
+      return next();
+    }
+    urlencoded({ limit: '100mb', extended: true })(req, res, next);
+  });
   
   // Configuration CORS pour le développement
   app.enableCors({
