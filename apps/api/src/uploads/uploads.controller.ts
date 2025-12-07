@@ -10,6 +10,7 @@ import {
 import { FilesInterceptor } from '@nestjs/platform-express';
 import { JwtAuthGuard } from '../auth/jwt-auth.guard';
 import { UploadsService } from './uploads.service';
+import { memoryStorage } from 'multer';
 
 @Controller('uploads')
 export class UploadsController {
@@ -19,6 +20,7 @@ export class UploadsController {
   @UseGuards(JwtAuthGuard)
   @UseInterceptors(
     FilesInterceptor('images', 10, {
+      storage: memoryStorage(),
       fileFilter: (req, file, cb) => {
         const allowedTypes = ['image/jpeg', 'image/jpg', 'image/png', 'image/webp'];
         if (!allowedTypes.includes(file.mimetype)) {
