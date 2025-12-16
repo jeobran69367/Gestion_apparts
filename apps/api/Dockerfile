@@ -16,8 +16,21 @@ COPY . .
 # Build the application (this also generates Prisma client)
 RUN npm run build
 
-# Verify build output
-RUN ls -la dist/ && echo "Build artifacts created successfully"
+# Verify build output - FAIL if dist doesn't exist or is empty
+RUN if [ ! -d "dist" ]; then \
+      echo "ERROR: dist directory was not created!"; \
+      echo "Listing current directory:"; \
+      ls -la; \
+      exit 1; \
+    fi && \
+    if [ ! -f "dist/main.js" ]; then \
+      echo "ERROR: dist/main.js was not created!"; \
+      echo "Contents of dist directory:"; \
+      ls -laR dist/; \
+      exit 1; \
+    fi && \
+    echo "✅ Build successful: dist/main.js created" && \
+    ls -la dist/
 
 # Stage 2: Production
 FROM node:20-alpine AS runner
