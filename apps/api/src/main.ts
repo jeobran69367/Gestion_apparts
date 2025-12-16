@@ -36,17 +36,30 @@ async function bootstrap() {
 
   app.enableCors({
     origin: (origin, callback) => {
-      // Permettre les requêtes sans origine (comme les appels d'API mobile)
+      // Permettre les requêtes sans origine (comme les appels d'API mobile ou serveur à serveur)
       if (!origin) return callback(null, true);
       
-      // Vérifier si l'origine est dans la liste ou correspond au pattern Vercel
-      if (allowedOrigins.includes(origin) || 
-          origin.endsWith('.vercel.app') || 
-          origin.endsWith('.vercel.com')) {
-        callback(null, true);
-      } else {
-        callback(new Error('Not allowed by CORS'));
+      // Vérifier si l'origine est dans la liste autorisée
+      if (allowedOrigins.includes(origin)) {
+        return callback(null, true);
       }
+      
+      // Pour les domaines Vercel, vérifier que c'est notre projet spécifique
+      // Pattern: https://<project-name>-*.vercel.app ou https://<project-name>.vercel.app
+      const vercelProjectName = process.env.VERCEL_PROJECT_NAME || 'gestion-apparts';
+      if (origin.includes('.vercel.app') || origin.includes('.vercel.com')) {
+        // Extraire le nom du sous-domaine
+        const urlParts = new URL(origin);
+        const hostname = urlParts.hostname;
+        // Vérifier si le hostname commence par notre nom de projet ou correspond exactement
+        if (hostname === `${vercelProjectName}.vercel.app` || 
+            hostname.startsWith(`${vercelProjectName}-`)) {
+          return callback(null, true);
+        }
+      }
+      
+      // Origine non autorisée
+      callback(new Error('Not allowed by CORS'));
     },
     methods: ['GET', 'POST', 'PUT', 'DELETE', 'PATCH'],
     allowedHeaders: ['Content-Type', 'Authorization'],
