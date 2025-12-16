@@ -4,6 +4,7 @@ import { useState, useEffect } from 'react';
 import { useParams, useRouter } from 'next/navigation';
 import Link from 'next/link';
 import BookingConfirmationManager from '../../../../components/payment/BookingConfirmationManager';
+import { API_ENDPOINTS } from '@/config/api';
 
 /**
  * Local SmartPriceDisplay component used to render prices (expects price in cents).
@@ -168,7 +169,7 @@ export default function BookingPage() {
 
   const fetchStudio = async () => {
     try {
-      const response = await fetch(`http://localhost:4000/api/studios/${studioId}`);
+      const response = await fetch(API_ENDPOINTS.STUDIOS.BY_ID(studioId));
       if (response.ok) {
         const data = await response.json();
         setStudio(data);

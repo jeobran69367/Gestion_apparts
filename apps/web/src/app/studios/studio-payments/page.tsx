@@ -3,6 +3,7 @@
 import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
+import { API_ENDPOINTS } from '@/config/api';
 
 interface Payment {
   id: number;
@@ -97,7 +98,7 @@ export default function StudioPaymentsPage() {
   const fetchStudioPayments = async (token: string, start?: string, end?: string) => {
     try {
       setLoading(true);
-      let url = 'http://localhost:4000/api/payments/studio-payments';
+      let url = API_ENDPOINTS.PAYMENTS.STUDIO_PAYMENTS;
       const params = new URLSearchParams();
       
       if (start) params.append('startDate', start);

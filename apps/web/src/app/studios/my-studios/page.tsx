@@ -5,6 +5,7 @@ import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 import CardMaisonLocation, { MaisonLocation } from '../../../components/CardMaisonLocation';
 import { useAuth } from '../../../hooks/useAuth';
+import { API_ENDPOINTS } from '@/config/api';
 
 export default function MyStudiosPage() {
   const [studios, setStudios] = useState<MaisonLocation[]>([]);
@@ -35,7 +36,7 @@ export default function MyStudiosPage() {
 
   const fetchMyStudios = async (token: string) => {
     try {
-      const response = await fetch('http://localhost:4000/api/studios/my-studios', {
+      const response = await fetch(API_ENDPOINTS.STUDIOS.MY_STUDIOS, {
         headers: {
           'Authorization': `Bearer ${token}`,
           'Content-Type': 'application/json',
@@ -97,7 +98,7 @@ export default function MyStudiosPage() {
     setOperationLoading(studioId);
     try {
       const token = localStorage.getItem('token');
-      const response = await fetch(`http://localhost:4000/api/studios/${studioId}`, {
+      const response = await fetch(API_ENDPOINTS.STUDIOS.BY_ID(studioId), {
         method: 'DELETE',
         headers: {
           'Authorization': `Bearer ${token}`,
@@ -120,7 +121,7 @@ export default function MyStudiosPage() {
     setOperationLoading(studioId);
     try {
       const token = localStorage.getItem('token');
-      const response = await fetch(`http://localhost:4000/api/studios/${studioId}`, {
+      const response = await fetch(API_ENDPOINTS.STUDIOS.BY_ID(studioId), {
         method: 'PATCH',
         headers: {
           'Authorization': `Bearer ${token}`,

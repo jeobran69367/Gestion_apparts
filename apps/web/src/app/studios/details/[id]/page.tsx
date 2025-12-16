@@ -3,6 +3,7 @@
 import { useState, useEffect } from 'react';
 import { useParams, useRouter } from 'next/navigation';
 import Link from 'next/link';
+import { API_ENDPOINTS } from '@/config/api';
 
 interface Studio {
   id: number;
@@ -106,7 +107,7 @@ export default function StudioDetailsPage() {
 
   const fetchStudio = async () => {
     try {
-      const response = await fetch(`http://localhost:4000/api/studios/${studioId}`);
+      const response = await fetch(API_ENDPOINTS.STUDIOS.BY_ID(studioId));
       if (response.ok) {
         const data = await response.json();
         setStudio(data);
@@ -123,7 +124,7 @@ export default function StudioDetailsPage() {
 
   const fetchReservations = async () => {
     try {
-      const response = await fetch(`http://localhost:4000/api/studios/${studioId}/reservations`);
+      const response = await fetch(API_ENDPOINTS.STUDIOS.RESERVATIONS_BY_STUDIO(studioId));
       if (response.ok) {
         const data = await response.json();
         setReservations(data);
@@ -139,7 +140,7 @@ export default function StudioDetailsPage() {
 
     const fetchReservedDates = async () => {
       try {
-        const response = await fetch(`http://localhost:4000/api/studios/${studio.id}/reservations`);
+        const response = await fetch(API_ENDPOINTS.STUDIOS.RESERVATIONS_BY_STUDIO(studio.id));
         if (!response.ok) {
           console.error('Erreur API:', response.statusText);
           return;

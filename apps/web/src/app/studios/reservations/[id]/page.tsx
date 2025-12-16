@@ -2,6 +2,7 @@
 
 import { useParams } from 'next/navigation';
 import { useEffect, useState } from 'react';
+import { API_ENDPOINTS } from '@/config/api';
 
 interface ReservationDetails {
   id: string;
@@ -25,7 +26,7 @@ export default function ReservationDetailsPage() {
 
   useEffect(() => {
     if (id) {
-      fetch(`http://localhost:4000/api/reservations/${id}`)
+      fetch(API_ENDPOINTS.RESERVATIONS.BY_ID(id as string))
         .then((response) => response.json())
         .then((data) => setReservation(data))
         .catch((error) => console.error('Erreur lors du chargement des détails de la réservation:', error));

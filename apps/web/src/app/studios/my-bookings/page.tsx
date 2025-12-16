@@ -4,6 +4,7 @@ import { useState, useEffect, useCallback } from 'react';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 import { useAuth } from '../../../hooks/useAuth';
+import { API_ENDPOINTS } from '@/config/api';
 
 interface Booking {
   id: number;
@@ -48,7 +49,7 @@ export default function MyBookingsPage() {
         return;
       }
 
-      const response = await fetch('http://localhost:4000/api/reservations/my-reservations', {
+      const response = await fetch(API_ENDPOINTS.RESERVATIONS.MY_RESERVATIONS, {
         headers: {
           'Authorization': `Bearer ${token}`,
           'Content-Type': 'application/json',
