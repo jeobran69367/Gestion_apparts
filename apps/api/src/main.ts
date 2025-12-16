@@ -27,9 +27,27 @@ async function bootstrap() {
     urlencoded({ limit: '100mb', extended: true })(req, res, next);
   });
   
-  // Configuration CORS pour le développement
+  // Configuration CORS pour le développement et la production
+  const allowedOrigins = [
+    'http://localhost:3000',
+    'http://127.0.0.1:3000',
+    process.env.FRONTEND_URL,
+  ].filter(Boolean); // Enlever les valeurs undefined
+
   app.enableCors({
-    origin: ['http://localhost:3000', 'http://127.0.0.1:3000'],
+    origin: (origin, callback) => {
+      // Permettre les requêtes sans origine (comme les appels d'API mobile)
+      if (!origin) return callback(null, true);
+      
+      // Vérifier si l'origine est dans la liste ou correspond au pattern Vercel
+      if (allowedOrigins.includes(origin) || 
+          origin.endsWith('.vercel.app') || 
+          origin.endsWith('.vercel.com')) {
+        callback(null, true);
+      } else {
+        callback(new Error('Not allowed by CORS'));
+      }
+    },
     methods: ['GET', 'POST', 'PUT', 'DELETE', 'PATCH'],
     allowedHeaders: ['Content-Type', 'Authorization'],
     credentials: true,

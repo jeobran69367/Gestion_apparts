@@ -1,121 +1,67 @@
-# Documentation: Déploiement du Projet Gestion Apparts
+# ⚠️ Ce document est obsolète
 
-## Introduction
-Ce document décrit les étapes nécessaires pour déployer le projet **Gestion Apparts**, qui comprend un backend (API NestJS) et un frontend (Next.js). Le déploiement peut être effectué sur des plateformes gratuites et simples comme Railway, Render, et Vercel.
+## 📚 Documentation de Déploiement Mise à Jour
 
----
+Ce fichier a été remplacé par une documentation plus complète et détaillée.
 
-## Structure du Projet
+### 🔗 Nouveaux Documents
 
-- **Backend (API)** :
-  - Framework : NestJS
-  - Localisation : `apps/api`
-  - Base de données : PostgreSQL
+Pour déployer l'application **Gestion Apparts**, veuillez consulter:
 
-- **Frontend (Web)** :
-  - Framework : Next.js
-  - Localisation : `apps/web`
+1. **[📖 Guide de Déploiement Complet](./GUIDE_DEPLOIEMENT_COMPLET.md)**
+   - Guide détaillé étape par étape
+   - Configuration Railway (Backend)
+   - Configuration Vercel (Frontend)
+   - Configuration de la base de données
+   - Dépannage et solutions
 
----
+2. **[⌨️ Commandes de Déploiement](./COMMANDES_DEPLOIEMENT.md)**
+   - Référence rapide des commandes
+   - Scripts utiles
+   - Commandes CLI Railway et Vercel
+   - Gestion de Prisma
 
-## Étapes de Déploiement
+3. **[✅ Checklist de Déploiement](./CHECKLIST_DEPLOIEMENT.md)**
+   - Liste de vérification complète
+   - Toutes les étapes à suivre
+   - Validation post-déploiement
 
-### 1. Déploiement du Backend (API NestJS)
-
-#### 1.1. Préparer le Backend
-1. Assurez-vous que toutes les dépendances sont installées :
-   ```bash
-   cd apps/api
-   npm install
-   ```
-2. Vérifiez que le fichier `.env` contient les variables nécessaires, par exemple :
-   ```env
-   DATABASE_URL=postgresql://user:password@host:port/database
-   ```
-
-#### 1.2. Déployer sur Railway
-1. Créez un compte sur [Railway](https://railway.app).
-2. Importez le projet depuis GitHub.
-3. Configurez les variables d'environnement nécessaires (comme `DATABASE_URL`).
-4. Railway détectera automatiquement votre projet et déploiera l'API.
-
-#### 1.3. Déployer sur Render
-1. Créez un compte sur [Render](https://render.com).
-2. Créez un nouveau service "Web Service" et connectez votre dépôt GitHub.
-3. Ajoutez les variables d'environnement nécessaires.
-4. Spécifiez la commande de démarrage :
-   ```bash
-   npm run start:prod
-   ```
-5. Render déploiera automatiquement votre backend.
+4. **[📘 README](./README.md)**
+   - Vue d'ensemble du projet
+   - Instructions de développement local
+   - Technologies utilisées
 
 ---
 
-### 2. Déploiement du Frontend (Next.js)
+## 🚀 Déploiement Rapide
 
-#### 2.1. Préparer le Frontend
-1. Assurez-vous que toutes les dépendances sont installées :
-   ```bash
-   cd apps/web
-   npm install
-   ```
-2. Vérifiez que le fichier `.env` contient les variables nécessaires, par exemple :
-   ```env
-   NEXT_PUBLIC_API_URL=https://api-backend.railway.app
-   ```
+### Backend → Railway
+```bash
+# 1. Créer un projet sur https://railway.app
+# 2. Importer depuis GitHub: jeobran69367/Gestion_apparts
+# 3. Ajouter une base de données PostgreSQL
+# 4. Configurer les variables d'environnement (voir .env.example)
+# 5. Railway déploie automatiquement
+```
 
-#### 2.2. Déployer sur Vercel
-1. Créez un compte sur [Vercel](https://vercel.com).
-2. Importez votre projet Next.js depuis GitHub.
-3. Configurez les variables d'environnement nécessaires (comme `NEXT_PUBLIC_API_URL`).
-4. Vercel déploiera automatiquement votre frontend.
-
----
-
-## Communication entre le Frontend et le Backend
-
-1. **Configurer les CORS dans le Backend** :
-   - Assurez-vous que le backend autorise les requêtes provenant du domaine du frontend.
-   - Exemple de configuration dans NestJS :
-     ```typescript
-     import { NestFactory } from '@nestjs/core';
-     import { AppModule } from './app.module';
-
-     async function bootstrap() {
-       const app = await NestFactory.create(AppModule);
-       app.enableCors({
-         origin: 'https://frontend.vercel.app',
-       });
-       await app.listen(4000);
-     }
-     bootstrap();
-     ```
-
-2. **Utiliser des URLs publiques** :
-   - Dans le frontend, utilisez l'URL publique du backend (ex. `https://api-backend.railway.app`).
+### Frontend → Vercel
+```bash
+# 1. Créer un projet sur https://vercel.com
+# 2. Importer depuis GitHub: jeobran69367/Gestion_apparts
+# 3. Configurer les variables d'environnement (voir .env.example)
+# 4. Vercel déploie automatiquement
+```
 
 ---
 
-## Tester et Vérifier
+## 📞 Support
 
-1. **Tester le Backend** :
-   - Utilisez Postman ou un navigateur pour vérifier les endpoints de l'API.
-   - Exemple : `https://api-backend.railway.app/reservations`.
-
-2. **Tester le Frontend** :
-   - Accédez à l'URL fournie par Vercel et vérifiez que l'application fonctionne correctement.
+Pour toute question concernant le déploiement:
+1. Consultez le [Guide de Déploiement Complet](./GUIDE_DEPLOIEMENT_COMPLET.md)
+2. Vérifiez la [Checklist de Déploiement](./CHECKLIST_DEPLOIEMENT.md)
+3. Consultez les [Commandes de Déploiement](./COMMANDES_DEPLOIEMENT.md)
 
 ---
 
-## Ressources Utiles
-
-- [Railway Documentation](https://docs.railway.app)
-- [Render Documentation](https://render.com/docs)
-- [Vercel Documentation](https://vercel.com/docs)
-
----
-
-## Auteur
-- **Nom** : Jeobran Kombou
-- **Projet** : Gestion Apparts
-- **Date** : 20 novembre 2025
+**Mis à jour**: Décembre 2024  
+**Auteur**: Jeobran Kombou
