@@ -5,7 +5,8 @@
   "scripts": {
     "dev": "next dev",
     "dev:turbo": "next dev --turbopack",
-    "build": "next build",
+    "build": "next build && mkdir public && cp -r .next public",
+
     "start": "next start",
     "lint": "eslint"
   },
