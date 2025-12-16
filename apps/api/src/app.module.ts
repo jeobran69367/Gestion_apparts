@@ -9,6 +9,7 @@ import { ReservationsModule } from './reservations/reservations.module';
 import { PaymentsModule } from './payments/payments.module'; 
 import { UserModule} from './user/user.module';
 import { EmailModule } from './email/email.module';
+import { UploadsModule } from './uploads/uploads.module';
 
 @Module({
   imports: [
@@ -22,6 +23,7 @@ import { EmailModule } from './email/email.module';
     UserModule,
     PaymentsModule, // Ajout du module PaymentsModule
     EmailModule,
+    UploadsModule, // Module for image uploads
   ],
   controllers: [AppController],
   providers: [AppService],

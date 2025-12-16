@@ -68,7 +68,8 @@ model Studio {
   maxStay       Int     @default(30) // nuits maximum
 
   // Média et services
-  photos        String[] // URLs des photos
+  photos        String[] // Images encodées en Base64
+  primaryPhoto  String?  // Image principale encodée en Base64 (première à afficher)
   amenities     String[] // ["wifi", "kitchen", "parking", etc.]
   rules         String[] // Règles de la maison
 
