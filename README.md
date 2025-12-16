@@ -2,7 +2,9 @@
 
 Application de gestion d'appartements avec backend NestJS et frontend Next.js.
 
-## 🚀 Déploiement Rapide avec Docker
+## 🚀 Démarrage Rapide avec Docker
+
+> **📘 Guide Complet** : Consultez [DOCKER_QUICK_START.md](./DOCKER_QUICK_START.md) pour un guide détaillé avec résolution de problèmes.
 
 ### Prérequis
 - Docker et Docker Compose installés
@@ -18,29 +20,18 @@ cd Gestion_apparts
 
 2. **Configurer les variables d'environnement** :
 
-Créer `.env` à la racine du projet (copiez depuis `.env.example`) :
+Créer `.env` à la racine du projet :
+```bash
+cp .env.example .env
+# Puis éditez .env avec vos valeurs
+```
+
+**Minimum requis** :
 ```env
 JWT_SECRET=your-secret-key-change-in-production
 FRONTEND_URL=http://localhost:3000
 NEXT_PUBLIC_API_URL=http://localhost:4000/api
 PAWAPAY_API_KEY=your-pawapay-api-key
-```
-
-OU créer les fichiers .env individuels :
-
-Créer `apps/api/.env` :
-```env
-DATABASE_URL="postgresql://postgres:postgres@postgres:5432/gestion_apparts?schema=public"
-JWT_SECRET="your-secret-key-change-in-production"
-FRONTEND_URL="http://localhost:3000"
-NODE_ENV="production"
-PORT=4000
-```
-
-Créer `apps/web/.env` :
-```env
-NEXT_PUBLIC_API_URL="http://localhost:4000/api"
-PAWAPAY_API_KEY="your-pawapay-api-key"
 ```
 
 3. **Lancer l'application** :
