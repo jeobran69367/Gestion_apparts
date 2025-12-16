@@ -14,7 +14,8 @@ RUN npm ci
 COPY . .
 
 # Generate Prisma client and build
-RUN npx prisma generate
+# Use the locally installed prisma version from node_modules
+RUN npm run prisma:generate
 RUN npm run build
 
 # Stage 2: Production
@@ -27,11 +28,13 @@ COPY package*.json ./
 COPY prisma ./prisma/
 
 # Install production dependencies only
-RUN npm ci --only=production
+RUN npm ci --omit=dev
+
+# Generate Prisma client in production stage
+RUN npm run prisma:generate
 
 # Copy built application from builder
 COPY --from=builder /app/dist ./dist
-COPY --from=builder /app/node_modules/.prisma ./node_modules/.prisma
 
 # Expose port
 EXPOSE 4000
@@ -40,4 +43,4 @@ EXPOSE 4000
 ENV NODE_ENV=production
 
 # Start the application
-CMD ["npm", "run", "start:prod"]
+CMD ["node", "dist/main"]
