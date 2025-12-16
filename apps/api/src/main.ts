@@ -47,15 +47,21 @@ async function bootstrap() {
       // Pour les domaines Vercel, vérifier que c'est notre projet spécifique
       // Pattern: https://<project-name>-*.vercel.app ou https://<project-name>.vercel.app
       const vercelProjectName = process.env.VERCEL_PROJECT_NAME || 'gestion-apparts';
-      if (origin.includes('.vercel.app') || origin.includes('.vercel.com')) {
-        // Extraire le nom du sous-domaine
+      try {
         const urlParts = new URL(origin);
         const hostname = urlParts.hostname;
-        // Vérifier si le hostname commence par notre nom de projet ou correspond exactement
-        if (hostname === `${vercelProjectName}.vercel.app` || 
-            hostname.startsWith(`${vercelProjectName}-`)) {
-          return callback(null, true);
+        
+        // Vérifier que le hostname se termine par .vercel.app (domaine exact)
+        if (hostname.endsWith('.vercel.app') || hostname === `${vercelProjectName}.vercel.app`) {
+          // Vérifier si le hostname correspond à notre projet Vercel
+          if (hostname === `${vercelProjectName}.vercel.app` || 
+              hostname.startsWith(`${vercelProjectName}-`) && hostname.endsWith('.vercel.app')) {
+            return callback(null, true);
+          }
         }
+      } catch (error) {
+        // Origine invalide (pas une URL valide)
+        return callback(new Error('Invalid origin URL'));
       }
       
       // Origine non autorisée
