@@ -15,9 +15,6 @@ const nextConfig: NextConfig = {
    env: {
     PAWAPAY_API_KEY: process.env.PAWAPAY_API_KEY,
   },
-    distDir: 'build' // Modifie ce nom selon ta sortie
-
 };
-
 
 export default nextConfig;
