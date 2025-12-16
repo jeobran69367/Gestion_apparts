@@ -139,17 +139,13 @@ https://votre-app.railway.app/api/studios
 
 Dans les paramètres de projet Vercel:
 
-1. **Root Directory**: Laissez à la racine (ou spécifiez `apps/web` si demandé)
+1. **Root Directory**: **IMPORTANT** - Spécifiez `apps/web` (ceci est obligatoire pour un monorepo)
 2. **Framework Preset**: Next.js (détecté automatiquement)
-3. **Build Command**: 
-   ```bash
-   cd apps/web && npm install && npm run build
-   ```
-4. **Output Directory**: `apps/web/.next`
-5. **Install Command**: 
-   ```bash
-   cd apps/web && npm install
-   ```
+3. **Build Command**: Laissez par défaut (`npm run build`) ou laissez vide pour auto-détection
+4. **Output Directory**: Laissez par défaut (`.next`) ou laissez vide pour auto-détection
+5. **Install Command**: Laissez par défaut (`npm install`) ou laissez vide pour auto-détection
+
+**Note importante**: Le paramètre **Root Directory** doit être `apps/web` car votre application Next.js est dans un sous-dossier (structure monorepo).
 
 ### Étape 2.3: Configurer les Variables d'Environnement
 

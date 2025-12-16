@@ -60,10 +60,11 @@ Votre application est maintenant prête pour le déploiement sur **Railway (Back
 
 1. **Se connecter à Vercel**
 2. **Importer le projet** depuis GitHub
-3. **Configurer les variables** (copier depuis `.env.vercel.example`)
+3. **⚠️ IMPORTANT: Définir Root Directory = `apps/web`** (obligatoire pour monorepo)
+4. **Configurer les variables** (copier depuis `.env.vercel.example`)
    - **Important**: Utiliser l'URL Railway copiée pour `NEXT_PUBLIC_API_URL`
-4. **Déployer** ✅
-5. **Copier l'URL Vercel** (ex: `https://xxx.vercel.app`)
+5. **Déployer** ✅
+6. **Copier l'URL Vercel** (ex: `https://xxx.vercel.app`)
 
 📖 **Détails**: Voir [GUIDE_DEPLOIEMENT_COMPLET.md](./GUIDE_DEPLOIEMENT_COMPLET.md#partie-2-déploiement-du-frontend-sur-vercel)
 
@@ -100,6 +101,7 @@ Pour ceux qui connaissent déjà Railway et Vercel:
 
 # 2. Vercel
 - Importer repo GitHub → jeobran69367/Gestion_apparts
+- ⚠️ IMPORTANT: Root Directory = apps/web
 - Copier variables depuis .env.vercel.example
 - NEXT_PUBLIC_API_URL = URL Railway
 - Copier URL: https://xxx.vercel.app

@@ -35,6 +35,7 @@ Ce guide visuel présente le processus de déploiement de manière simple et gra
     ┌───────────────▼───────────────────────────────┐
     │         ÉTAPE 2: FRONTEND (Vercel)            │
     │  • Importer depuis GitHub                     │
+    │  • ⚠️ Root Directory = apps/web               │
     │  • Ajouter NEXT_PUBLIC_API_URL = URL Railway  │
     │  • Configurer autres variables                │
     │  • Déploiement automatique                    │
@@ -243,6 +244,7 @@ Ce guide visuel présente le processus de déploiement de manière simple et gra
 ┌─────────────────────────────────────────────┐
 │  ☐  Projet Vercel créé                     │
 │  ☐  Repository GitHub importé              │
+│  ☐  ⚠️ Root Directory = apps/web           │
 │  ☐  Variables configurées                  │
 │       ☐  NEXT_PUBLIC_API_URL = URL Railway │
 │       ☐  PAWAPAY_API_KEY                    │

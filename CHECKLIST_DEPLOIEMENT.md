@@ -93,10 +93,11 @@ Vérifiez que toutes ces variables sont configurées:
 
 ### Configuration Build
 
-- [ ] Build Command: `cd apps/web && npm install && npm run build`
-- [ ] Output Directory: `apps/web/.next`
-- [ ] Install Command: `cd apps/web && npm install`
-- [ ] Root Directory configuré si nécessaire
+- [ ] **Root Directory: `apps/web`** (OBLIGATOIRE pour monorepo)
+- [ ] Framework Preset: Next.js (auto-détecté)
+- [ ] Build Command: Laisser par défaut ou vide (auto-détection)
+- [ ] Output Directory: Laisser par défaut ou vide (auto-détection)
+- [ ] Install Command: Laisser par défaut ou vide (auto-détection)
 
 ### Variables d'Environnement
 
