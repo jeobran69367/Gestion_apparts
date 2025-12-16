@@ -4,6 +4,7 @@ dockerfilePath = "apps/api/Dockerfile"
 dockerContext = "apps/api"
 
 [deploy]
+# Startup command is handled by Dockerfile CMD (runs migrations then starts app)
 restartPolicyType = "ON_FAILURE"
 restartPolicyMaxRetries = 10
 
