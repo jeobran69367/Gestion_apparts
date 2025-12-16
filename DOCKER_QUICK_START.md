@@ -135,19 +135,27 @@ docker-compose down -v --rmi all
 
 ### Erreur : "Cannot find module '/app/dist/main'"
 
-✅ **Résolu** dans la dernière version du Dockerfile.
+✅ **Résolu** dans la dernière version (commit ae5e2f3).
 
-**Cause** : Le build NestJS ne créait pas le fichier `dist/main.js` correctement.
+**Causes identifiées** :
+1. Scripts `package.json` utilisaient `npx prisma` au lieu du Prisma local
+2. Fichier `tsconfig.build.json` manquant pour la compilation NestJS
+3. Configuration de build NestJS incomplète
 
-**Solution** : Ajout de `nest-cli.json` et mise à jour du Dockerfile pour :
-- Utiliser la version locale de Prisma (pas `npx prisma`)
-- Corriger le chemin de démarrage (`node dist/main`)
+**Solutions appliquées** :
+- ✅ Ajout de `tsconfig.build.json` pour exclure test/dist du build
+- ✅ Ajout de `nest-cli.json` pour configurer la structure de sortie
+- ✅ Mise à jour de tous les scripts pour utiliser `prisma` local (pas `npx`)
+- ✅ Simplification du Dockerfile avec vérifications de build
 
-Si vous avez cette erreur :
+**Pour appliquer le fix :**
 ```bash
 git pull origin copilot/fix-deploiyement-issue
+docker-compose down -v
 docker-compose up -d --build
 ```
+
+Le build devrait maintenant créer correctement `dist/main.js`.
 
 ### Erreur : "public directory not found"
 
