@@ -7,25 +7,17 @@ WORKDIR /app
 COPY package*.json ./
 COPY prisma ./prisma/
 
-# Install dependencies (including devDependencies for build)
+# Install all dependencies (including devDependencies needed for build)
 RUN npm ci
 
-# Copy source code
+# Copy source code  
 COPY . .
 
-# Generate Prisma client and build
-# Use the locally installed prisma version from node_modules
-RUN npm run prisma:generate
+# Build the application (this also generates Prisma client)
 RUN npm run build
 
-# Debug: List what was created
-RUN echo "=== Build completed, checking dist folder ===" && \
-    ls -la && \
-    if [ -d dist ]; then \
-      echo "dist folder exists:" && ls -laR dist/; \
-    else \
-      echo "ERROR: dist folder does not exist!"; \
-    fi
+# Verify build output
+RUN ls -la dist/ && echo "Build artifacts created successfully"
 
 # Stage 2: Production
 FROM node:20-alpine AS runner
@@ -39,19 +31,14 @@ COPY prisma ./prisma/
 # Install production dependencies only
 RUN npm ci --omit=dev
 
-# Generate Prisma client in production stage
-RUN npm run prisma:generate
-
 # Copy built application from builder
 COPY --from=builder /app/dist ./dist
 
-# Debug: Verify files were copied
-RUN echo "=== Checking copied dist folder ===" && \
-    if [ -d dist ]; then \
-      echo "dist folder exists in runner:" && ls -laR dist/ | head -20; \
-    else \
-      echo "ERROR: dist folder was not copied!"; \
-    fi
+# Generate Prisma client in production (needed for runtime)
+RUN npx prisma generate
+
+# Verify dist structure
+RUN ls -la dist/ && echo "Dist folder copied to runner"
 
 # Expose port
 EXPOSE 4000
