@@ -1,7 +1,7 @@
 [build]
 builder = "DOCKERFILE"
 dockerfilePath = "apps/api/Dockerfile"
-dockerContext = "apps/api"
+dockerContext = "."
 
 [deploy]
 # Startup command is handled by Dockerfile CMD (runs migrations then starts app)
