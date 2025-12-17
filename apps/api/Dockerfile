@@ -20,12 +20,8 @@ RUN npx prisma generate
 COPY src ./src
 COPY tsconfig.json ./
 
-# Build the application and verify output
-RUN npm run build && \
-    echo "=== Build completed ===" && \
-    ls -la dist/ && \
-    echo "=== Checking for main file ===" && \
-    ls -la dist/main* || echo "No main file found"
+# Build the application
+RUN npm run build
 
 # Production stage
 FROM node:20-alpine AS production
@@ -52,4 +48,4 @@ COPY --from=base /app/dist ./dist
 EXPOSE 3000
 
 # Start command - run migrations then start the app
-CMD ["sh", "-c", "npx prisma migrate deploy && node dist/main"]
+CMD ["sh", "-c", "npx prisma migrate deploy && node dist/main.js"]
