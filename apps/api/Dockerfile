@@ -20,8 +20,12 @@ RUN npx prisma generate
 COPY src ./src
 COPY tsconfig.json ./
 
-# Build the application
-RUN npm run build
+# Build the application and verify output
+RUN npm run build && \
+    echo "=== Build completed ===" && \
+    ls -la dist/ && \
+    echo "=== Checking for main file ===" && \
+    ls -la dist/main* || echo "No main file found"
 
 # Production stage
 FROM node:20-alpine AS production
