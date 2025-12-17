@@ -17,7 +17,8 @@ RUN npm ci --include=dev
 RUN npx prisma generate
 
 # Copy source code
-COPY . .
+COPY src ./src
+COPY tsconfig.json ./
 
 # Build the application
 RUN npm run build
