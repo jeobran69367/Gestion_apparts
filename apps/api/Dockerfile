@@ -24,8 +24,13 @@ COPY nest-cli.json ./
 # Build the application using explicit npx command
 RUN npx nest build
 
-# Verify build output exists
-RUN test -d dist && test -f dist/main.js && echo "✓ Build successful: dist/main.js exists" || (echo "✗ Build failed: dist directory or main.js not found" && ls -la && exit 1)
+# Verify build output exists - show what's in dist
+RUN echo "=== Checking build output ===" && \
+    ls -la && \
+    echo "=== Contents of dist directory ===" && \
+    ls -laR dist/ && \
+    echo "=== Verifying dist/main.js ===" && \
+    test -f dist/main.js && echo "✓ Build successful: dist/main.js exists" || (echo "✗ Build failed: dist/main.js not found" && exit 1)
 
 # Production stage
 FROM node:20-alpine AS production
