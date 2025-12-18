@@ -21,11 +21,11 @@ COPY src ./src
 COPY tsconfig.json ./
 COPY nest-cli.json ./
 
-# Build the application
-RUN npm run build
+# Build the application using explicit npx command
+RUN npx nest build
 
-# Verify build output
-RUN ls -la dist/ && test -f dist/main.js && echo "✓ Build successful: dist/main.js exists"
+# Verify build output exists
+RUN test -d dist && test -f dist/main.js && echo "✓ Build successful: dist/main.js exists" || (echo "✗ Build failed: dist directory or main.js not found" && ls -la && exit 1)
 
 # Production stage
 FROM node:20-alpine AS production
