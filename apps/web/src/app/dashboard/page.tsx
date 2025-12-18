@@ -4,9 +4,7 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 import { useAuth, UserRole } from "../../hooks/useAuth";
-
-// API URL - matches existing codebase pattern
-const API_URL = 'http://localhost:4000';
+import API_BASE_URL from "@/config/api";
 
 // Helper function to get display text for user role
 function getRoleDisplayText(role: UserRole | undefined): string {
@@ -83,7 +81,7 @@ export default function DashboardPage() {
         throw new Error('Vous devez être connecté pour modifier votre profil');
       }
 
-      const response = await fetch(`${API_URL}/api/users/${user.id}`, {
+      const response = await fetch(`${API_BASE_URL}/api/users/${user.id}`, {
         method: 'PUT',
         headers: {
           'Content-Type': 'application/json',

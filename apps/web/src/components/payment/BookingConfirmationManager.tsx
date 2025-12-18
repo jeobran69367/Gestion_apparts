@@ -4,6 +4,7 @@ import { useState } from 'react';
 import PaymentMethodSelector from './PaymentMethodSelector';
 import PawaPayPayment from './PawaPayPayment';
 import EmailSender from '../EmailSender';
+import { API_ENDPOINTS } from '@/config/api';
 
 interface BookingConfirmationManagerProps {
   bookingData: {
@@ -130,7 +131,7 @@ export default function BookingConfirmationManager({
 
     try {
       // Essayer de créer l'utilisateur via l'API d'inscription
-      const result = await apiCall('http://localhost:4000/api/auth/register', 'POST', userData);
+      const result = await apiCall(API_ENDPOINTS.AUTH.REGISTER, 'POST', userData);
       console.log('✅ Utilisateur créé:', result);
       
       // Stocker le token si retourné
@@ -146,7 +147,7 @@ export default function BookingConfirmationManager({
         console.log('🔄 Utilisateur existe déjà, tentative de connexion...');
         
         try {
-          const loginResult = await apiCall('http://localhost:4000/api/auth/login', 'POST', {
+          const loginResult = await apiCall(API_ENDPOINTS.AUTH.LOGIN, 'POST', {
             email: bookingData.guestInfo.email,
             password: 'temporary123' // Mot de passe par défaut pour la récupération
           });
@@ -191,7 +192,7 @@ const generateTemporaryPassword = (): string => {
 
     console.log('📝 Création réservation PENDING:', reservationData);
 
-    const result = await apiCall('http://localhost:4000/api/reservations', 'POST', reservationData, token);
+    const result = await apiCall(API_ENDPOINTS.RESERVATIONS.BASE, 'POST', reservationData, token);
     console.log('✅ Réservation PENDING créée:', result);
     
     return result;
@@ -218,7 +219,7 @@ const generateTemporaryPassword = (): string => {
     };
 
     console.log('💰 Création paiement COMPLETED:', paymentPayload);
-    const paymentResult = await apiCall('http://localhost:4000/api/payments', 'POST', paymentPayload, token);
+    const paymentResult = await apiCall(API_ENDPOINTS.PAYMENTS.BASE, 'POST', paymentPayload, token);
     console.log('✅ Paiement créé:', paymentResult);
 
     // ÉTAPE 3B : Mettre à jour la réservation en CONFIRMED
@@ -227,7 +228,7 @@ const generateTemporaryPassword = (): string => {
     };
 
     console.log('🔄 Mise à jour réservation CONFIRMED');
-    await apiCall(`http://localhost:4000/api/reservations/${currentReservationId}`, 'PATCH', updateReservationPayload, token);
+    await apiCall(API_ENDPOINTS.RESERVATIONS.BY_ID(currentReservationId), 'PATCH', updateReservationPayload, token);
     
     console.log('🎉 Réservation confirmée avec succès!');
 
@@ -274,7 +275,7 @@ const handleEmailSending = async () => {
   console.log('📧 Envoi email avec payload:', emailPayload);
 
   try {
-    const response = await fetch('http://localhost:4000/api/email/send-email', {
+    const response = await fetch(API_ENDPOINTS.EMAIL.SEND, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',

@@ -654,13 +654,15 @@ export default function Home() {
                 <a href="#">Analytics</a>
               </div>
               
-              <div className="footer-section">
-                <h4>Développement</h4>
-                <a href="http://localhost:5555" target="_blank">Base de Données</a>
-                <a href="http://localhost:4000" target="_blank">API REST</a>
-                <a href="#">Next.js 15</a>
-                <a href="#">PostgreSQL</a>
-              </div>
+              {process.env.NODE_ENV === 'development' && (
+                <div className="footer-section">
+                  <h4>Développement</h4>
+                  <a href="http://localhost:5555" target="_blank">Base de Données</a>
+                  <a href="http://localhost:4000" target="_blank">API REST</a>
+                  <a href="#">Next.js 15</a>
+                  <a href="#">PostgreSQL</a>
+                </div>
+              )}
               
               <div className="footer-section">
                 <h4>Contact</h4>

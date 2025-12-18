@@ -1,4 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
+import { INTERNAL_API } from '@/config/api';
 
 /**
  * API pour vérifier l'état d'une réservation par paymentId
@@ -81,7 +82,7 @@ export async function POST(request: NextRequest) {
 
 
     // Forcer l'appel à l'API de création complète
-    const completeResponse = await fetch(`${process.env.NEXT_PUBLIC_BASE_URL || 'http://localhost:3000'}/api/bookings/complete`, {
+    const completeResponse = await fetch(INTERNAL_API.BOOKINGS.COMPLETE, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
