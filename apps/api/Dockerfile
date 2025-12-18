@@ -60,4 +60,4 @@ EXPOSE 4000
 ENV NODE_ENV=production
 
 # Start the application
-CMD ["node", "dist/main"]
+CMD ["node", "dist/main.js"]
