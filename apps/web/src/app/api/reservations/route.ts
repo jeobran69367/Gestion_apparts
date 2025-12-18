@@ -1,5 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 
+const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:4000';
+
 // API pour créer ou confirmer une réservation
 export async function POST(request: NextRequest) {
   try {
@@ -58,7 +60,7 @@ export async function POST(request: NextRequest) {
     
     // Exemple d'appel backend :
     /*
-    const backendResponse = await fetch('http://localhost:4000/api/reservations', {
+    const backendResponse = await fetch(`${API_BASE_URL}/api/reservations`, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',

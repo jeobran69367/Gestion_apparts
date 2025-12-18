@@ -3,6 +3,7 @@
 import { useState, useEffect } from 'react';
 import Link from 'next/link';
 import CardMaisonLocation, { MaisonLocation } from '../../components/CardMaisonLocation';
+import API_BASE_URL from '../../config/api';
 
 export default function PropertiesPage() {
   const [properties, setProperties] = useState<MaisonLocation[]>([]);
@@ -31,7 +32,7 @@ export default function PropertiesPage() {
         ...(filters.city && { city: filters.city }),
       });
 
-      const response = await fetch(`http://localhost:4000/api/studios?${params}`);
+      const response = await fetch(`${API_BASE_URL}/api/studios?${params}`);
       
       if (response.ok) {
         const data = await response.json();
