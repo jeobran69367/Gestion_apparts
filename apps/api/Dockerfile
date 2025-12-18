@@ -59,4 +59,4 @@ RUN ls -la dist/ && test -f dist/main.js && echo "✓ Production stage: dist/mai
 EXPOSE 3000
 
 # Start command: run migrations then start the application
-CMD ["sh", "-c", "npx prisma migrate deploy && node dist/main.js"]
+CMD ["sh", "-c", "npx prisma migrate deploy && node dist/main"]
