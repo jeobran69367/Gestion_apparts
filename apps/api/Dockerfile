@@ -16,36 +16,16 @@ RUN npm ci
 # Generate Prisma Client
 RUN npx prisma generate
 
-# Copy source code and TypeScript configuration
+# Copy source code, TypeScript configuration, and NestJS CLI configuration
 COPY src ./src
 COPY tsconfig.json ./
+COPY nest-cli.json ./
 
-# Build the application with verbose output
-RUN npm run build 2>&1 | tee build.log && \
-    echo "=== Build command completed ===" && \
-    echo "=== Current directory contents ===" && \
-    ls -la && \
-    echo "=== Checking for dist directory ===" && \
-    if [ -d "dist" ]; then \
-        echo "✓ dist directory exists" && \
-        echo "=== dist directory contents ===" && \
-        ls -la dist/ && \
-        if [ -f "dist/main.js" ]; then \
-            echo "✓ Build successful: dist/main.js exists"; \
-        else \
-            echo "✗ Build failed: dist/main.js not found in dist/" && \
-            echo "Files in dist:" && \
-            find dist -type f && \
-            exit 1; \
-        fi \
-    else \
-        echo "✗ Build failed: dist directory not created" && \
-        echo "Available directories:" && \
-        ls -la && \
-        echo "=== Build log ===" && \
-        cat build.log && \
-        exit 1; \
-    fi
+# Build the application
+RUN npm run build
+
+# Verify build output
+RUN ls -la dist/ && test -f dist/main.js && echo "✓ Build successful: dist/main.js exists"
 
 # Production stage
 FROM node:20-alpine AS production
