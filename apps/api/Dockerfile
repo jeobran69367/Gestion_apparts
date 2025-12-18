@@ -1,31 +1,57 @@
-# --- STAGE 1: Build ---
+# Build stage
 FROM node:20-alpine AS build
+
+# Install necessary system dependencies
 RUN apk add --no-cache openssl libc6-compat
+
 WORKDIR /app
 
+# Copy package files for dependency installation
 COPY package*.json ./
 COPY prisma ./prisma/
 
-# On installe TOUTES les dépendances pour compiler le TypeScript
+# Install all dependencies (including devDependencies for building)
 RUN npm ci
 
-COPY . .
+# Generate Prisma Client
 RUN npx prisma generate
+
+# Copy source code and configuration
+COPY src ./src
+COPY tsconfig.json ./
+
+# Build the application
 RUN npm run build
 
-# --- STAGE 2: Production ---
+# Verify build output
+RUN ls -la dist/ && test -f dist/main.js && echo "✓ Build successful: dist/main.js exists" || (echo "✗ Build failed: dist/main.js not found" && exit 1)
+
+# Production stage
 FROM node:20-alpine AS production
+
+# Install necessary system dependencies
 RUN apk add --no-cache openssl libc6-compat
+
 WORKDIR /app
 
-# Copie uniquement les fichiers nécessaires pour l'exécution
-COPY --from=build /app/package*.json ./
-COPY --from=build /app/prisma ./prisma/
-COPY --from=build /app/node_modules ./node_modules
-# /!\ BIEN VÉRIFIER LE CHEMIN CI-DESSOUS /!\
+# Copy package files
+COPY package*.json ./
+
+# Install only production dependencies
+RUN npm ci --omit=dev
+
+# Copy Prisma schema and generate client
+COPY prisma ./prisma/
+RUN npx prisma generate
+
+# Copy built application from build stage
 COPY --from=build /app/dist ./dist
 
+# Verify dist directory in production
+RUN ls -la dist/ && test -f dist/main.js && echo "✓ Production stage: dist/main.js exists" || (echo "✗ Production stage: dist/main.js not found" && exit 1)
+
+# Expose application port
 EXPOSE 3000
 
-# Utilisation de npx prisma migrate deploy pour la prod
+# Start command: run migrations then start the application
 CMD ["sh", "-c", "npx prisma migrate deploy && node dist/main.js"]
