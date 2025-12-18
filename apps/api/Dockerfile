@@ -34,15 +34,13 @@ RUN apk add --no-cache openssl libc6-compat
 
 WORKDIR /app
 
-# Copy package files
+# Copy package files and Prisma schema (needed for postinstall script)
 COPY package*.json ./
+COPY prisma ./prisma/
 
 # Install only production dependencies
+# Note: postinstall script runs "npx prisma generate" which needs prisma directory
 RUN npm ci --omit=dev
-
-# Copy Prisma schema and generate client
-COPY prisma ./prisma/
-RUN npx prisma generate
 
 # Copy built application from build stage
 COPY --from=build /app/dist ./dist
