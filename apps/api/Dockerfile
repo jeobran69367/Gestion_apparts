@@ -21,10 +21,24 @@ COPY src ./src
 COPY tsconfig.json ./
 
 # Build the application
-RUN npm run build
-
-# Verify build output
-RUN ls -la dist/ && test -f dist/main.js && echo "✓ Build successful: dist/main.js exists" || (echo "✗ Build failed: dist/main.js not found" && exit 1)
+RUN npm run build && \
+    echo "=== Build command completed ===" && \
+    ls -la && \
+    echo "=== Checking for dist directory ===" && \
+    if [ -d "dist" ]; then \
+        echo "✓ dist directory exists" && \
+        ls -la dist/ && \
+        echo "=== Checking for main.js ===" && \
+        if [ -f "dist/main.js" ]; then \
+            echo "✓ Build successful: dist/main.js exists"; \
+        else \
+            echo "✗ Build failed: dist/main.js not found" && \
+            exit 1; \
+        fi \
+    else \
+        echo "✗ Build failed: dist directory not created" && \
+        exit 1; \
+    fi
 
 # Production stage
 FROM node:20-alpine AS production
