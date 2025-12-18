@@ -58,4 +58,5 @@ RUN echo "=== Checking dist in production stage ===" && \
 EXPOSE 3000
 
 # Start command - run migrations then start the app
-CMD ["sh", "-c", "npx prisma migrate deploy && node dist/main.js"]
+CMD ["sh", "-c", "npx prisma migrate deploy && node dist/apps/api/main.js"]
+
