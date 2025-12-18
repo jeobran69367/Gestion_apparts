@@ -4,7 +4,7 @@ import { useState } from 'react';
 import PaymentMethodSelector from './PaymentMethodSelector';
 import PawaPayPayment from './PawaPayPayment';
 import EmailSender from '../EmailSender';
-import API_BASE_URL from '../../config/api';
+import API_BASE_URL from '@/config/api';
 
 interface BookingConfirmationManagerProps {
   bookingData: {

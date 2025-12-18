@@ -4,7 +4,7 @@ import { useState, useEffect, ChangeEvent, FormEvent } from 'react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { useAuth } from '../../../hooks/useAuth';
-import API_BASE_URL from '../../../config/api';
+import API_BASE_URL from '@/config/api';
 
 interface Reservation {
   id: string;

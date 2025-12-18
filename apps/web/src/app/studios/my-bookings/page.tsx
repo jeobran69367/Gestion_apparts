@@ -4,7 +4,7 @@ import { useState, useEffect, useCallback } from 'react';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 import { useAuth } from '../../../hooks/useAuth';
-import API_BASE_URL from '../../../config/api';
+import API_BASE_URL from '@/config/api';
 
 interface Booking {
   id: number;

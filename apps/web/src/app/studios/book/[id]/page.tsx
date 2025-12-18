@@ -4,7 +4,7 @@ import { useState, useEffect } from 'react';
 import { useParams, useRouter } from 'next/navigation';
 import Link from 'next/link';
 import BookingConfirmationManager from '../../../../components/payment/BookingConfirmationManager';
-import API_BASE_URL from '../../../../config/api';
+import API_BASE_URL from '@/config/api';
 
 /**
  * Local SmartPriceDisplay component used to render prices (expects price in cents).

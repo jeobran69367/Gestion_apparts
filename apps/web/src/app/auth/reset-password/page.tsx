@@ -3,7 +3,7 @@
 import { useState, useEffect, Suspense } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import Link from 'next/link';
-import API_BASE_URL from '../../config/api';
+import API_BASE_URL from '@/config/api';
 
 function ResetPasswordForm() {
   const [newPassword, setNewPassword] = useState('');

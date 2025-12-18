@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { useAuth } from "../hooks/useAuth";
-import API_BASE_URL from "../config/api";
+import API_BASE_URL from '@/config/api';
 
 export default function Home() {
   const { mounted } = useAuth();

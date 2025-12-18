@@ -3,7 +3,7 @@
 import { useState, useEffect } from 'react';
 import Link from 'next/link';
 import CardMaisonLocation, { MaisonLocation } from '../../components/CardMaisonLocation';
-import API_BASE_URL from '../../config/api';
+import API_BASE_URL from '@/config/api';
 
 export default function PropertiesPage() {
   const [properties, setProperties] = useState<MaisonLocation[]>([]);

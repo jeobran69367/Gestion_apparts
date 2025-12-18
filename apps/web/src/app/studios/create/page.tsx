@@ -4,7 +4,7 @@ import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 import { useAuth } from '../../../hooks/useAuth';
-import { API_ENDPOINTS } from '../../../config/api';
+import { API_ENDPOINTS } from '@/config/api';
 
 export default function CreateStudioPage() {
   const [loading, setLoading] = useState(false);

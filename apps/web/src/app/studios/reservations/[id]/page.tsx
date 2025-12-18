@@ -2,7 +2,7 @@
 
 import { useParams } from 'next/navigation';
 import { useEffect, useState } from 'react';
-import API_BASE_URL from '../../../../config/api';
+import API_BASE_URL from '@/config/api';
 
 interface ReservationDetails {
   id: string;

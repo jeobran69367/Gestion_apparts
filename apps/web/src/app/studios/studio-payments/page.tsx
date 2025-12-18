@@ -3,7 +3,7 @@
 import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
-import API_BASE_URL from '../../../config/api';
+import API_BASE_URL from '@/config/api';
 
 interface Payment {
   id: number;

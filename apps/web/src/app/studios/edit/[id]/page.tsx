@@ -3,7 +3,7 @@
 import { useState, useEffect } from 'react';
 import { useRouter, useParams } from 'next/navigation';
 import { use } from 'react';
-import { API_ENDPOINTS } from '../../../../config/api';
+import { API_ENDPOINTS } from '@/config/api';
 
 type ValuePiece = Date | null;
 type Value = ValuePiece | [ValuePiece, ValuePiece];

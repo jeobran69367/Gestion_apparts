@@ -4,7 +4,7 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 import { useAuth, UserRole } from "../../hooks/useAuth";
-import API_BASE_URL from "../../config/api";
+import API_BASE_URL from '@/config/api';
 
 // API URL - matches existing codebase pattern
 const API_URL = API_BASE_URL;
