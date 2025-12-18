@@ -4,6 +4,7 @@ import { useState, useEffect, ChangeEvent, FormEvent } from 'react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { useAuth } from '../../../hooks/useAuth';
+import API_BASE_URL from '@/config/api';
 
 interface Reservation {
   id: string;
@@ -69,7 +70,7 @@ export default function ReservationsPage() {
 
   const fetchReservations = async () => {
     try {
-      const response = await fetch('http://localhost:4000/api/reservations');
+      const response = await fetch(`${API_BASE_URL}/api/reservations`);
       if (response.ok) {
         const data: Reservation[] = await response.json();
         setReservations(data);
@@ -85,7 +86,7 @@ export default function ReservationsPage() {
 
   const fetchStudios = async () => {
     try {
-      const response = await fetch('http://localhost:4000/api/studios');
+      const response = await fetch(`${API_BASE_URL}/api/studios`);
       if (response.ok) {
         const data = await response.json();
         
@@ -107,7 +108,7 @@ export default function ReservationsPage() {
 
   const fetchGuests = async () => {
     try {
-      const response = await fetch('http://localhost:4000/api/users');
+      const response = await fetch(`${API_BASE_URL}/api/users`);
       if (response.ok) {
         const data = await response.json();
         setGuests(data);
@@ -147,7 +148,7 @@ export default function ReservationsPage() {
 
 
     try {
-      const response = await fetch('http://localhost:4000/api/reservations', {
+      const response = await fetch(`${API_BASE_URL}/api/reservations`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',

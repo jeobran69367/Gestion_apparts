@@ -1,6 +1,8 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { paymentCache } from '@/lib/paymentCache';
 
+const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:4000';
+
 // API complète pour créer utilisateur + réservation en BDD
 export async function POST(request: NextRequest) {
   try {
@@ -60,7 +62,7 @@ export async function POST(request: NextRequest) {
 
     try {
       // Appel à l'API Backend NestJS
-      const backendResponse = await fetch('http://localhost:4000/api/reservations', {
+      const backendResponse = await fetch(`${API_BASE_URL}/api/reservations`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -153,7 +155,7 @@ async function createOrGetUser(guestInfo: any) {
   
   try {
     // 1. Vérifier si l'utilisateur existe déjà
-    let userResponse = await fetch(`http://localhost:4000/api/auth/user-by-email?email=${email}`);
+    let userResponse = await fetch(`${API_BASE_URL}/api/auth/user-by-email?email=${email}`);
     
     if (userResponse.ok) {
       const existingUser = await userResponse.json();
@@ -170,7 +172,7 @@ async function createOrGetUser(guestInfo: any) {
       role: 'GUEST'
     };
 
-    const createUserResponse = await fetch('http://localhost:4000/api/auth/register', {
+    const createUserResponse = await fetch(`${API_BASE_URL}/api/auth/register`, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
@@ -250,7 +252,7 @@ export async function GET(request: NextRequest) {
     // Récupérer depuis Backend NestJS si possible
     if (reservationId) {
       try {
-        const backendResponse = await fetch(`http://localhost:4000/api/reservations/${reservationId}`);
+        const backendResponse = await fetch(`${API_BASE_URL}/api/reservations/${reservationId}`);
         if (backendResponse.ok) {
           const reservation = await backendResponse.json();
           return NextResponse.json({

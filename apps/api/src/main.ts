@@ -27,9 +27,46 @@ async function bootstrap() {
     urlencoded({ limit: '100mb', extended: true })(req, res, next);
   });
   
-  // Configuration CORS pour le développement
+  // Configuration CORS pour le développement et la production
+  const allowedOrigins = [
+    'http://localhost:3000',
+    'http://127.0.0.1:3000',
+    process.env.FRONTEND_URL,
+  ].filter(Boolean); // Enlever les valeurs undefined
+
   app.enableCors({
-    origin: ['http://localhost:3000', 'http://127.0.0.1:3000'],
+    origin: (origin, callback) => {
+      // Permettre les requêtes sans origine (comme les appels d'API mobile ou serveur à serveur)
+      if (!origin) return callback(null, true);
+      
+      // Vérifier si l'origine est dans la liste autorisée
+      if (allowedOrigins.includes(origin)) {
+        return callback(null, true);
+      }
+      
+      // Pour les domaines Vercel, vérifier que c'est notre projet spécifique
+      // Pattern: https://<project-name>-*.vercel.app ou https://<project-name>.vercel.app
+      const vercelProjectName = process.env.VERCEL_PROJECT_NAME || 'gestion-apparts';
+      try {
+        const urlParts = new URL(origin);
+        const hostname = urlParts.hostname;
+        
+        // Vérifier que le hostname se termine par .vercel.app (domaine exact)
+        if (hostname.endsWith('.vercel.app') || hostname === `${vercelProjectName}.vercel.app`) {
+          // Vérifier si le hostname correspond à notre projet Vercel
+          if (hostname === `${vercelProjectName}.vercel.app` || 
+              hostname.startsWith(`${vercelProjectName}-`) && hostname.endsWith('.vercel.app')) {
+            return callback(null, true);
+          }
+        }
+      } catch (error) {
+        // Origine invalide (pas une URL valide)
+        return callback(new Error('Invalid origin URL'));
+      }
+      
+      // Origine non autorisée
+      callback(new Error('Not allowed by CORS'));
+    },
     methods: ['GET', 'POST', 'PUT', 'DELETE', 'PATCH'],
     allowedHeaders: ['Content-Type', 'Authorization'],
     credentials: true,
