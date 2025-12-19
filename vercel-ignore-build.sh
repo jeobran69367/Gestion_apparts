@@ -1,5 +1,4 @@
-#!/bin/bash
-set -e
+#!/bin/sh
 # Vercel Ignore Build Step Script
 # This script determines whether Vercel should deploy based on the branch and CI status
 # Exit 1 to skip deployment, Exit 0 to proceed with deployment
@@ -11,7 +10,7 @@ BRANCH_NAME=$(git rev-parse --abbrev-ref HEAD)
 echo "📍 Current branch: $BRANCH_NAME"
 
 # Always deploy on master/main branch (after tests pass in GitHub Actions)
-if [[ "$BRANCH_NAME" == "master" ]] || [[ "$BRANCH_NAME" == "main" ]]; then
+if [ "$BRANCH_NAME" = "master" ] || [ "$BRANCH_NAME" = "main" ]; then
   echo "✅ Master/Main branch detected - deployment will proceed"
   echo "ℹ️  GitHub Actions must pass before merge protection allows this to reach master"
   exit 0
