@@ -4,7 +4,7 @@
   "outputDirectory": "apps/web/.next",
   "installCommand": "cd apps/web && npm install",
   "devCommand": "cd apps/web && npm run dev",
-  "ignoreCommand": "./apps/web/vercel-ignore-build.sh",
+  "ignoreCommand": "./vercel-ignore-build.sh",
   "github": {
     "silent": true
   }
