@@ -9,6 +9,10 @@ on:
     branches:
       - master
 
+# Set minimal permissions for GITHUB_TOKEN
+permissions:
+  contents: read
+
 jobs:
   # Job for API (Backend NestJS)
   api-tests:
