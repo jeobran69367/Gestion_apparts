@@ -12,8 +12,6 @@ import {
   ParseIntPipe,
   HttpCode,
   HttpStatus,
-  NotFoundException,
-  InternalServerErrorException,
 } from '@nestjs/common';
 import { StudiosService } from './studios.service';
 import { CreateStudioDto, UpdateStudioDto } from './dto/studio.dto';
