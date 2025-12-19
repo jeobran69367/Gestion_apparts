@@ -1,6 +1,6 @@
 import nodemailer from 'nodemailer';
 import dotenv from 'dotenv';
-const PDFDocument = require('pdfkit');
+import PDFDocument from 'pdfkit';
 
 dotenv.config();
 

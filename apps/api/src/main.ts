@@ -59,7 +59,7 @@ async function bootstrap() {
             return callback(null, true);
           }
         }
-      } catch (error) {
+      } catch {
         // Origine invalide (pas une URL valide)
         return callback(new Error('Invalid origin URL'));
       }
@@ -103,8 +103,7 @@ async function bootstrap() {
       }
     });
 
-    availableRoutes.forEach(route => {
-    });
+    // Routes are already logged above
   };
 
   // Enregistrer les routes email

@@ -4,8 +4,6 @@ import {
   UseGuards,
   UploadedFiles,
   UseInterceptors,
-  BadRequestException,
-  Request,
 } from '@nestjs/common';
 import { FilesInterceptor } from '@nestjs/platform-express';
 import { JwtAuthGuard } from '../auth/jwt-auth.guard';
@@ -35,7 +33,6 @@ export class UploadsController {
   )
   async uploadImages(
     @UploadedFiles() files: Express.Multer.File[],
-    @Request() req,
   ) {
     if (!files || files.length === 0) {
       return { base64Images: [] };
