@@ -1,4 +1,5 @@
 #!/bin/sh
+set -e
 # Vercel Ignore Build Step Script
 # This script determines whether Vercel should deploy based on the branch and CI status
 # Exit 1 to skip deployment, Exit 0 to proceed with deployment
