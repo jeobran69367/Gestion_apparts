@@ -1,13 +1,9 @@
 name: CI/CD Pipeline
 
-# Trigger only on pull requests to master or pushes to master
+# Trigger on all pushes and pull requests
 on:
   pull_request:
-    branches:
-      - master
   push:
-    branches:
-      - master
 
 # Set minimal permissions for GITHUB_TOKEN
 permissions:

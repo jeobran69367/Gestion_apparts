@@ -1,7 +1,11 @@
 {
   "framework": "nextjs",
-  "buildCommand": "npm run build",
-  "outputDirectory": ".next",
-  "installCommand": "npm install",
-  "devCommand": "npm run dev"
+  "buildCommand": "cd apps/web && npm run build",
+  "outputDirectory": "apps/web/.next",
+  "installCommand": "cd apps/web && npm install",
+  "devCommand": "cd apps/web && npm run dev",
+  "ignoreCommand": "bash apps/web/vercel-ignore-build.sh",
+  "github": {
+    "silent": true
+  }
 }
