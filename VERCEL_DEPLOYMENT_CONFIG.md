@@ -39,8 +39,10 @@ Ce guide explique comment configurer Vercel pour qu'il ne déploie que lorsque l
 1. Dans Settings → Git → **Ignored Build Step**
 2. Activer "Override" et utiliser:
    ```bash
-   bash apps/web/vercel-ignore-build.sh
+   ./vercel-ignore-build.sh
    ```
+   
+   **Note**: Le script est placé à la racine du repository (pas dans `apps/web/`) pour être accessible par Vercel.
 
 **Résultat**: Vercel exécutera le script avant chaque build pour décider s'il faut déployer.
 
@@ -149,10 +151,12 @@ La configuration GitHub empêche:
 
 **Solution 1**: Vérifier que le script `vercel-ignore-build.sh` est exécutable:
 ```bash
-chmod +x apps/web/vercel-ignore-build.sh
-git add apps/web/vercel-ignore-build.sh
+chmod +x vercel-ignore-build.sh
+git add vercel-ignore-build.sh
 git commit -m "fix: make script executable"
 ```
+
+**Note**: Le script doit être à la racine du repository pour être accessible par Vercel.
 
 **Solution 2**: Vérifier la configuration Vercel:
 - Settings → Git → Ignored Build Step doit être configuré
